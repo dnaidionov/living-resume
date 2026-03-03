@@ -1,0 +1,10 @@
+.next
+node_modules
+.wrangler
+dist
+coverage
+content-index.json
+embeddings.json
+.env.local
+*.log
+.DS_Store

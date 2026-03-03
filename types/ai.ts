@@ -1,0 +1,47 @@
+import type { Citation, EvidenceChunk } from "@/types/content";
+
+export type ChatMode = "auto" | "resume_qa" | "fit_analysis" | "build_process";
+
+export type ChatRequest = {
+  message: string;
+  mode?: ChatMode;
+  sessionId: string;
+};
+
+export type ChatAnswer = {
+  answer: string;
+  citations: Citation[];
+  confidence: "high" | "medium" | "low";
+};
+
+export type RoleInput =
+  | { kind: "text"; text: string }
+  | { kind: "file"; fileId: string; mimeType: string }
+  | { kind: "url"; url: string };
+
+export type FitDimension = {
+  name: "domain" | "execution" | "ai_technical" | "leadership";
+  score: number;
+  rationale: string;
+  evidence: string[];
+};
+
+export type FitAnalysisResult = {
+  overallSummary: string;
+  overallScore: number;
+  dimensions: FitDimension[];
+  strengths: string[];
+  gaps: string[];
+  transferableAdvantages: string[];
+  interviewAngles: string[];
+  confidence: "high" | "medium" | "low";
+  citations: Citation[];
+};
+
+export type ModelInput = {
+  prompt: string;
+  evidence: EvidenceChunk[];
+  mode: ChatMode;
+};
+
+export type ModelOutput = ChatAnswer;

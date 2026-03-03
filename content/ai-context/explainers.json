@@ -1,0 +1,143 @@
+[
+  {
+    "id": "ctx-ohny",
+    "roleId": "ohny",
+    "headline": "Built an AI-native product system from ambiguous requirements to implementation-ready architecture.",
+    "summary": "This role centered on translating uncertainty into a system that could actually be shipped, evaluated, and explained.",
+    "situation": "The product needed to show both a compelling user experience and a credible internal delivery system for AI-native execution.",
+    "goal": "Define a product and architecture that demonstrated grounded AI interactions, clear role-fit analysis, and reusable agent handoffs.",
+    "constraints": [
+      "The product had to feel premium and recruiter-ready, not experimental.",
+      "The architecture needed to stay under a strict monthly budget.",
+      "The implementation needed to be portable to richer infrastructure later."
+    ],
+    "approach": [
+      "Made chat the primary interface instead of a secondary feature.",
+      "Introduced structured AI context explainers behind each role.",
+      "Separated content, retrieval, AI provider, and platform boundaries so the system could evolve."
+    ],
+    "keyDecisions": [
+      "Use repo-managed content as the source of truth in v1.",
+      "Use Cloudflare plus OpenAI rather than a heavier hosted database stack.",
+      "Document the build publicly as part of the product value."
+    ],
+    "execution": [
+      "Defined the content model and agent handoff process.",
+      "Specified retrieval, fit analysis, and citation behavior.",
+      "Sequenced delivery into repo foundation, content system, UI, AI flows, and release hardening."
+    ],
+    "outcomes": [
+      "Created a portfolio artifact that doubles as a working AI-native product.",
+      "Made resume claims inspectable rather than purely declarative.",
+      "Kept the MVP within a small infrastructure budget."
+    ],
+    "metrics": [
+      "Budget target below $20/month.",
+      "Every role mapped to an approved AI context explainer.",
+      "All user-facing AI features grounded in curated source material."
+    ],
+    "skillsDemonstrated": ["Product Framing", "AI Architecture", "Decision Making", "Execution Planning"],
+    "relatedProjectIds": ["living-resume", "agentic-delivery"],
+    "citations": [
+      {
+        "sourceId": "build-architecture",
+        "title": "Architecture Overview",
+        "section": "Summary"
+      }
+    ]
+  },
+  {
+    "id": "ctx-consulting",
+    "roleId": "consulting",
+    "headline": "Turned ambiguous product asks into structured delivery programs with visible tradeoffs.",
+    "summary": "The work focused on creating enough clarity for teams to move without pretending uncertainty was gone.",
+    "situation": "Teams had real product pressure but inconsistent framing, scattered priorities, and unclear coordination patterns.",
+    "goal": "Create operating clarity, decision boundaries, and execution confidence across product and engineering stakeholders.",
+    "constraints": [
+      "High ambiguity at the start.",
+      "Cross-functional stakeholders had different definitions of success.",
+      "The work needed to stay practical and lightweight."
+    ],
+    "approach": [
+      "Used concise framing docs to align decisions early.",
+      "Translated broad goals into scopes, milestones, and acceptance criteria.",
+      "Balanced product ambition with delivery realism."
+    ],
+    "keyDecisions": [
+      "Favor clear tradeoff articulation over optimistic vagueness.",
+      "Use artifacts that support handoff, not just discussion.",
+      "Keep strategy close to implementation detail."
+    ],
+    "execution": [
+      "Ran through goals, constraints, dependencies, and sequencing.",
+      "Documented product and operating assumptions.",
+      "Made the work legible to both business and technical stakeholders."
+    ],
+    "outcomes": [
+      "Lowered confusion around priorities.",
+      "Improved cross-functional decision velocity.",
+      "Gave teams a clearer path from problem definition to execution."
+    ],
+    "metrics": [
+      "Faster scope alignment.",
+      "Clearer decision accountability.",
+      "Reduced ambiguity in handoffs."
+    ],
+    "skillsDemonstrated": ["Strategy", "Communication", "Execution Design", "Stakeholder Management"],
+    "relatedProjectIds": ["fit-analysis"],
+    "citations": [
+      {
+        "sourceId": "build-agents",
+        "title": "Agent Delivery Model",
+        "section": "Workflow"
+      }
+    ]
+  },
+  {
+    "id": "ctx-platform",
+    "roleId": "platform",
+    "headline": "Connected platform thinking with product execution and operating discipline.",
+    "summary": "The emphasis was on making systems, teams, and priorities work together rather than optimizing a single function in isolation.",
+    "situation": "Platform and product decisions were tightly coupled, but teams often treated them separately.",
+    "goal": "Improve execution by clarifying the relationship between user value, internal capability, and release sequence.",
+    "constraints": [
+      "Competing priorities across teams.",
+      "Operational and product goals moved at different speeds.",
+      "Decisions needed to be understandable across disciplines."
+    ],
+    "approach": [
+      "Mapped workflows instead of isolated features.",
+      "Used decision frameworks to show tradeoffs and dependencies.",
+      "Framed platform work in terms of product outcomes."
+    ],
+    "keyDecisions": [
+      "Keep system clarity ahead of local optimization.",
+      "Translate technical work into user and business relevance.",
+      "Document why priorities were sequenced the way they were."
+    ],
+    "execution": [
+      "Built shared views of workflows and priorities.",
+      "Connected operational constraints to roadmap choices.",
+      "Structured release thinking around evidence and readiness."
+    ],
+    "outcomes": [
+      "Improved alignment between platform and product work.",
+      "Reduced friction in cross-functional planning.",
+      "Created better execution narratives for stakeholders."
+    ],
+    "metrics": [
+      "More coherent roadmap discussions.",
+      "Better handoffs across functions.",
+      "Clearer release readiness."
+    ],
+    "skillsDemonstrated": ["Platform Strategy", "Systems Thinking", "Operational Product Management"],
+    "relatedProjectIds": ["fit-analysis"],
+    "citations": [
+      {
+        "sourceId": "build-content",
+        "title": "Content Model",
+        "section": "Role Evidence"
+      }
+    ]
+  }
+]

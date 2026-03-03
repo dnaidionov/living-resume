@@ -1,0 +1,17 @@
+[
+  {
+    "id": "faq-1",
+    "question": "What makes this different from a portfolio with a chatbot?",
+    "answer": "The chat is the primary interface, every answer is grounded in curated evidence, each resume role exposes a structured AI context explainer, and the build itself is documented as an AI-native product."
+  },
+  {
+    "id": "faq-2",
+    "question": "How trustworthy are the answers?",
+    "answer": "The system is constrained to curated repo-managed source material, shows citations, and is expected to distinguish proven experience from adjacent or unsupported claims."
+  },
+  {
+    "id": "faq-3",
+    "question": "What happens to uploaded job descriptions?",
+    "answer": "The MVP treats job description inputs as ephemeral. They are processed for the current analysis and are not stored as durable source material."
+  }
+]

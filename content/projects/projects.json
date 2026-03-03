@@ -1,0 +1,56 @@
+[
+  {
+    "id": "living-resume",
+    "name": "Living Resume",
+    "summary": "A recruiter-facing digital twin that answers grounded resume questions and performs candid fit analysis.",
+    "problem": "Traditional portfolios are passive and do not demonstrate how someone thinks or how they execute in AI-native environments.",
+    "actions": [
+      "Designed a chat-first recruiter journey.",
+      "Added structured AI explainers behind each role to make resume claims inspectable.",
+      "Chose a low-cost deployment strategy that still preserves architectural portability."
+    ],
+    "outcomes": [
+      "Transforms resume review into an active conversation.",
+      "Demonstrates product, architecture, and AI-system thinking in one artifact.",
+      "Creates a reusable showcase for collaboration and hiring conversations."
+    ],
+    "tags": ["ai", "portfolio", "retrieval"],
+    "relatedRoleIds": ["ohny", "consulting"]
+  },
+  {
+    "id": "agentic-delivery",
+    "name": "Agentic Delivery Framework",
+    "summary": "Defined a role-based agent workflow with explicit handoffs, artifacts, and review gates for shipping AI-native products.",
+    "problem": "Agentic workflows often sound impressive but collapse under unclear ownership and poor artifact boundaries.",
+    "actions": [
+      "Separated delivery into product, content, AI architecture, application, QA, and ops roles.",
+      "Required every handoff to include decisions, assumptions, and acceptance criteria.",
+      "Integrated process documentation into the final product instead of hiding it."
+    ],
+    "outcomes": [
+      "Reduced ambiguity across implementation.",
+      "Made the delivery model itself part of the portfolio story.",
+      "Created reusable templates for future projects."
+    ],
+    "tags": ["agents", "delivery", "architecture"],
+    "relatedRoleIds": ["ohny"]
+  },
+  {
+    "id": "fit-analysis",
+    "name": "Role Fit Analysis Workflow",
+    "summary": "A structured evaluator that compares external job requirements against curated evidence from the resume corpus.",
+    "problem": "Recruiters need a quick, trustworthy way to understand how experience maps to a role without reading everything manually.",
+    "actions": [
+      "Defined a scoring rubric for domain, execution, AI fluency, and leadership.",
+      "Separated proven experience from adjacent experience and unsupported claims.",
+      "Designed support for paste, upload, and URL job-description intake."
+    ],
+    "outcomes": [
+      "Makes fit evaluation faster and more transparent.",
+      "Shows candor instead of generic self-promotion.",
+      "Adds a concrete AI-native workflow beyond basic chat."
+    ],
+    "tags": ["evaluation", "recruiting", "ai"],
+    "relatedRoleIds": ["consulting", "platform"]
+  }
+]

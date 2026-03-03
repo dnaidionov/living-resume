@@ -1,0 +1,20 @@
+[
+  {
+    "id": "case-living-resume",
+    "title": "Designing a Living Resume That Can Defend Its Claims",
+    "summary": "Turned a static personal site into a structured, inspectable, recruiter-facing AI product.",
+    "body": "The core move was treating every resume claim as something that should be explorable. Instead of only presenting outcomes, the system also exposes the situation, approach, constraints, and evidence behind each role. That makes the site simultaneously a hiring asset and a product demonstration."
+  },
+  {
+    "id": "case-agentic",
+    "title": "Using Agent Handoffs to Prevent AI Workflow Theater",
+    "summary": "Structured the project as a chain of accountable roles rather than a vague agent swarm.",
+    "body": "The delivery model defines what each agent owns, what artifact it must produce, and what the next role can rely on. That keeps the system auditable and makes the process legible enough to publish as part of the product itself."
+  },
+  {
+    "id": "case-cost",
+    "title": "Optimizing an AI Product for a Strict Cost Ceiling",
+    "summary": "Chose a repo-backed retrieval model and free hosting to stay under a constrained monthly budget.",
+    "body": "Rather than paying for a database and vector platform on day one, the MVP keeps content and embeddings in repo-managed artifacts. That preserves portability while keeping hosting, logs, and analytics effectively free."
+  }
+]

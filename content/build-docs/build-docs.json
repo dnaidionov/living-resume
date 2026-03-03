@@ -1,0 +1,20 @@
+[
+  {
+    "id": "build-architecture",
+    "title": "Architecture Overview",
+    "summary": "The MVP uses a portable architecture with repo-backed content, static retrieval artifacts, Cloudflare deployment, and OpenAI-backed generation.",
+    "body": "The system keeps content, retrieval, AI-provider, and platform concerns isolated. That allows the first release to stay inexpensive while leaving a clear migration path to Postgres, pgvector, or alternate hosting."
+  },
+  {
+    "id": "build-agents",
+    "title": "Agent Delivery Model",
+    "summary": "The project is delivered through specialized agent roles with explicit handoffs, artifacts, and acceptance criteria.",
+    "body": "Each agent owns a narrow slice of the system and hands off decisions in a structured format. The output is a repository that doubles as an implementation artifact and a public case study."
+  },
+  {
+    "id": "build-content",
+    "title": "Content Model",
+    "summary": "The source of truth lives in repo-managed structured files for resume roles, projects, explainers, FAQ, and build documents.",
+    "body": "This keeps the MVP simple, reviewable, and cheap to operate. The retrieval layer treats all of these materials as evidence sources while preserving stable IDs for later migration into a database."
+  }
+]
