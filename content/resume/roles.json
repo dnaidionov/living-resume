@@ -1,0 +1,48 @@
+[
+  {
+    "id": "ohny",
+    "company": "OHNY",
+    "title": "Product Builder / AI-Native Systems Lead",
+    "startDate": "2024-01",
+    "summary": "Led product definition and system design for an AI-native conversational platform spanning orchestration, retrieval, evaluation, and delivery workflow design.",
+    "achievements": [
+      "Framed the end-to-end user journey for an AI-first product from discovery through release readiness.",
+      "Defined agent roles, handoff rules, and artifact ownership so execution could scale without losing clarity.",
+      "Translated ambiguous requirements into delivery-ready architecture and product decisions."
+    ],
+    "skills": ["AI Product", "System Design", "Delivery Architecture", "Prompting"],
+    "tags": ["ai", "product", "orchestration"],
+    "aiContextId": "ctx-ohny"
+  },
+  {
+    "id": "consulting",
+    "company": "Independent / Advisory Work",
+    "title": "Product Strategy and Execution Advisor",
+    "startDate": "2022-01",
+    "summary": "Partnered with teams on strategy, delivery structure, and translating messy product problems into executable programs.",
+    "achievements": [
+      "Helped teams define priorities, constraints, and measurable outcomes before implementation started.",
+      "Created communication and decision-making structures that reduced ambiguity across design, product, and engineering.",
+      "Supported high-context stakeholder conversations with concise product framing."
+    ],
+    "skills": ["Product Strategy", "Stakeholder Management", "Roadmapping", "Execution"],
+    "tags": ["strategy", "delivery", "consulting"],
+    "aiContextId": "ctx-consulting"
+  },
+  {
+    "id": "platform",
+    "company": "Digital Product Teams",
+    "title": "Platform and Product Operator",
+    "startDate": "2019-01",
+    "endDate": "2021-12",
+    "summary": "Worked across product and platform initiatives, connecting roadmap decisions to operational delivery and user outcomes.",
+    "achievements": [
+      "Mapped user and internal workflows into better operating models.",
+      "Connected technical capabilities with product priorities and release sequencing.",
+      "Drove cross-functional execution through structured decision frameworks."
+    ],
+    "skills": ["Platform Thinking", "Cross-functional Leadership", "Process Design", "Execution"],
+    "tags": ["platform", "operations", "product"],
+    "aiContextId": "ctx-platform"
+  }
+]

@@ -1,0 +1,29 @@
+{
+  "name": "living-resume",
+  "version": "0.1.0",
+  "private": true,
+  "scripts": {
+    "dev": "next dev",
+    "build": "next build",
+    "start": "next start",
+    "lint": "next lint",
+    "test": "node --import tsx --test tests/**/*.test.ts",
+    "content:build": "node --import tsx scripts/build-content-index.ts",
+    "embeddings:build": "node --import tsx scripts/build-embeddings.ts"
+  },
+  "dependencies": {
+    "next": "15.2.0",
+    "react": "19.0.0",
+    "react-dom": "19.0.0"
+  },
+  "devDependencies": {
+    "@cloudflare/workers-types": "4.20250303.0",
+    "@types/node": "22.13.10",
+    "@types/react": "19.0.10",
+    "@types/react-dom": "19.0.4",
+    "eslint": "8.57.1",
+    "eslint-config-next": "15.2.0",
+    "tsx": "4.19.3",
+    "typescript": "5.8.2"
+  }
+}
