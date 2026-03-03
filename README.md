@@ -40,11 +40,11 @@ npm run dev
 
 ## Deployment target
 
-The app is structured for a Cloudflare deployment path using OpenNext-compatible output and Worker runtime boundaries. Details live in [deployment-cloudflare-openai.md](/Users/Dmitry_Naidionov/Projects/living-resume/docs/architecture/deployment-cloudflare-openai.md).
+The app is structured for a Cloudflare deployment path using OpenNext-compatible output and Worker runtime boundaries. Details live in [deployment-cloudflare-openai.md](docs/architecture/deployment-cloudflare-openai.md).
 
 ## Documentation map
 
-- [PRD](/Users/Dmitry_Naidionov/Projects/living-resume/docs/product/prd.md)
-- [Architecture Overview](/Users/Dmitry_Naidionov/Projects/living-resume/docs/architecture/overview.md)
-- [Agent Roster](/Users/Dmitry_Naidionov/Projects/living-resume/docs/agents/roster.md)
-- [Runbook](/Users/Dmitry_Naidionov/Projects/living-resume/docs/operations/runbook.md)
+- [PRD](docs/product/prd.md)
+- [Architecture Overview](docs/architecture/overview.md)
+- [Agent Roster](docs/agents/roster.md)
+- [Runbook](docs/operations/runbook.md)
