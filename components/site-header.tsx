@@ -1,36 +1,30 @@
-import Link from "next/link";
-
 const links = [
-  { href: "/resume", label: "Resume" },
-  { href: "/projects", label: "Projects" },
-  { href: "/build", label: "Build" }
+  { href: "#experience", label: "Experience" },
+  { href: "#fit-check", label: "Fit Check" },
+  { href: "#how-built", label: "How this is built" }
 ];
 
-export function SiteHeader() {
+export function SiteHeader({ onAskAi }: { onAskAi?: () => void }) {
   return (
-    <header className="shell" style={{ padding: "20px 0 8px" }}>
+    <header className="shell sticky-header" style={{ padding: "20px 0 8px" }}>
       <div
-        className="card"
-        style={{
-          padding: "16px 20px",
-          display: "flex",
-          alignItems: "center",
-          justifyContent: "space-between",
-          gap: 16
-        }}
+        className="card menu-bar"
+        style={{ backdropFilter: "blur(14px)", background: "rgba(19, 29, 35, 0.84)" }}
       >
-        <Link href="/" style={{ fontSize: "1.15rem", fontWeight: 700 }}>
+        <a href="#" style={{ fontSize: "1rem", fontWeight: 700, fontFamily: "var(--font-sans)" }}>
           Dmitry Naidionov
-        </Link>
-        <nav style={{ display: "flex", gap: 16, flexWrap: "wrap" }}>
+        </a>
+        <nav className="menu-nav">
           {links.map((link) => (
-            <Link key={link.href} href={link.href} className="muted">
+            <a key={link.href} href={link.href} className="menu-link">
               {link.label}
-            </Link>
+            </a>
           ))}
-          <a href="#contact" className="button secondary">
-            Contact
-          </a>
+          {onAskAi ? (
+            <button type="button" className="menu-cta" onClick={onAskAi}>
+              Ask AI
+            </button>
+          ) : null}
         </nav>
       </div>
     </header>

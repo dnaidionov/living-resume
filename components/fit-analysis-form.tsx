@@ -66,12 +66,11 @@ export function FitAnalysisForm() {
   }
 
   return (
-    <section className="section shell">
-      <div className="grid two-col">
-        <div className="card" style={{ padding: 28 }}>
+      <div className="grid two-col" style={{ marginTop: 24 }}>
+        <div className="card" style={{ padding: 28, background: "var(--surface-alt)" }}>
           <span className="eyebrow">Role Fit</span>
-          <h2 style={{ marginBottom: 8 }}>Run a candid fit analysis</h2>
-          <p className="muted">
+          <h3 style={{ marginBottom: 8, fontSize: "1.5rem" }}>Run a candid fit analysis</h3>
+          <p className="muted body-copy">
             Paste a job description and the system will map the role against curated resume and project
             evidence.
           </p>
@@ -84,7 +83,7 @@ export function FitAnalysisForm() {
               <button
                 key={value}
                 type="button"
-                className={`button ${inputMode === value ? "" : "secondary"}`}
+                className={`button ${inputMode === value ? "primary-accent" : "secondary"}`}
                 onClick={() => setInputMode(value as typeof inputMode)}
               >
                 {label}
@@ -103,7 +102,8 @@ export function FitAnalysisForm() {
                   padding: 16,
                   borderRadius: 20,
                   border: "1px solid var(--line)",
-                  background: "rgba(255,255,255,0.55)"
+                  background: "rgba(255,255,255,0.04)",
+                  color: "var(--ink)"
                 }}
               />
             ) : null}
@@ -118,7 +118,8 @@ export function FitAnalysisForm() {
                   padding: 16,
                   borderRadius: 20,
                   border: "1px solid var(--line)",
-                  background: "rgba(255,255,255,0.55)"
+                  background: "rgba(255,255,255,0.04)",
+                  color: "var(--ink)"
                 }}
               />
             ) : null}
@@ -131,7 +132,7 @@ export function FitAnalysisForm() {
             ) : null}
             {error ? <p style={{ color: "var(--accent)", margin: 0 }}>{error}</p> : null}
             <button
-              className="button"
+              className="button primary-accent"
               type="submit"
               disabled={
                 loading ||
@@ -145,13 +146,13 @@ export function FitAnalysisForm() {
           </form>
         </div>
 
-        <aside className="card" style={{ padding: 28 }}>
+        <aside className="card" style={{ padding: 28, background: "var(--surface-alt)" }}>
           <span className="eyebrow">Output</span>
           {result ? (
             <div style={{ display: "grid", gap: 16 }}>
               <div>
-                <h3 style={{ marginBottom: 4 }}>Overall score: {result.overallScore}/10</h3>
-                <p className="muted" style={{ marginTop: 0 }}>
+                <h3 style={{ marginBottom: 4, fontSize: "1.45rem" }}>Overall score: {result.overallScore}/10</h3>
+                <p className="muted body-copy" style={{ marginTop: 0 }}>
                   {result.overallSummary}
                 </p>
               </div>
@@ -169,6 +170,5 @@ export function FitAnalysisForm() {
           )}
         </aside>
       </div>
-    </section>
   );
 }
