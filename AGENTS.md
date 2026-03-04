@@ -28,3 +28,25 @@ This repository treats implementation artifacts and delivery artifacts as first-
 5. Application Engineer
 6. QA / Evaluations Agent
 7. Ops / Release Agent
+
+## How to invoke an agent
+
+Name the agent explicitly in your request and state the task you want that role to handle.
+
+Examples:
+
+- `Use the Product Architect agent to refine the homepage positioning.`
+- `Act as the AI Systems Architect and define the retrieval and prompt contracts.`
+- `Have the QA / Evaluations Agent review the fit-analysis flow.`
+
+For multi-agent work, specify the sequence:
+
+1. `Content Strategist`
+2. `AI Systems Architect`
+3. `Application Engineer`
+
+Important:
+
+- Invoking an agent means asking Codex to operate in that documented role.
+- The repository currently documents the agent workflow; it does not run a separate automated multi-agent runtime.
+- Each agent should produce role-appropriate artifacts and handoff notes in `docs/agents/` and the relevant docs folders.
