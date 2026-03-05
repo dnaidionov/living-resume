@@ -55,3 +55,5 @@
 
 - Mermaid source: `docs/agents/handoffs.mmd`
 - Rendered image used in site: `public/agent-handoffs.svg`
+- add repository CTA in How This Is Built section (`See it on GitHub` with GitHub icon) linking to project repo
+- move GitHub repo CTA beside How This Is Built intro text with compact spacing

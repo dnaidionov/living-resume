@@ -48,3 +48,5 @@ Polish the living-resume UI so it reads as a coherent recruiter-facing product r
 - The overlay chat should reuse the same API contract as the existing chat flow.
 - Theme tokens in `app/globals.css` should remain the single source of truth for palette changes across components.
 - Agent Workflow now includes a rendered Mermaid handoff diagram image generated from `docs/agents/handoffs.mmd`.
+- add a GitHub logo CTA (`See it on GitHub`) to the How This Is Built section, linking directly to the repository
+- reposition the GitHub CTA inline with the How This Is Built intro copy to reduce vertical footprint
