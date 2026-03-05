@@ -14,8 +14,8 @@ export function ContentSection({
   return (
     <section className="section shell">
       <span className="eyebrow">{eyebrow}</span>
-      <h2 style={{ marginBottom: 8 }}>{title}</h2>
-      {intro ? <p className="muted">{intro}</p> : null}
+      <h2 className="section-title">{title}</h2>
+      {intro ? <p className="muted section-intro">{intro}</p> : null}
       {children}
     </section>
   );

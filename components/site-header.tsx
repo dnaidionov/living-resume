@@ -1,36 +1,54 @@
-import Link from "next/link";
+"use client";
+
+import { useEffect, useState } from "react";
+import { SparkleIcon } from "@/components/sparkle-icon";
 
 const links = [
-  { href: "/resume", label: "Resume" },
-  { href: "/projects", label: "Projects" },
-  { href: "/build", label: "Build" }
+  { href: "#experience", label: "Experience" },
+  { href: "#fit-check", label: "Fit Check" },
+  { href: "#how-built", label: "How this is built" }
 ];
 
-export function SiteHeader() {
+export function SiteHeader({ onAskAi }: { onAskAi?: () => void }) {
+  const [isScrolled, setIsScrolled] = useState(false);
+
+  useEffect(() => {
+    function onScroll() {
+      setIsScrolled(window.scrollY > 0);
+    }
+
+    onScroll();
+    window.addEventListener("scroll", onScroll, { passive: true });
+
+    return () => window.removeEventListener("scroll", onScroll);
+  }, []);
+
   return (
-    <header className="shell" style={{ padding: "20px 0 8px" }}>
-      <div
-        className="card"
-        style={{
-          padding: "16px 20px",
-          display: "flex",
-          alignItems: "center",
-          justifyContent: "space-between",
-          gap: 16
-        }}
-      >
-        <Link href="/" style={{ fontSize: "1.15rem", fontWeight: 700 }}>
-          Dmitry Naidionov
-        </Link>
-        <nav style={{ display: "flex", gap: 16, flexWrap: "wrap" }}>
+    <header className={`sticky-header ${isScrolled ? "scrolled" : ""}`}>
+      <div className="menu-bar">
+        <a
+          href="#"
+          style={{
+            fontSize: "1.05rem",
+            fontWeight: 700,
+            letterSpacing: "0.03em",
+            fontFamily: 'Georgia, "Times New Roman", serif'
+          }}
+        >
+          DN
+        </a>
+        <nav className="menu-nav">
           {links.map((link) => (
-            <Link key={link.href} href={link.href} className="muted">
+            <a key={link.href} href={link.href} className="menu-link">
               {link.label}
-            </Link>
+            </a>
           ))}
-          <a href="#contact" className="button secondary">
-            Contact
-          </a>
+          {onAskAi ? (
+            <button type="button" className="menu-cta" onClick={onAskAi}>
+              <SparkleIcon size={28} />
+              Ask AI
+            </button>
+          ) : null}
         </nav>
       </div>
     </header>

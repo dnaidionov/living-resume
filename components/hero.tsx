@@ -1,49 +1,58 @@
-import Link from "next/link";
+import Image from "next/image";
+import { ChatIcon } from "@/components/chat-icon";
 
-export function Hero() {
+export function Hero({ onAskAi }: { onAskAi: () => void }) {
   return (
-    <section className="section shell">
-      <div className="grid two-col" style={{ alignItems: "stretch" }}>
-        <div className="card" style={{ padding: 32 }}>
-          <span className="eyebrow">Living Resume</span>
-          <h1 style={{ fontSize: "clamp(2.8rem, 7vw, 5.6rem)", lineHeight: 0.92, margin: "18px 0" }}>
-            An AI-native digital twin for recruiters and collaborators.
+    <section className="section shell" style={{ paddingTop: 36 }}>
+      <div className="grid" style={{ alignItems: "stretch" }}>
+        <div
+          className="card"
+          style={{
+            padding: 32,
+            background:
+              "radial-gradient(circle at 85% 10%, rgba(117, 103, 255, 0.3), transparent 35%), radial-gradient(circle at 80% 72%, rgba(221, 57, 132, 0.2), transparent 44%), linear-gradient(160deg, #070b12, #0b1220 64%, #111a30)"
+          }}
+        >
+          <h1 className="hero-title" style={{ fontFamily: 'Georgia, "Times New Roman", serif' }}>
+            Dmitry Naidionov
           </h1>
-          <p className="muted" style={{ fontSize: "1.1rem", maxWidth: 680 }}>
-            Ask about resume fit, product judgment, execution style, AI system design, or how specific
-            achievements were actually delivered. Every major role includes structured AI context showing
-            situation, approach, and outcomes.
-          </p>
-          <div style={{ display: "flex", gap: 12, flexWrap: "wrap", marginTop: 24 }}>
-            <a href="#chat" className="button">
-              Start with chat
+          <h2
+            style={{
+              margin: "0 0 12px 0",
+              fontSize: "1.5rem",
+              fontWeight: 600,
+              fontFamily: 'Georgia, "Times New Roman", serif'
+            }}
+          >
+            Product Manager
+          </h2>
+          <p className="muted hero-copy">
+            Product Strategy, AI Product Lifecycle &amp; LLM Orchestration, Enternprise and Consumer
+            Products{" "}
+            <a
+              href="https://www.linkedin.com/in/dnaidionov/"
+              target="_blank"
+              rel="noreferrer"
+              className="inline-logo-image-link"
+              aria-label="LinkedIn profile"
+              title="LinkedIn"
+            >
+              <Image src="/linkedin-mark.svg" alt="LinkedIn" className="inline-logo-image" width={22} height={22} />
             </a>
-            <Link href="/resume" className="button secondary">
-              Explore resume
-            </Link>
-          </div>
-          <div className="pill-row" style={{ marginTop: 24 }}>
-            <span className="pill">Grounded citations</span>
-            <span className="pill">Role-fit analysis</span>
-            <span className="pill">View AI Context</span>
-            <span className="pill">Public build docs</span>
+          </p>
+          <div style={{ display: "flex", gap: 12, flexWrap: "wrap", marginTop: 24, alignItems: "stretch" }}>
+            <a href="#experience" className="button secondary">
+              Review experience
+            </a>
+            <a href="#fit-check" className="button secondary">
+              Run fit check
+            </a>
+            <button type="button" className="button primary-accent" onClick={onAskAi} style={{ fontWeight: 700 }}>
+              <ChatIcon size={22} />
+              Ask AI About Me
+            </button>
           </div>
         </div>
-        <aside className="card" style={{ padding: 28 }}>
-          <span className="eyebrow">Suggested Prompts</span>
-          <div style={{ marginTop: 18, display: "grid", gap: 12 }}>
-            {[
-              "What kind of AI-native product builder is Dmitry?",
-              "Where does his strongest evidence for product execution come from?",
-              "Analyze fit for a founding product lead role.",
-              "How was this site designed and implemented?"
-            ].map((prompt) => (
-              <div key={prompt} className="pill" style={{ borderRadius: 18, padding: 16 }}>
-                {prompt}
-              </div>
-            ))}
-          </div>
-        </aside>
       </div>
     </section>
   );

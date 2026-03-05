@@ -20,6 +20,24 @@
 - retrieval and citation contract
 - fit-analysis output shape
 
+## Experience Designer -> Application Engineer (Brand Palette Update)
+
+- apply EPAM-inspired palette tokens in `app/globals.css`
+- preserve accessible contrast for body copy, nav, and CTA states
+- keep accent usage concentrated in eyebrows, CTA, and interaction outlines
+- use dark-first foundations with cyan/purple interaction accents and lime for priority CTA emphasis
+- switch priority `Ask AI` CTA treatment to cyan-violet gradient fill for stronger visual coherence
+- use a compact secondary button variant for `View AI Context` and add sparkle iconography to AI-entry buttons
+- increase sparkle icon scale and further reduce compact button dimensions to improve visual hierarchy in role cards
+- replace modal AI Context behavior with inline expandable panels per role card; trigger uses borderless bottom-anchored control with open/close arrow state
+- update role-card toggle to chevron indicators, lighten inline AI Context panel background, and reduce keyword pill scale/typography
+- remove hero Reading Guide and utility pills; update hero identity copy and CTA text/icon (`Ask AI About Me` with chat icon)
+- set hero title/subtitle to serif and increase hero `Ask AI About Me` CTA text weight
+- add LinkedIn CTA to hero action row and switch top-menu identity from full name to serif initials
+- move LinkedIn from hero action row into inline linked image treatment within hero copy text
+- convert header to full-width sticky nav with scroll-triggered background lightening and bottom separator border
+- align full-width sticky header inner content to same horizontal bounds as section shell
+
 ## Application Engineer -> QA / Evaluations Agent
 
 - route behavior
