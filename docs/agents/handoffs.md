@@ -50,3 +50,8 @@
 - pass/fail results
 - unresolved risks
 - release gates
+
+## Diagram Artifact
+
+- Mermaid source: `docs/agents/handoffs.mmd`
+- Rendered image used in site: `public/agent-handoffs.svg`

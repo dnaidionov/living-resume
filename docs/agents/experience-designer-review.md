@@ -47,3 +47,4 @@ Polish the living-resume UI so it reads as a coherent recruiter-facing product r
 - Existing subpages can remain in the codebase, but the top-level menu should no longer route to them.
 - The overlay chat should reuse the same API contract as the existing chat flow.
 - Theme tokens in `app/globals.css` should remain the single source of truth for palette changes across components.
+- Agent Workflow now includes a rendered Mermaid handoff diagram image generated from `docs/agents/handoffs.mmd`.

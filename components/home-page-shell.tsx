@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import Image from "next/image";
 import type { AIContextExplainer, BuildDoc, ProjectBrief, ResumeRole } from "@/types/content";
 import { SiteHeader } from "@/components/site-header";
 import { Hero } from "@/components/hero";
@@ -118,6 +119,15 @@ export function HomePageShell({
             <div className="card" style={{ padding: 24 }}>
               <span className="eyebrow">Agent Workflow</span>
               <h3 style={{ marginBottom: 8 }}>The delivery model is documented, not implied</h3>
+              <div className="card" style={{ padding: 12, marginBottom: 16, background: "var(--surface-alt)" }}>
+                <Image
+                  src="/agent-handoffs.svg"
+                  alt="Agent handoff diagram"
+                  width={1200}
+                  height={900}
+                  style={{ width: "100%", height: "auto", display: "block" }}
+                />
+              </div>
               <div className="grid">
                 {[
                   "Product Architect -> scope, surface inventory, success criteria",
