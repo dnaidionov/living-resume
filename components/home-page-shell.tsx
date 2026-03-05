@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import Image from "next/image";
 import type { AIContextExplainer, BuildDoc, ProjectBrief, ResumeRole } from "@/types/content";
 import { SiteHeader } from "@/components/site-header";
 import { Hero } from "@/components/hero";
@@ -8,6 +9,7 @@ import { RoleCard } from "@/components/role-card";
 import { FitAnalysisForm } from "@/components/fit-analysis-form";
 import { ContactPanel } from "@/components/contact-panel";
 import { AskAiOverlay } from "@/components/ask-ai-overlay";
+import { GithubIcon } from "@/components/github-icon";
 
 export function HomePageShell({
   roles,
@@ -99,10 +101,30 @@ export function HomePageShell({
         <section id="how-built" className="section shell">
           <span className="eyebrow">How This Is Built</span>
           <h2 className="section-title">The site is also the case study</h2>
-          <p className="muted section-intro">
-            This product is intentionally transparent about architecture, delivery workflow, and the role
-            each agent played in shaping the result.
-          </p>
+          <div
+            style={{
+              display: "flex",
+              gap: 14,
+              alignItems: "center",
+              justifyContent: "space-between",
+              flexWrap: "wrap"
+            }}
+          >
+            <p className="muted section-intro" style={{ margin: 0, flex: "1 1 540px" }}>
+              This product is intentionally transparent about architecture, delivery workflow, and the role
+              each agent played in shaping the result.
+            </p>
+            <a
+              href="https://github.com/dnaidionov/living-resume"
+              target="_blank"
+              rel="noreferrer"
+              className="button secondary"
+              style={{ fontWeight: 600, minWidth: 0, padding: "10px 14px" }}
+            >
+              <GithubIcon size={18} />
+              See it on GitHub
+            </a>
+          </div>
           <div className="grid two-col" style={{ marginTop: 24 }}>
             <div className="grid">
               {buildDocs.map((doc) => (
@@ -118,6 +140,15 @@ export function HomePageShell({
             <div className="card" style={{ padding: 24 }}>
               <span className="eyebrow">Agent Workflow</span>
               <h3 style={{ marginBottom: 8 }}>The delivery model is documented, not implied</h3>
+              <div className="card" style={{ padding: 12, marginBottom: 16, background: "var(--surface-alt)" }}>
+                <Image
+                  src="/agent-handoffs.svg"
+                  alt="Agent handoff diagram"
+                  width={1200}
+                  height={900}
+                  style={{ width: "100%", height: "auto", display: "block" }}
+                />
+              </div>
               <div className="grid">
                 {[
                   "Product Architect -> scope, surface inventory, success criteria",

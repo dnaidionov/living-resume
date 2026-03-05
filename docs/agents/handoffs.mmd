@@ -1,0 +1,17 @@
+flowchart TD
+    PA["Product Architect"]
+    ED["Experience Designer"]
+    CS["Content Strategist"]
+    AIS["AI Systems Architect"]
+    AE["Application Engineer"]
+    QA["QA / Evaluations Agent"]
+    OPS["Ops / Release Agent"]
+
+    PA --> ED
+    PA --> CS
+    CS --> AIS
+    CS --> AE
+    ED --> AE
+    AIS --> AE
+    AE --> QA
+    QA --> OPS
