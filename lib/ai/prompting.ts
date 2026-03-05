@@ -2,13 +2,14 @@ import type { ChatMode, FitAnalysisResult } from "@/types/ai";
 import type { EvidenceChunk } from "@/types/content";
 
 export function buildGroundedAnswer(message: string, evidence: EvidenceChunk[], mode: ChatMode): string {
-  const lead =
-    mode === "build_process"
-      ? "Based on the documented build artifacts, the current implementation direction is:"
-      : "Based on the curated resume and project evidence, the strongest grounded answer is:";
-
   const evidenceLines = evidence.slice(0, 3).map((item) => `${item.title}: ${item.text}`);
-  return [lead, "", ...evidenceLines, "", `Question: ${message}`].join("\n");
+  if (evidenceLines.length > 0) {
+    return evidenceLines.join("\n\n");
+  }
+
+  return mode === "build_process"
+    ? "I do not see enough build evidence to answer that yet."
+    : "I do not see enough resume or project evidence to answer that yet.";
 }
 
 export function buildFitAnalysisSummary(roleText: string, evidence: EvidenceChunk[]): FitAnalysisResult {

@@ -22,3 +22,9 @@ The current repo includes:
 - a fit-analysis service abstraction
 
 The current implementation uses deterministic local retrieval and a placeholder OpenAI-backed model wrapper so the app remains runnable without a full production prompt stack wired in.
+
+## Response formatting
+
+- Chat responses are returned as direct answers only.
+- The assistant should not prepend rationale intros like "Based on..." in the visible answer body.
+- The assistant should not echo the user's question in the answer output.

@@ -57,3 +57,10 @@
 - Rendered image used in site: `public/agent-handoffs.svg`
 - add repository CTA in How This Is Built section (`See it on GitHub` with GitHub icon) linking to project repo
 - move GitHub repo CTA beside How This Is Built intro text with compact spacing
+- replace two-column Ask AI overlay with single-column chat UI (no mode selector, no evidence column, no confidence/meta), plus starter questions and appended message history per session
+- update overlay chat UX: prior title/subtitle restored, icon-only close, assistant-style starter chips, one-line-to-three-line auto-growing input, and send button anchored to the right of composer
+- change send button glyph to paper-plane icon in Ask AI overlay composer
+- adjust chat composer send icon centering/scale and set higher-contrast icon color for readability on accent gradient button
+- switch send glyph to tilted outlined plane icon for clearer directional affordance
+- refine overlay header separation and close affordance: thin header-bottom border plus larger borderless top-right close icon
+- remove chat answer preambles and question echoes; return direct answer text only
