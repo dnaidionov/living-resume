@@ -50,3 +50,9 @@ Polish the living-resume UI so it reads as a coherent recruiter-facing product r
 - Agent Workflow now includes a rendered Mermaid handoff diagram image generated from `docs/agents/handoffs.mmd`.
 - add a GitHub logo CTA (`See it on GitHub`) to the How This Is Built section, linking directly to the repository
 - reposition the GitHub CTA inline with the How This Is Built intro copy to reduce vertical footprint
+- redesign Ask AI overlay into chatbot pattern: fixed header, scrollable message history, compact composer with corner send icon, clickable starter prompts, and in-session message persistence
+- restore Ask AI overlay heading/subheading, convert close control to icon-only, style starter prompts as compact assistant-side chips, and implement one-line auto-growing composer (max three lines) with fixed right-side send button
+- set composer send control to paper-plane icon for familiar chat affordance
+- replace send icon path with a visually centered custom plane glyph, enlarge to 30px, and increase contrast using deep navy icon color on gradient send button
+- update send icon to an outlined, tilted paper-plane style while preserving size and center alignment in the composer button
+- add thin divider under chat header and reposition close control as larger borderless top-right icon aligned to header start line
