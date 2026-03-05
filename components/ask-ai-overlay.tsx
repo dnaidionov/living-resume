@@ -85,7 +85,7 @@ export function AskAiOverlay({ onClose }: { onClose: () => void }) {
                   padding: 16,
                   borderRadius: 20,
                   border: "1px solid var(--line)",
-                  background: "rgba(255,255,255,0.04)",
+                  background: "rgba(8, 12, 18, 0.72)",
                   color: "var(--ink)"
                 }}
               />

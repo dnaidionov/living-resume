@@ -1,3 +1,8 @@
+"use client";
+
+import { useEffect, useState } from "react";
+import { SparkleIcon } from "@/components/sparkle-icon";
+
 const links = [
   { href: "#experience", label: "Experience" },
   { href: "#fit-check", label: "Fit Check" },
@@ -5,14 +10,32 @@ const links = [
 ];
 
 export function SiteHeader({ onAskAi }: { onAskAi?: () => void }) {
+  const [isScrolled, setIsScrolled] = useState(false);
+
+  useEffect(() => {
+    function onScroll() {
+      setIsScrolled(window.scrollY > 0);
+    }
+
+    onScroll();
+    window.addEventListener("scroll", onScroll, { passive: true });
+
+    return () => window.removeEventListener("scroll", onScroll);
+  }, []);
+
   return (
-    <header className="shell sticky-header" style={{ padding: "20px 0 8px" }}>
-      <div
-        className="card menu-bar"
-        style={{ backdropFilter: "blur(14px)", background: "rgba(19, 29, 35, 0.84)" }}
-      >
-        <a href="#" style={{ fontSize: "1rem", fontWeight: 700, fontFamily: "var(--font-sans)" }}>
-          Dmitry Naidionov
+    <header className={`sticky-header ${isScrolled ? "scrolled" : ""}`}>
+      <div className="menu-bar">
+        <a
+          href="#"
+          style={{
+            fontSize: "1.05rem",
+            fontWeight: 700,
+            letterSpacing: "0.03em",
+            fontFamily: 'Georgia, "Times New Roman", serif'
+          }}
+        >
+          DN
         </a>
         <nav className="menu-nav">
           {links.map((link) => (
@@ -22,6 +45,7 @@ export function SiteHeader({ onAskAi }: { onAskAi?: () => void }) {
           ))}
           {onAskAi ? (
             <button type="button" className="menu-cta" onClick={onAskAi}>
+              <SparkleIcon size={28} />
               Ask AI
             </button>
           ) : null}

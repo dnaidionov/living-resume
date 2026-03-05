@@ -26,8 +26,17 @@ Polish the living-resume UI so it reads as a coherent recruiter-facing product r
 
 ## Design decisions
 
-- Keep serif typography for the body and major editorial copy, but move the navigation and UI controls to sans-serif for sharper hierarchy.
-- Use a dark slate palette with warm gold accents instead of the original light-paper palette.
+- Use a sans-first typography stack across body and interface elements for a cleaner, enterprise-forward look.
+- Adopt an EPAM-inspired visual language: dark near-black surfaces, white foreground text, cyan/purple interaction accents, and lime reserved for the highest-priority actions.
+- Style highest-priority `Ask AI` CTAs with a cyan-to-violet gradient fill so they align with EPAM-style accent treatments.
+- Reduce `View AI Context` button scale to avoid overpowering card headers, and add a sparkle icon to AI-trigger buttons for clearer affordance.
+- Move `View AI Context` to the bottom of each role card as a borderless inline toggle that expands/collapses AI Context within the same card, with state arrow affordance.
+- Refine role-card interactions with chevron state indicators, a lighter inline context panel surface, and smaller keyword pills for tighter visual hierarchy.
+- Simplify hero composition by removing the Reading Guide panel and utility pills; shift hero copy to personal profile framing with a chat-icon `Ask AI About Me` CTA.
+- Apply serif typography to hero name and role title while keeping body/UI sans; increase hero CTA label weight for stronger action emphasis.
+- Add a secondary LinkedIn CTA in the hero actions, and simplify top-nav identity to serif initials for a cleaner header signature.
+- Convert LinkedIn to an inline linked image within hero body copy, reducing CTA row noise while preserving profile discoverability.
+- Rework top navigation into a full-width sticky layer that is transparent at page top and only introduces subtle background/bottom-divider separation after scroll.
 - Keep the role cards and AI context modal as the strongest trust-building surfaces within the one-page flow.
 - Remove the embedded inline chat section from the homepage and make chat a modal interaction initiated through `Ask AI`.
 - Preserve fit analysis as a visible section because it is the strongest recruiter-specific workflow after experience review.
@@ -37,3 +46,4 @@ Polish the living-resume UI so it reads as a coherent recruiter-facing product r
 - The homepage becomes the primary one-page experience.
 - Existing subpages can remain in the codebase, but the top-level menu should no longer route to them.
 - The overlay chat should reuse the same API contract as the existing chat flow.
+- Theme tokens in `app/globals.css` should remain the single source of truth for palette changes across components.
