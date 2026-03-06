@@ -1,5 +1,6 @@
 import Image from "next/image";
 import { ChatIcon } from "@/components/chat-icon";
+import { DownloadIcon } from "@/components/download-icon";
 
 export function Hero({ onAskAi }: { onAskAi: () => void }) {
   return (
@@ -47,6 +48,17 @@ export function Hero({ onAskAi }: { onAskAi: () => void }) {
             <a href="#fit-check" className="button secondary">
               Run fit check
             </a>
+            <span className="callout-anchor hero-download-anchor">
+              <a
+                href="/DmitryNaidionov-cv.pdf"
+                download="DmitryNaidionov-cv.pdf"
+                className="button secondary hero-download-button"
+                aria-label="Download classic resume"
+              >
+                <DownloadIcon />
+              </a>
+              <span className="callout-bubble">Download classic resume</span>
+            </span>
             <button type="button" className="button primary-accent" onClick={onAskAi} style={{ fontWeight: 700 }}>
               <ChatIcon size={22} />
               Ask AI About Me

@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { SparkleIcon } from "@/components/sparkle-icon";
+import { DownloadIcon } from "@/components/download-icon";
 
 const links = [
   { href: "#experience", label: "Experience" },
@@ -43,6 +44,17 @@ export function SiteHeader({ onAskAi }: { onAskAi?: () => void }) {
               {link.label}
             </a>
           ))}
+          <span className="callout-anchor">
+            <a
+              href="/DmitryNaidionov-cv.pdf"
+              download="DmitryNaidionov-cv.pdf"
+              className="menu-link menu-download-button"
+              aria-label="Download classic resume"
+            >
+              <DownloadIcon />
+            </a>
+            <span className="callout-bubble">Download classic resume</span>
+          </span>
           {onAskAi ? (
             <button type="button" className="menu-cta" onClick={onAskAi}>
               <SparkleIcon size={28} />

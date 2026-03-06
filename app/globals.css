@@ -240,6 +240,87 @@ textarea {
   background: var(--accent-soft);
 }
 
+.menu-download-button {
+  width: 42px;
+  min-width: 42px;
+  padding: 0;
+  border-radius: 999px;
+}
+
+.hero-download-button {
+  width: auto;
+  height: 44px;
+  min-width: 44px;
+  min-height: 44px;
+  padding: 0 12px;
+  border-radius: 999px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.hero-download-anchor {
+  display: flex;
+  align-items: center;
+  align-self: center;
+  line-height: 0;
+}
+
+.hero-download-button svg {
+  width: 20px;
+  height: 20px;
+  transform: translateY(-0.5px);
+}
+
+.callout-anchor {
+  position: relative;
+  display: inline-flex;
+}
+
+.callout-bubble {
+  position: absolute;
+  left: 50%;
+  top: calc(100% + 10px);
+  transform: translateX(-50%);
+  white-space: nowrap;
+  padding: 6px 10px;
+  border-radius: 10px;
+  border: 1px solid var(--line);
+  background: var(--surface-strong);
+  color: var(--ink);
+  font-size: 0.74rem;
+  line-height: 1.2;
+  opacity: 0;
+  pointer-events: none;
+}
+
+.callout-bubble::before,
+.callout-bubble::after {
+  content: "";
+  position: absolute;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 0;
+  height: 0;
+  border-left: 6px solid transparent;
+  border-right: 6px solid transparent;
+}
+
+.callout-bubble::before {
+  bottom: 100%;
+  border-bottom: 7px solid var(--line);
+}
+
+.callout-bubble::after {
+  bottom: calc(100% - 1px);
+  border-bottom: 7px solid var(--surface-strong);
+}
+
+.callout-anchor:hover .callout-bubble,
+.callout-anchor:focus-within .callout-bubble {
+  opacity: 1;
+}
+
 .menu-cta {
   display: inline-flex;
   align-items: center;
