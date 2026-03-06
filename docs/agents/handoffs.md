@@ -14,6 +14,14 @@
 - source files for retrieval
 - voice and candor rules
 
+## Content Strategist -> AI Systems Architect / Application Engineer (Resume Data Pack 2026-03-05)
+
+- replaced scaffold resume roles with production role data from approved resume content
+- added project-level AI context structure via `projectContexts[]` (`situation`, `approach`, `work`, optional `lessonsLearned`)
+- enforced EPAM client anonymity in stored content
+- introduced intentional legacy-role AI context omission (`aiContextId` optional on condensed earlier engineering role)
+- documented implementation requirements in `docs/agents/content-strategist-resume-data-pack-2026-03-05.md`
+
 ## Experience Designer + AI Systems Architect -> Application Engineer
 
 - UI behavior for chat, scorecard, AI context
@@ -64,3 +72,11 @@
 - switch send glyph to tilted outlined plane icon for clearer directional affordance
 - refine overlay header separation and close affordance: thin header-bottom border plus larger borderless top-right close icon
 - remove chat answer preambles and question echoes; return direct answer text only
+- add top-menu resume download icon button with tooltip `Download classic resume`, linked to `public/classic-resume.txt` download target
+- add resume download control to hero and menu; implement zero-delay attached callout label in place of native tooltip
+- update menu/hero resume download targets to latest PDF (`/DmitryNaidionov-cv.pdf`) copied from user-provided source path
+- apply selected file-download icon variant and remove hero download button text (icon-only with callout label)
+- normalize download button style/alignment to match section-specific controls rather than standalone icon-button treatment
+- fix hero download button scale/alignment mismatch by matching action-row button dimensions and stretch behavior
+- remove `public/classic-resume.txt` fallback and keep PDF (`public/DmitryNaidionov-cv.pdf`) as the only download target
+- correct hero download icon/text-row alignment via flex baseline tuning and icon-level centering adjustment

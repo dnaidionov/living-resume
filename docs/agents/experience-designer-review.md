@@ -56,3 +56,11 @@ Polish the living-resume UI so it reads as a coherent recruiter-facing product r
 - replace send icon path with a visually centered custom plane glyph, enlarge to 30px, and increase contrast using deep navy icon color on gradient send button
 - update send icon to an outlined, tilted paper-plane style while preserving size and center alignment in the composer button
 - add thin divider under chat header and reposition close control as larger borderless top-right icon aligned to header start line
+- add icon-only top-nav resume download control with tooltip text `Download classic resume` and downloadable classic resume artifact in public/
+- surface resume download in both top navigation and hero actions; replace tooltip with immediate attached hover callout (`Download classic resume`) to improve affordance clarity
+- wire download controls to latest PDF resume artifact in public (`DmitryNaidionov-cv.pdf`) so clicks fetch the current classic resume file
+- switch resume download glyph to file-download icon style and make hero download action icon-only (label carried by attached callout)
+- align icon-only resume download controls with each section’s existing button system (menu-link in header, secondary button in hero)
+- adjust hero icon-only resume download control to match surrounding action-button height/alignment (44px) while remaining icon-only
+- fine-tune hero icon-only resume control baseline alignment by matching flex-row center alignment and adjusting icon visual centering/size to text-button rhythm
+- remove text-file resume fallback and standardize downloads on the latest PDF resume artifact only
