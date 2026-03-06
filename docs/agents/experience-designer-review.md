@@ -63,3 +63,4 @@ Polish the living-resume UI so it reads as a coherent recruiter-facing product r
 - align icon-only resume download controls with each section’s existing button system (menu-link in header, secondary button in hero)
 - adjust hero icon-only resume download control to match surrounding action-button height/alignment (44px) while remaining icon-only
 - fine-tune hero icon-only resume control baseline alignment by matching flex-row center alignment and adjusting icon visual centering/size to text-button rhythm
+- remove text-file resume fallback and standardize downloads on the latest PDF resume artifact only

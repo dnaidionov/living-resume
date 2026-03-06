@@ -78,4 +78,5 @@
 - apply selected file-download icon variant and remove hero download button text (icon-only with callout label)
 - normalize download button style/alignment to match section-specific controls rather than standalone icon-button treatment
 - fix hero download button scale/alignment mismatch by matching action-row button dimensions and stretch behavior
+- remove `public/classic-resume.txt` fallback and keep PDF (`public/DmitryNaidionov-cv.pdf`) as the only download target
 - correct hero download icon/text-row alignment via flex baseline tuning and icon-level centering adjustment
