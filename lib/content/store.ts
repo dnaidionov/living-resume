@@ -129,7 +129,45 @@ export async function buildDocuments(): Promise<ContentDocument[]> {
         section: `outcome-${index + 1}`,
         text: outcome,
         tags: explainer.skillsDemonstrated
-      }))
+      })),
+      ...(explainer.projectContexts ?? []).flatMap((projectContext) => [
+        {
+          id: `ai-context-${explainer.id}-${projectContext.id}-situation`,
+          sourceType: "ai_context" as const,
+          title: `${explainer.headline} · ${projectContext.title}`,
+          section: "project-situation",
+          text: projectContext.situation,
+          tags: explainer.skillsDemonstrated
+        },
+        {
+          id: `ai-context-${explainer.id}-${projectContext.id}-approach`,
+          sourceType: "ai_context" as const,
+          title: `${explainer.headline} · ${projectContext.title}`,
+          section: "project-approach",
+          text: projectContext.approach,
+          tags: explainer.skillsDemonstrated
+        },
+        {
+          id: `ai-context-${explainer.id}-${projectContext.id}-work`,
+          sourceType: "ai_context" as const,
+          title: `${explainer.headline} · ${projectContext.title}`,
+          section: "project-work",
+          text: projectContext.work,
+          tags: explainer.skillsDemonstrated
+        },
+        ...(projectContext.lessonsLearned
+          ? [
+              {
+                id: `ai-context-${explainer.id}-${projectContext.id}-lessons-learned`,
+                sourceType: "ai_context" as const,
+                title: `${explainer.headline} · ${projectContext.title}`,
+                section: "project-lessons-learned",
+                text: projectContext.lessonsLearned,
+                tags: explainer.skillsDemonstrated
+              }
+            ]
+          : [])
+      ])
     ]),
     ...faq.map((item) => ({
       id: `faq-${item.id}`,

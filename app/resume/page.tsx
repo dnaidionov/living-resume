@@ -11,9 +11,9 @@ export default async function ResumePage() {
     <main>
       <SiteHeader />
       <ContentSection
-        eyebrow="Resume"
-        title="Experience with inspectable context"
-        intro="Each role includes a structured explainer that shows how the headline claims were achieved."
+        eyebrow="Experience"
+        title="Professional Experience"
+        intro="Chronological roles highlighting responsibilities, scope, and business outcomes."
       >
         <div className="grid">
           {roles.map((role) => (

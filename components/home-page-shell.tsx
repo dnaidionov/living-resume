@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import Image from "next/image";
-import type { AIContextExplainer, BuildDoc, ProjectBrief, ResumeRole } from "@/types/content";
+import type { AIContextExplainer, BuildDoc, ResumeRole } from "@/types/content";
 import { SiteHeader } from "@/components/site-header";
 import { Hero } from "@/components/hero";
 import { RoleCard } from "@/components/role-card";
@@ -13,12 +13,10 @@ import { GithubIcon } from "@/components/github-icon";
 
 export function HomePageShell({
   roles,
-  projects,
   explainers,
   buildDocs
 }: {
   roles: ResumeRole[];
-  projects: ProjectBrief[];
   explainers: AIContextExplainer[];
   buildDocs: BuildDoc[];
 }) {
@@ -32,10 +30,18 @@ export function HomePageShell({
 
         <section id="experience" className="section shell">
           <span className="eyebrow">Experience</span>
-          <h2 className="section-title">Readable proof, not just resume headlines</h2>
-          <p className="muted section-intro">
-            The experience section is the core of the site. Each role exposes context, decisions, and
-            outcomes in a consistent, inspectable format.
+          <h2 className="section-title">Professional Experience</h2>
+          <p
+            style={{
+              marginBottom: 16,
+              fontSize: "1.02rem",
+              fontWeight: 600,
+              color: "var(--text-muted)",
+              opacity: 0.74
+            }}
+          >
+            Current focus: AI product management, developer experience, and cross-functional execution at
+            scale.
           </p>
           <div className="grid" style={{ marginTop: 24 }}>
             {roles.map((role) => (
@@ -47,53 +53,14 @@ export function HomePageShell({
             ))}
           </div>
 
-          <div className="grid two-col" style={{ marginTop: 24 }}>
-            <div className="card" style={{ padding: 24 }}>
-              <span className="eyebrow">Selected Initiatives</span>
-              <h3 style={{ marginBottom: 8 }}>What the experience compounds into</h3>
-              <div className="grid">
-                {projects.map((project) => (
-                  <div key={project.id} style={{ paddingBottom: 16, borderBottom: "1px solid var(--line)" }}>
-                    <strong>{project.name}</strong>
-                    <p className="muted body-copy" style={{ marginBottom: 6 }}>
-                      {project.summary}
-                    </p>
-                    <div className="pill-row">
-                      {project.tags.map((tag) => (
-                        <span key={tag} className="pill">
-                          {tag}
-                        </span>
-                      ))}
-                    </div>
-                  </div>
-                ))}
-              </div>
-            </div>
-            <div className="card" style={{ padding: 24 }}>
-              <span className="eyebrow">What to ask next</span>
-              <h3 style={{ marginBottom: 8 }}>Conversation prompts that reveal fit faster</h3>
-              <div className="grid">
-                {[
-                  "Which role best demonstrates AI-native product judgment?",
-                  "Where is the strongest evidence for execution under ambiguity?",
-                  "What type of company context fits this background best?",
-                  "Which achievements should a hiring manager probe deeper?"
-                ].map((item) => (
-                  <div key={item} className="pill" style={{ borderRadius: 18, padding: 16 }}>
-                    {item}
-                  </div>
-                ))}
-              </div>
-            </div>
-          </div>
         </section>
 
         <section id="fit-check" className="section shell">
-          <span className="eyebrow">Fit Check</span>
-          <h2 className="section-title">Evaluate role fit without reading the whole site first</h2>
+          <span className="eyebrow">Role Fit</span>
+          <h2 className="section-title">Role Fit Assessment</h2>
           <p className="muted section-intro">
-            Paste a JD, upload a file, or use a job URL. The system stays candid, evidence-backed, and
-            explicit about what is proven versus adjacent.
+            Paste a job description, upload a file, or use a job URL to compare role requirements with
+            documented experience and outcomes.
           </p>
           <FitAnalysisForm />
         </section>

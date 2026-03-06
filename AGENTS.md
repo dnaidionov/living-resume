@@ -18,6 +18,7 @@ This repository treats implementation artifacts and delivery artifacts as first-
 - Architecture changes update the relevant ADR in `docs/decisions/`.
 - Agent handoffs are captured in `docs/agents/handoffs.md`.
 - Public build pages should derive from repo documentation instead of diverging from it.
+- Every meaningful product/content/UX decision must be documented proactively (without requiring explicit user prompt) in the current role artifact and/or decision log.
 
 ## Delivery order
 
