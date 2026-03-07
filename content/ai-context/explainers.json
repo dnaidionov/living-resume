@@ -1,142 +1,488 @@
 [
   {
-    "id": "ctx-ohny",
-    "roleId": "ohny",
-    "headline": "Built an AI-native product system from ambiguous requirements to implementation-ready architecture.",
-    "summary": "This role centered on translating uncertainty into a system that could actually be shipped, evaluated, and explained.",
-    "situation": "The product needed to show both a compelling user experience and a credible internal delivery system for AI-native execution.",
-    "goal": "Define a product and architecture that demonstrated grounded AI interactions, clear role-fit analysis, and reusable agent handoffs.",
+    "id": "ctx-epam",
+    "roleId": "epam",
+    "headline": "Enterprise product delivery across AI, DX, compliance, healthcare, and fintech programs.",
+    "summary": "Portfolio of anonymized EPAM engagements focused on measurable business outcomes and execution in complex enterprise environments.",
+    "projectContexts": [
+      {
+        "id": "epam-ai-experience",
+        "title": "AI Experience",
+        "situation": "Sales and support teams had thousands of documents across 20+ products distributed across Salesforce, SharePoint, brand websites, and an internal proprietary learning system. This slowed quote and customer-offer preparation, interfered with new-business bidding, and increased issue-resolution times.",
+        "approach": "Build a solution that aggregates relevant information across multiple data sources and presents it in client-presentation-ready form with talking points, supporting evidence, and step-by-step workflows.",
+        "work": "Led development of a conversational product knowledge assistant MVP; defined the AI evaluation framework and supported implementation to ensure response quality and prevent drift."
+      },
+      {
+        "id": "epam-api-devex",
+        "title": "API and Developer Experience",
+        "situation": "API documentation quality and discoverability were inconsistent, slowing adoption and externalization.",
+        "approach": "Improve docs maturity standards, automate docs generation, and test new content with simulated target developer segments before publishing externally.",
+        "work": "Built external API docs portal; redesigned docs maturity guidance; built synthetic developer profiles and a docs evaluation agent using a synthetic audience based on those profiles; streamlined API promotion from internal to external-facing.",
+        "lessonsLearned": "For developer-facing products like docs, synthetic audiences are workflow-based more than demographic-based. Synthetic research should use real domain signals (issues, telemetry, and similar) and simulate actual workflows."
+      },
+      {
+        "id": "epam-service-management",
+        "title": "Service Management Compliance",
+        "situation": "Regulated-market compliance initiatives required prioritization and coordinated execution across business and technical stakeholders.",
+        "approach": "Use cost-benefit prioritization and execution governance to sequence initiatives and align implementation.",
+        "work": "Led initiative evaluation and execution for regulated portfolio.",
+        "lessonsLearned": "Even for high-profile, high-visibility initiatives, not implementing a solution can be the right move."
+      },
+      {
+        "id": "epam-healthcare-medtech",
+        "title": "Healthcare and MedTech",
+        "situation": "A medical device manufacturer was running into problems managing the global fleet of devices. Legacy workflows required manual setup, maintenance, and troubleshooting by qualified technicians traveling worldwide, which ballooned operating costs.",
+        "approach": "Build a fleet management portal enabling hospital IT personnel to self-manage devices, significantly cutting costs for both manufacturer and clients.",
+        "work": "Led portal product work, journey and workflow shaping, integration coordination, and cross-functional governance."
+      },
+      {
+        "id": "epam-fintech",
+        "title": "Fintech",
+        "situation": "Multiple enterprise- and customer-facing products across the portfolio lacked operational efficiency. Fraud in customer-facing services was costing millions annually. CFPB and NACHA deadlines introduced risk of significant fines and potential ACH suspension.",
+        "approach": "Evaluate workflows across the portfolio and prioritize by revenue impact, with compliance projects first. Launch targeted workflow improvements (including KYC) across the product portfolio with clear metrics.",
+        "work": "Led initiatives across multiple products; implemented B2B2C KYC workflow; supported new product-line launch workshops."
+      }
+    ],
+    "situation": "Anonymized enterprise engagements required measurable outcomes in regulated and integration-heavy environments.",
+    "goal": "Deliver product improvements that combine operational impact, compliance readiness, and scalable execution.",
     "constraints": [
-      "The product had to feel premium and recruiter-ready, not experimental.",
-      "The architecture needed to stay under a strict monthly budget.",
-      "The implementation needed to be portable to richer infrastructure later."
+      "Client confidentiality requirements.",
+      "Complex multi-system integrations.",
+      "Strict compliance and timeline constraints."
     ],
     "approach": [
-      "Made chat the primary interface instead of a secondary feature.",
-      "Introduced structured AI context explainers behind each role.",
-      "Separated content, retrieval, AI provider, and platform boundaries so the system could evolve."
+      "Run portfolio-style discovery and prioritization.",
+      "Sequence high-risk and compliance-sensitive workflows first.",
+      "Anchor delivery on measurable operational outcomes."
     ],
     "keyDecisions": [
-      "Use repo-managed content as the source of truth in v1.",
-      "Use Cloudflare plus OpenAI rather than a heavier hosted database stack.",
-      "Document the build publicly as part of the product value."
+      "Use anonymized client references across all EPAM contexts.",
+      "Prioritize compliance-critical initiatives when deadlines impose systemic risk.",
+      "Treat AI evaluation as a first-class product requirement."
     ],
     "execution": [
-      "Defined the content model and agent handoff process.",
-      "Specified retrieval, fit analysis, and citation behavior.",
-      "Sequenced delivery into repo foundation, content system, UI, AI flows, and release hardening."
+      "Led cross-functional alignment across product, engineering, design, compliance, and operations.",
+      "Defined metrics and validation criteria before rollout where possible.",
+      "Coordinated delivery across multiple workflows and systems."
     ],
     "outcomes": [
-      "Created a portfolio artifact that doubles as a working AI-native product.",
-      "Made resume claims inspectable rather than purely declarative.",
-      "Kept the MVP within a small infrastructure budget."
+      "40% call-center load reduction in fintech workflows.",
+      "35% operational cost reduction in fintech operations.",
+      "70% fraud reduction in customer-facing services.",
+      "Projected $8-10M first-year savings in healthcare and medtech self-service operations."
     ],
     "metrics": [
-      "Budget target below $20/month.",
-      "Every role mapped to an approved AI context explainer.",
-      "All user-facing AI features grounded in curated source material."
+      "25% lower support handling time (UAT indicator).",
+      "30% higher sales closure rate (UAT indicator).",
+      "15 hours per week reclaimed per salesperson (UAT indicator).",
+      "NACHA and CFPB compliance milestones achieved."
     ],
-    "skillsDemonstrated": ["Product Framing", "AI Architecture", "Decision Making", "Execution Planning"],
-    "relatedProjectIds": ["living-resume", "agentic-delivery"],
+    "skillsDemonstrated": [
+      "Enterprise Product Management",
+      "AI Product Evaluation",
+      "Developer Experience",
+      "Compliance Program Delivery",
+      "Workflow Transformation"
+    ],
+    "relatedProjectIds": ["fit-analysis"],
     "citations": [
       {
-        "sourceId": "build-architecture",
-        "title": "Architecture Overview",
-        "section": "Summary"
+        "sourceId": "resume-2026-latest",
+        "title": "DmitryNaidionov-cv.pdf",
+        "section": "EPAM"
       }
     ]
   },
   {
-    "id": "ctx-consulting",
-    "roleId": "consulting",
-    "headline": "Turned ambiguous product asks into structured delivery programs with visible tradeoffs.",
-    "summary": "The work focused on creating enough clarity for teams to move without pretending uncertainty was gone.",
-    "situation": "Teams had real product pressure but inconsistent framing, scattered priorities, and unclear coordination patterns.",
-    "goal": "Create operating clarity, decision boundaries, and execution confidence across product and engineering stakeholders.",
+    "id": "ctx-modus-create",
+    "roleId": "modus-create",
+    "headline": "Productized workshop-led strategy for idea-to-MVP execution.",
+    "summary": "Role focused on creating repeatable strategic alignment programs for clients with recurring product dysfunction patterns.",
+    "projectContexts": [
+      {
+        "id": "modus-product-strategy-kickstart",
+        "title": "Product Strategy and Kickstart",
+        "situation": "Multiple clients exhibited the same dysfunction patterns and needed a clearer path from idea to validated product.",
+        "approach": "Develop a KPI-first workshop series as a productized offering for those clients.",
+        "work": "Led strategy workshops, validated offering definition, and roadmap creation; redesigned the Product Kickstart workshop series; delivered a masterclass about it."
+      }
+    ],
+    "situation": "Clients needed practical strategic structure before scaling delivery.",
+    "goal": "Reduce ambiguity and accelerate idea-to-MVP execution with repeatable facilitation artifacts.",
     "constraints": [
-      "High ambiguity at the start.",
-      "Cross-functional stakeholders had different definitions of success.",
-      "The work needed to stay practical and lightweight."
+      "Different client maturity levels.",
+      "Limited alignment across stakeholders at project start."
     ],
     "approach": [
-      "Used concise framing docs to align decisions early.",
-      "Translated broad goals into scopes, milestones, and acceptance criteria.",
-      "Balanced product ambition with delivery realism."
+      "KPI-first strategy framing.",
+      "Workshop-led alignment and prioritization.",
+      "Conversion of strategy artifacts into delivery-ready roadmap inputs."
     ],
     "keyDecisions": [
-      "Favor clear tradeoff articulation over optimistic vagueness.",
-      "Use artifacts that support handoff, not just discussion.",
-      "Keep strategy close to implementation detail."
+      "Productize the workshop series rather than run ad-hoc facilitation.",
+      "Anchor exercises on measurable outcomes, not feature wishlists."
     ],
     "execution": [
-      "Ran through goals, constraints, dependencies, and sequencing.",
-      "Documented product and operating assumptions.",
-      "Made the work legible to both business and technical stakeholders."
+      "Led strategy sessions across multiple clients.",
+      "Mapped business goals to validated offering definitions.",
+      "Documented roadmap decisions for downstream delivery teams."
     ],
     "outcomes": [
-      "Lowered confusion around priorities.",
-      "Improved cross-functional decision velocity.",
-      "Gave teams a clearer path from problem definition to execution."
+      "Clearer product direction and execution boundaries for participating clients.",
+      "Reusable workshop format for repeated client scenarios."
     ],
     "metrics": [
-      "Faster scope alignment.",
-      "Clearer decision accountability.",
-      "Reduced ambiguity in handoffs."
+      "Consistent strategy-to-roadmap handoff artifacts.",
+      "Reduced ambiguity during kickoff phases."
     ],
-    "skillsDemonstrated": ["Strategy", "Communication", "Execution Design", "Stakeholder Management"],
-    "relatedProjectIds": ["fit-analysis"],
+    "skillsDemonstrated": ["Product Strategy", "Facilitation", "Roadmapping", "KPI Framing"],
+    "relatedProjectIds": [],
     "citations": [
       {
-        "sourceId": "build-agents",
-        "title": "Agent Delivery Model",
-        "section": "Workflow"
+        "sourceId": "resume-2026-latest",
+        "title": "DmitryNaidionov-cv.pdf",
+        "section": "Modus Create"
       }
     ]
   },
   {
-    "id": "ctx-platform",
-    "roleId": "platform",
-    "headline": "Connected platform thinking with product execution and operating discipline.",
-    "summary": "The emphasis was on making systems, teams, and priorities work together rather than optimizing a single function in isolation.",
-    "situation": "Platform and product decisions were tightly coupled, but teams often treated them separately.",
-    "goal": "Improve execution by clarifying the relationship between user value, internal capability, and release sequence.",
+    "id": "ctx-cardstack",
+    "roleId": "cardstack",
+    "headline": "Platform and ecosystem product delivery in a web3 and no-code environment.",
+    "summary": "Delivered multiple parallel product streams: platform core, developer framework, token workflows, and partner pilots.",
+    "projectContexts": [
+      {
+        "id": "cardstack-platform-framework",
+        "title": "No-code Platform and Developer Framework",
+        "situation": "Simultaneously building a developer-facing platform, a no-code user-facing layer of that platform, and user-facing applications on that platform.",
+        "approach": "Define product UX and platform capabilities in parallel.",
+        "work": "Owned functionality and UX definition for low-code and no-code app platform and companion web framework."
+      },
+      {
+        "id": "cardstack-kyc-token",
+        "title": "KYC and Token Generation Platform",
+        "situation": "Company was preparing for ICO and needed to pre-register and vet large numbers of users, generate tokens, and distribute tokens while ensuring peak-load performance.",
+        "approach": "Build a two-layer KYC workflow integrating with an external provider via API.",
+        "work": "Launched KYC and token generation platform; the company's own ICO was performed on it."
+      },
+      {
+        "id": "cardstack-warner-pilot",
+        "title": "Warner Music Pilot",
+        "situation": "Warner Music was experiencing digital-rights transparency issues where multiple parties owned different pieces of data and no unified view existed.",
+        "approach": "Build a decentralized artist data management system where each owner can manage data while enabling fair royalty distribution and conflict resolution.",
+        "work": "Performed discovery, led development and pilot launch with Warner Music and participating partners and third parties, ensured cross-functional alignment, and designed next-stage workflows for expansion."
+      },
+      {
+        "id": "cardstack-travel-rewards",
+        "title": "Travel Rewards System",
+        "situation": "IATA was exploring a cross-company rewards model and partnered with Cardstack for discovery and pilot work.",
+        "approach": "Map inter-company value exchange and design user and admin workflows.",
+        "work": "Ran value stream mapping with stakeholders from IATA and partner airlines. Developed workflows and UX for a decentralized cross-company rewards management system for the travel industry."
+      },
+      {
+        "id": "cardstack-tally",
+        "title": "Tally Protocol and Web App",
+        "situation": "Needed to validate payment protocol behavior with a usable product surface before going live.",
+        "approach": "Ship protocol and user-facing interface together in testnet, collect telemetry, emulate real-life use, and ensure performance SLAs.",
+        "work": "Led GTM efforts, deployment, testing, usage-data and feedback collection, and codebase refinement related to launching Tally payment protocol and accompanying web app in testnet."
+      }
+    ],
+    "situation": "Multiple platform and ecosystem initiatives had to be delivered in parallel under high technical and market uncertainty.",
+    "goal": "Ship reliable product increments across protocol, platform, and partner-facing streams without losing execution coherence.",
     "constraints": [
-      "Competing priorities across teams.",
-      "Operational and product goals moved at different speeds.",
-      "Decisions needed to be understandable across disciplines."
+      "Concurrent delivery tracks with shared dependencies.",
+      "Performance sensitivity around ICO and payment workflows.",
+      "Partner and third-party alignment requirements."
     ],
     "approach": [
-      "Mapped workflows instead of isolated features.",
-      "Used decision frameworks to show tradeoffs and dependencies.",
-      "Framed platform work in terms of product outcomes."
+      "Use project-specific discovery and workflow modeling.",
+      "Pair technical platform milestones with user-facing validation.",
+      "Sequence pilots before larger rollout commitments."
     ],
     "keyDecisions": [
-      "Keep system clarity ahead of local optimization.",
-      "Translate technical work into user and business relevance.",
-      "Document why priorities were sequenced the way they were."
+      "Use the same platform for internal ICO execution to validate readiness.",
+      "Treat interoperability and data-ownership boundaries as first-class product inputs.",
+      "Run telemetry-backed testnet validation before broader payment rollout."
     ],
     "execution": [
-      "Built shared views of workflows and priorities.",
-      "Connected operational constraints to roadmap choices.",
-      "Structured release thinking around evidence and readiness."
+      "Defined product UX and platform capabilities.",
+      "Led cross-functional pilot alignment with external partners.",
+      "Owned launch execution for protocol and web application tracks."
     ],
     "outcomes": [
-      "Improved alignment between platform and product work.",
-      "Reduced friction in cross-functional planning.",
-      "Created better execution narratives for stakeholders."
+      "Company ICO executed on launched KYC and token workflow platform.",
+      "Warner Music pilot delivered with partner alignment.",
+      "Tally protocol and app validated in testnet environment."
     ],
     "metrics": [
-      "More coherent roadmap discussions.",
-      "Better handoffs across functions.",
-      "Clearer release readiness."
+      "Successful ICO support under expected load.",
+      "Pilot completion with external partner ecosystem.",
+      "Telemetry and performance validation in testnet."
     ],
-    "skillsDemonstrated": ["Platform Strategy", "Systems Thinking", "Operational Product Management"],
-    "relatedProjectIds": ["fit-analysis"],
+    "skillsDemonstrated": ["Platform PM", "Web3 Product", "Pilot Delivery", "GTM Execution"],
+    "relatedProjectIds": [],
     "citations": [
       {
-        "sourceId": "build-content",
-        "title": "Content Model",
-        "section": "Role Evidence"
+        "sourceId": "resume-2026-latest",
+        "title": "DmitryNaidionov-cv.pdf",
+        "section": "Cardstack"
+      }
+    ]
+  },
+  {
+    "id": "ctx-vingis",
+    "roleId": "vingis",
+    "headline": "Product consulting across startup and enterprise environments.",
+    "summary": "Applied a repeatable product operating model to client engagements with different maturity levels and constraints.",
+    "projectContexts": [
+      {
+        "id": "vingis-product-leadership",
+        "title": "Product Leadership Across Clients",
+        "situation": "Provided product consulting services to startups and enterprises.",
+        "approach": "Apply repeatable PM fundamentals: discovery, roadmaping, requirements engineering, and stakeholder alignment.",
+        "work": "Led multi-client product engagements across sectors and stages."
+      }
+    ],
+    "situation": "Client contexts varied significantly in business model, team maturity, and execution readiness.",
+    "goal": "Deliver consistent product execution outcomes across heterogeneous environments.",
+    "constraints": [
+      "Different organizational maturity levels.",
+      "Limited initial process and artifact consistency."
+    ],
+    "approach": [
+      "Standardize discovery-to-roadmap flow.",
+      "Keep recommendations execution-ready and measurable.",
+      "Align technical and business stakeholders on scope boundaries."
+    ],
+    "keyDecisions": [
+      "Use a compact but repeatable product operating model across clients.",
+      "Prioritize delivery artifacts that improve implementation clarity."
+    ],
+    "execution": [
+      "Ran discovery and requirement framing.",
+      "Built stakeholder alignment mechanisms.",
+      "Supported cross-functional execution through roadmap and scope discipline."
+    ],
+    "outcomes": [
+      "Improved execution consistency across client engagements.",
+      "Faster movement from product ambiguity to delivery plans."
+    ],
+    "metrics": [
+      "Stable discovery-to-roadmap artifacts across engagements.",
+      "Reduced cross-functional ambiguity at kickoff."
+    ],
+    "skillsDemonstrated": ["Product Consulting", "Discovery", "Requirements Engineering", "Stakeholder Alignment"],
+    "relatedProjectIds": [],
+    "citations": [
+      {
+        "sourceId": "resume-2026-latest",
+        "title": "DmitryNaidionov-cv.pdf",
+        "section": "Vingis"
+      }
+    ]
+  },
+  {
+    "id": "ctx-pwc-google-lab",
+    "roleId": "pwc-google-lab",
+    "headline": "Pilot-to-scale transformation of field-service operations and architecture.",
+    "summary": "Field Service Optimization work that combined deep discovery, workflow redesign, cloud transition, and vendor orchestration.",
+    "projectContexts": [
+      {
+        "id": "pwc-google-fso",
+        "title": "Field Service Optimization",
+        "situation": "Company was stuck with outdated on-premises software that created roadblocks across organizational workflows.",
+        "approach": "Perform full discovery, identify processes and workflows needing redesign, design a new cloud-based architecture, and implement organization-level changes.",
+        "work": "Owned parts of discovery (user interviews, usability studies, alignment and prioritization workshops), led development of new workflows, migration to cloud, and integration with remaining legacy systems. Coordinated six external vendors and offshore PwC team involved in delivery."
+      }
+    ],
+    "situation": "Legacy architecture and fragmented operations blocked field-service efficiency and downstream business processes.",
+    "goal": "Modernize workflows and architecture to enable commercial-scale field-service delivery.",
+    "constraints": [
+      "Legacy system dependencies.",
+      "Multi-vendor coordination complexity.",
+      "Operational continuity requirements during migration."
+    ],
+    "approach": [
+      "Run multi-method discovery before architecture decisions.",
+      "Redesign workflows and cloud architecture in tandem.",
+      "Plan integration boundaries with legacy systems deliberately."
+    ],
+    "keyDecisions": [
+      "Treat organizational workflow redesign as part of product scope.",
+      "Coordinate vendors through shared prioritization and alignment artifacts."
+    ],
+    "execution": [
+      "Led discovery tracks and prioritization sessions.",
+      "Directed workflow redesign and cloud migration activities.",
+      "Managed cross-team integration and delivery dependencies."
+    ],
+    "outcomes": [
+      "FSO moved from pilot to commercial deployment.",
+      "Projected annual parts savings of $1.4M.",
+      "Shortened billing cycle and improved dispatcher workflows."
+    ],
+    "metrics": [
+      "Projected $1.4M annual parts savings.",
+      "Reduced ticket-to-billing latency from months to days."
+    ],
+    "skillsDemonstrated": ["Enterprise Transformation", "Discovery Leadership", "Cloud Migration", "Vendor Orchestration"],
+    "relatedProjectIds": [],
+    "citations": [
+      {
+        "sourceId": "resume-2026-latest",
+        "title": "DmitryNaidionov-cv.pdf",
+        "section": "PwC and Google for Work"
+      }
+    ]
+  },
+  {
+    "id": "ctx-realplace",
+    "roleId": "realplace",
+    "headline": "Founding-stage product and technical execution in commercial real estate.",
+    "summary": "Built an early-stage transparency-focused marketplace concept from discovery to prototype.",
+    "projectContexts": [
+      {
+        "id": "realplace-marketplace",
+        "title": "Commercial Real Estate Startup",
+        "situation": "Market lacked transparent transaction flow for commercial real estate buying and selling.",
+        "approach": "Use discovery-led startup build and rapid prototyping to validate market and solution assumptions.",
+        "work": "Co-founded company, led research and discovery, authored product and technical requirements, built prototype, and secured accelerator acceptance.",
+        "lessonsLearned": "In a non-transparent market, guaranteed support from data owners is as important as raising capital, if not more important."
+      }
+    ],
+    "situation": "Commercial real estate workflows lacked transparency and trust.",
+    "goal": "Create a product foundation for more transparent marketplace transactions.",
+    "constraints": [
+      "Early-stage resource limits.",
+      "Data-owner dependency for marketplace viability."
+    ],
+    "approach": [
+      "Combine discovery and prototyping to validate assumptions quickly.",
+      "Use product and technical requirements as shared execution contract."
+    ],
+    "keyDecisions": [
+      "Prioritize research depth over premature feature expansion.",
+      "Anchor MVP framing around trust and transparency mechanics."
+    ],
+    "execution": [
+      "Ran customer and market discovery.",
+      "Defined product and technical architecture direction.",
+      "Built prototype and external accelerator narrative."
+    ],
+    "outcomes": [
+      "Prototype completion for auction-based transaction concept.",
+      "Acceptance into FirstGrowthVC accelerator."
+    ],
+    "metrics": [
+      "Accelerator admission achieved.",
+      "Validated core hypothesis through discovery and prototype signals."
+    ],
+    "skillsDemonstrated": ["Founding", "Discovery", "Product Definition", "Prototype Delivery"],
+    "relatedProjectIds": [],
+    "citations": [
+      {
+        "sourceId": "resume-2026-latest",
+        "title": "DmitryNaidionov-cv.pdf",
+        "section": "REALPLACE"
+      }
+    ]
+  },
+  {
+    "id": "ctx-acision",
+    "roleId": "acision",
+    "headline": "Retention-focused telecom product modernization through analytics and workflow redesign.",
+    "summary": "Led product development and customer-portal redesign initiatives to address measurable telecom attrition risks.",
+    "projectContexts": [
+      {
+        "id": "acision-telecom-suite",
+        "title": "Telecom Product Suite",
+        "situation": "Major telecom was experiencing strong customer attrition despite offering high-quality value-added services and competitive pricing.",
+        "approach": "Analyze customer analytics to discover attrition patterns, then redesign UX workflows to remove leading failure points.",
+        "work": "Performed data analysis, designed updated UX workflows, created requirements, and led development of updated customer portal."
+      }
+    ],
+    "situation": "Existing telecom product experience was not converting service quality into durable customer retention.",
+    "goal": "Lower customer attrition through targeted workflow and experience redesign grounded in analytics.",
+    "constraints": [
+      "Large-scale telecom customer base complexity.",
+      "Need to coordinate product, engineering, and UX changes in parallel."
+    ],
+    "approach": [
+      "Use retention analytics to identify highest-impact friction patterns.",
+      "Redesign UX workflows and delivery requirements around those patterns."
+    ],
+    "keyDecisions": [
+      "Prioritize churn-driver workflows over broad feature expansion.",
+      "Use data-backed requirement framing for redesign scope."
+    ],
+    "execution": [
+      "Ran data analysis and pattern discovery.",
+      "Defined redesign requirements with UX and engineering teams.",
+      "Led implementation of updated customer portal experience."
+    ],
+    "outcomes": [
+      "Lowered customer attrition by 60%.",
+      "Improved alignment between telecom product value and user experience flow."
+    ],
+    "metrics": ["60% customer attrition reduction."],
+    "skillsDemonstrated": ["Retention Strategy", "Product Analytics", "UX Redesign", "Delivery Leadership"],
+    "relatedProjectIds": [],
+    "citations": [
+      {
+        "sourceId": "resume-2026-latest",
+        "title": "DmitryNaidionov-cv.pdf",
+        "section": "ACISION"
+      }
+    ]
+  },
+  {
+    "id": "ctx-soli",
+    "roleId": "soli",
+    "headline": "US expansion enablement through technical product leadership and API platform work.",
+    "summary": "Established local technical delivery capability while scaling product process, API strategy, and integration execution.",
+    "projectContexts": [
+      {
+        "id": "soli-technical-expansion",
+        "title": "Technical Product Expansion",
+        "situation": "US expansion required local technical leadership and a scalable product process.",
+        "approach": "Build team and process baseline first, then scale PRD and PoC workflows, API productization, and operator integrations.",
+        "work": "Hired as first technical US employee, built NY team, implemented agile practices, led PRDs and PoCs, built external API, and led Olympics campaign integration delivery."
+      }
+    ],
+    "situation": "Fast expansion required immediate technical leadership and operating discipline in a new geography.",
+    "goal": "Create execution capacity for global-scale campaign integrations and API-enabled product delivery.",
+    "constraints": [
+      "Small initial US footprint.",
+      "High dependency on offshore coordination and external operator integrations."
+    ],
+    "approach": [
+      "Establish team and process foundations before scaling delivery throughput.",
+      "Pair product requirements discipline with technical integration ownership."
+    ],
+    "keyDecisions": [
+      "Invest early in local technical team formation.",
+      "Standardize PRD and PoC workflows to reduce integration risk."
+    ],
+    "execution": [
+      "Built local team structure and offshore collaboration model.",
+      "Introduced agile delivery practices.",
+      "Led API and campaign integration initiatives."
+    ],
+    "outcomes": [
+      "Established US technical delivery capability.",
+      "Shipped global campaign integrations including operator and agency coordination."
+    ],
+    "metrics": [
+      "Team and process baseline established in new market.",
+      "External API and major campaign integrations delivered."
+    ],
+    "skillsDemonstrated": ["Technical PM", "Team Building", "API Delivery", "Integration Leadership"],
+    "relatedProjectIds": [],
+    "citations": [
+      {
+        "sourceId": "resume-2026-latest",
+        "title": "DmitryNaidionov-cv.pdf",
+        "section": "SOLI"
       }
     ]
   }

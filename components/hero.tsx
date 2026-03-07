@@ -28,7 +28,7 @@ export function Hero({ onAskAi }: { onAskAi: () => void }) {
             Product Manager
           </h2>
           <p className="muted hero-copy">
-            Product Strategy, AI Product Lifecycle &amp; LLM Orchestration, Enternprise and Consumer
+            Product Strategy, AI Product Lifecycle and LLM Orchestration, Enterprise and Consumer
             Products{" "}
             <a
               href="https://www.linkedin.com/in/dnaidionov/"

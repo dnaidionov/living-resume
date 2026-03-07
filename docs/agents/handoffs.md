@@ -22,6 +22,12 @@
 - introduced intentional legacy-role AI context omission (`aiContextId` optional on condensed earlier engineering role)
 - documented implementation requirements in `docs/agents/content-strategist-resume-data-pack-2026-03-05.md`
 
+## Cross-role documentation policy
+
+- meaningful decisions must be logged proactively without explicit prompting
+- use `docs/agents/decision-log.md` for concise decision entries
+- use ADRs in `docs/decisions/` when decisions affect architecture or long-lived contracts
+
 ## Experience Designer + AI Systems Architect -> Application Engineer
 
 - UI behavior for chat, scorecard, AI context

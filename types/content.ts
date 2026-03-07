@@ -14,7 +14,7 @@ export type ResumeRole = {
   achievements: string[];
   skills: string[];
   tags: string[];
-  aiContextId: string;
+  aiContextId?: string;
 };
 
 export type ProjectBrief = {
@@ -33,6 +33,15 @@ export type AIContextExplainer = {
   roleId: string;
   headline: string;
   summary: string;
+  // Project- or portfolio-level contexts shown in "View AI Context".
+  projectContexts?: {
+    id: string;
+    title: string;
+    situation: string;
+    approach: string;
+    work: string;
+    lessonsLearned?: string;
+  }[];
   situation: string;
   goal: string;
   constraints: string[];

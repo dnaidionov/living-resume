@@ -1,48 +1,149 @@
 [
   {
-    "id": "ohny",
-    "company": "OHNY",
-    "title": "Product Builder / AI-Native Systems Lead",
-    "startDate": "2024-01",
-    "summary": "Led product definition and system design for an AI-native conversational platform spanning orchestration, retrieval, evaluation, and delivery workflow design.",
+    "id": "epam",
+    "company": "EPAM",
+    "title": "Senior Product Manager",
+    "startDate": "2021-06",
+    "summary": "Senior Product Manager leading AI, API and developer experience, compliance, healthcare, and fintech initiatives with measurable operational and revenue impact.",
     "achievements": [
-      "Framed the end-to-end user journey for an AI-first product from discovery through release readiness.",
-      "Defined agent roles, handoff rules, and artifact ownership so execution could scale without losing clarity.",
-      "Translated ambiguous requirements into delivery-ready architecture and product decisions."
+      "Led development of a conversational product knowledge assistant MVP for a global leader in automotive technology, defining the AI evaluation framework and supporting implementation to improve response quality.",
+      "Led developer experience enhancements for a leading US telecom provider, improving API discoverability and accelerating API promotion from internal to external audiences.",
+      "Led fintech workflow and KYC redesign across B2B2C flows, contributing to 40% call-center load reduction, 35% operational cost reduction, and 70% fraud reduction while meeting NACHA and CFPB compliance deadlines.",
+      "Led healthcare fleet-management portal product work for a major medical device manufacturer, with projected first-year savings of $8-10M from self-service workflow adoption."
     ],
-    "skills": ["AI Product", "System Design", "Delivery Architecture", "Prompting"],
-    "tags": ["ai", "product", "orchestration"],
-    "aiContextId": "ctx-ohny"
+    "skills": [
+      "AI Product Management",
+      "Developer Experience",
+      "Compliance Delivery",
+      "Cross-functional Leadership",
+      "Workflow Redesign"
+    ],
+    "tags": ["product", "ai", "fintech", "healthcare", "compliance", "developer-experience"],
+    "aiContextId": "ctx-epam"
   },
   {
-    "id": "consulting",
-    "company": "Independent / Advisory Work",
-    "title": "Product Strategy and Execution Advisor",
-    "startDate": "2022-01",
-    "summary": "Partnered with teams on strategy, delivery structure, and translating messy product problems into executable programs.",
+    "id": "modus-create",
+    "company": "Modus Create",
+    "title": "Product Strategist",
+    "startDate": "2020-12",
+    "endDate": "2021-06",
+    "summary": "Product Strategist focused on KPI-led product definition and workshop-driven idea-to-MVP execution.",
     "achievements": [
-      "Helped teams define priorities, constraints, and measurable outcomes before implementation started.",
-      "Created communication and decision-making structures that reduced ambiguity across design, product, and engineering.",
-      "Supported high-context stakeholder conversations with concise product framing."
+      "Led strategy workshops to align business goals, KPIs, and product direction, validated offering scope, and delivery roadmaps across client engagements.",
+      "Redesigned the Product Kickstart workshop series to move client teams from idea to MVP with clearer decision and execution structure."
     ],
-    "skills": ["Product Strategy", "Stakeholder Management", "Roadmapping", "Execution"],
-    "tags": ["strategy", "delivery", "consulting"],
-    "aiContextId": "ctx-consulting"
+    "skills": ["Product Strategy", "Workshop Facilitation", "Roadmapping", "KPI Design"],
+    "tags": ["strategy", "workshops", "mvp", "consulting"],
+    "aiContextId": "ctx-modus-create"
   },
   {
-    "id": "platform",
-    "company": "Digital Product Teams",
-    "title": "Platform and Product Operator",
-    "startDate": "2019-01",
-    "endDate": "2021-12",
-    "summary": "Worked across product and platform initiatives, connecting roadmap decisions to operational delivery and user outcomes.",
+    "id": "cardstack",
+    "company": "Cardstack",
+    "title": "Product Manager",
+    "startDate": "2018-03",
+    "endDate": "2020-04",
+    "summary": "Product Manager for no-code and web3 platform initiatives, including ICO enablement, partner pilots, and protocol launches.",
     "achievements": [
-      "Mapped user and internal workflows into better operating models.",
-      "Connected technical capabilities with product priorities and release sequencing.",
-      "Drove cross-functional execution through structured decision frameworks."
+      "Defined UX and functionality for a low-code/no-code platform and companion developer-facing web framework.",
+      "Led launch of a KYC and token-generation platform used to execute the company's own ICO.",
+      "Led decentralized pilot delivery with Warner Music, including partner alignment and next-stage workflow design.",
+      "Led GTM and testnet launch execution for Tally payment protocol and companion web app."
     ],
-    "skills": ["Platform Thinking", "Cross-functional Leadership", "Process Design", "Execution"],
-    "tags": ["platform", "operations", "product"],
-    "aiContextId": "ctx-platform"
+    "skills": [
+      "Platform Product Management",
+      "Web3 Product Delivery",
+      "UX Workflow Design",
+      "Pilot Launches"
+    ],
+    "tags": ["platform", "web3", "payments", "pilot", "music", "travel"],
+    "aiContextId": "ctx-cardstack"
+  },
+  {
+    "id": "vingis",
+    "company": "Vingis",
+    "title": "Product Manager",
+    "startDate": "2016-01",
+    "endDate": "2020-12",
+    "summary": "Fractional product leadership for startups and enterprises across discovery, roadmapping, and execution alignment.",
+    "achievements": [
+      "Led consulting engagements across startup and enterprise contexts, establishing repeatable discovery, roadmapping, and execution-alignment practices."
+    ],
+    "skills": ["Consulting", "Discovery", "Roadmapping", "Stakeholder Management"],
+    "tags": ["consulting", "product", "delivery"],
+    "aiContextId": "ctx-vingis"
+  },
+  {
+    "id": "pwc-google-lab",
+    "company": "PwC + Google for Work Innovation Lab",
+    "title": "Product Manager",
+    "startDate": "2016-06",
+    "endDate": "2017-05",
+    "summary": "Product Manager driving pilot-to-production transformation of field-service operations through workflow redesign and cloud migration.",
+    "achievements": [
+      "Owned key discovery tracks for Field Service Optimization, including user interviews, usability studies, and prioritization workshops.",
+      "Led workflow redesign and cloud migration planning, coordinating six external vendors and offshore delivery teams.",
+      "Contributed to projected $1.4M annual parts savings and reduced billing-cycle latency through system modernization."
+    ],
+    "skills": ["Enterprise Product", "Discovery", "Cloud Migration", "Vendor Coordination"],
+    "tags": ["enterprise", "field-service", "cloud", "operations"],
+    "aiContextId": "ctx-pwc-google-lab"
+  },
+  {
+    "id": "realplace",
+    "company": "Realplace",
+    "title": "Co-founder and CTO",
+    "startDate": "2014-10",
+    "endDate": "2015-06",
+    "summary": "Co-founder and CTO leading discovery, requirements, and prototype delivery for a transparency-focused commercial real-estate platform.",
+    "achievements": [
+      "Led product discovery and requirement definition for a commercial real-estate auction platform, delivering an accelerator-accepted prototype."
+    ],
+    "skills": ["Founding", "0-to-1 Product", "Customer Discovery", "Prototyping"],
+    "tags": ["startup", "real-estate", "prototype"],
+    "aiContextId": "ctx-realplace"
+  },
+  {
+    "id": "acision",
+    "company": "Acision (acquired Soli)",
+    "title": "Manager, Product Development",
+    "startDate": "2013-03",
+    "endDate": "2014-10",
+    "summary": "Product Development Manager leading telecom product delivery and retention-focused workflow redesign.",
+    "achievements": [
+      "Led delivery of value-added SMS products for telecom providers worldwide, enabling feature phones with smartphone-like service experiences.",
+      "Led telecom portal redesign based on attrition-pattern analysis, resulting in a 60% reduction in customer attrition."
+    ],
+    "skills": ["Product Development", "Team Leadership", "Telecom Products", "UX Redesign"],
+    "tags": ["telecom", "retention", "messaging", "analytics"],
+    "aiContextId": "ctx-acision"
+  },
+  {
+    "id": "soli",
+    "company": "Soli",
+    "title": "Technical Product Manager",
+    "startDate": "2011-08",
+    "endDate": "2013-03",
+    "summary": "Technical Product Manager who built US delivery capability and scaled API-driven campaign integrations.",
+    "achievements": [
+      "Built US technical delivery capacity as first technical hire, leading PRD and PoC execution and API-integrated campaign delivery."
+    ],
+    "skills": ["Technical PM", "API Product", "Team Building", "Agile Delivery"],
+    "tags": ["telecom", "api", "campaigns"],
+    "aiContextId": "ctx-soli"
+  },
+  {
+    "id": "earlier-engineering-foundation",
+    "company": "Earlier Engineering Experience",
+    "title": "Software Development Roles",
+    "startDate": "1996-07",
+    "endDate": "2011-08",
+    "summary": "Built enterprise software systems and internal frameworks across financial services and retail, with focus on scalability, automation, and delivery efficiency.",
+    "achievements": [
+      "Built reusable enterprise software frameworks and development tooling.",
+      "Delivered process automation that reduced manual operational overhead.",
+      "Contributed to large-scale systems in financial services and retail."
+    ],
+    "skills": ["Software Engineering", "System Design", "Automation", "Mentoring"],
+    "tags": ["engineering", "enterprise", "financial-services", "retail"]
   }
 ]
