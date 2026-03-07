@@ -9,6 +9,7 @@ type ChatMessage = {
   id: string;
   role: "user" | "assistant";
   text: string;
+  citations?: ChatAnswer["citations"];
 };
 
 const starterPrompts = [
@@ -18,13 +19,55 @@ const starterPrompts = [
   "What role and company context would fit Dmitry best?"
 ] as const;
 
+const storageKey = "living-resume:chat-overlay:v1";
+const sessionStorageKey = "living-resume:chat-session-id";
+
 export function AskAiOverlay({ onClose }: { onClose: () => void }) {
   const [message, setMessage] = useState("");
   const [messages, setMessages] = useState<ChatMessage[]>([]);
   const [loading, setLoading] = useState(false);
   const scrollRef = useRef<HTMLDivElement | null>(null);
   const textareaRef = useRef<HTMLTextAreaElement | null>(null);
-  const sessionId = useMemo(() => `overlay-${Date.now()}`, []);
+  const sessionId = useMemo(() => {
+    if (typeof window === "undefined") {
+      return "overlay-session";
+    }
+
+    const existing = window.localStorage.getItem(sessionStorageKey);
+    if (existing) {
+      return existing;
+    }
+
+    const next = crypto.randomUUID();
+    window.localStorage.setItem(sessionStorageKey, next);
+    return next;
+  }, []);
+
+  useEffect(() => {
+    if (typeof window === "undefined") {
+      return;
+    }
+
+    const stored = window.localStorage.getItem(storageKey);
+    if (!stored) {
+      return;
+    }
+
+    try {
+      const parsed = JSON.parse(stored) as ChatMessage[];
+      setMessages(parsed.slice(-20));
+    } catch {
+      window.localStorage.removeItem(storageKey);
+    }
+  }, []);
+
+  useEffect(() => {
+    if (typeof window === "undefined") {
+      return;
+    }
+
+    window.localStorage.setItem(storageKey, JSON.stringify(messages.slice(-20)));
+  }, [messages]);
 
   useEffect(() => {
     if (!scrollRef.current) {
@@ -61,7 +104,8 @@ export function AskAiOverlay({ onClose }: { onClose: () => void }) {
       text: trimmed
     };
 
-    setMessages((current) => [...current, userMessage]);
+    const nextMessages = [...messages, userMessage];
+    setMessages(nextMessages);
     setMessage("");
     setLoading(true);
     trackEvent("chat_started", { surface: "overlay" });
@@ -72,7 +116,11 @@ export function AskAiOverlay({ onClose }: { onClose: () => void }) {
         headers: { "content-type": "application/json" },
         body: JSON.stringify({
           message: trimmed,
-          sessionId
+          sessionId,
+          history: nextMessages.slice(-8).map((item) => ({
+            role: item.role,
+            text: item.text
+          }))
         })
       });
 
@@ -87,7 +135,8 @@ export function AskAiOverlay({ onClose }: { onClose: () => void }) {
         {
           id: crypto.randomUUID(),
           role: "assistant",
-          text: payload.answer
+          text: payload.answer,
+          citations: payload.citations
         }
       ]);
     } catch (caughtError) {
@@ -223,7 +272,16 @@ export function AskAiOverlay({ onClose }: { onClose: () => void }) {
                 whiteSpace: "pre-wrap"
               }}
             >
-              {item.text}
+              <div>{item.text}</div>
+              {item.citations && item.citations.length > 0 ? (
+                <div style={{ display: "grid", gap: 4, marginTop: 10 }}>
+                  {item.citations.map((citation) => (
+                    <div key={`${item.id}-${citation.sourceId}`} className="muted" style={{ fontSize: "0.8rem" }}>
+                      {citation.title} · {citation.section}
+                    </div>
+                  ))}
+                </div>
+              ) : null}
             </div>
           ))}
 
@@ -261,33 +319,10 @@ export function AskAiOverlay({ onClose }: { onClose: () => void }) {
                 color: "var(--ink)",
                 resize: "none"
               }}
-              onKeyDown={(event) => {
-                if (event.key === "Enter" && !event.shiftKey) {
-                  event.preventDefault();
-                  void sendMessage(message);
-                }
-              }}
             />
-            <button
-              type="submit"
-              aria-label="Send message"
-              disabled={loading || !message.trim()}
-              style={{
-                width: 44,
-                height: 44,
-                borderRadius: 10,
-                border: "1px solid transparent",
-                background: "var(--accent-gradient)",
-                color: "#020817",
-                display: "grid",
-                placeItems: "center",
-                padding: 0,
-                lineHeight: 0,
-                cursor: loading ? "not-allowed" : "pointer",
-                opacity: loading || !message.trim() ? 0.55 : 1
-              }}
-            >
-              <PaperPlaneIcon size={30} />
+            <button className="button primary-accent" type="submit" disabled={loading || !message.trim()}>
+              <PaperPlaneIcon />
+              <span style={{ marginLeft: 8 }}>{loading ? "Sending" : "Send"}</span>
             </button>
           </div>
         </form>

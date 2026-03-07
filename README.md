@@ -33,14 +33,14 @@ The site is designed to:
 
 ```bash
 npm install
-npm run content:build
-npm run embeddings:build
+npm test
+npm run build
 npm run dev
 ```
 
 ## Deployment target
 
-The app is structured for a Cloudflare deployment path using OpenNext-compatible output and Worker runtime boundaries. Details live in [deployment-cloudflare-openai.md](docs/architecture/deployment-cloudflare-openai.md).
+The app is structured for low-cost stateless deployment on Cloudflare, with portable runtime boundaries that also allow side-by-side deployment on Vercel. Details live in [deployment-cloudflare-openai.md](docs/architecture/deployment-cloudflare-openai.md) and the [operations runbook](docs/operations/runbook.md).
 
 ## Documentation map
 

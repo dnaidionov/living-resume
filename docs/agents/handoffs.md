@@ -80,3 +80,12 @@
 - fix hero download button scale/alignment mismatch by matching action-row button dimensions and stretch behavior
 - remove `public/classic-resume.txt` fallback and keep PDF (`public/DmitryNaidionov-cv.pdf`) as the only download target
 - correct hero download icon/text-row alignment via flex baseline tuning and icon-level centering adjustment
+
+## AI Systems Architect -> Application Engineer (Stateless LLM Runtime 2026-03-07)
+
+- replace placeholder chat and fit-analysis generation with portable OpenAI `fetch` calls
+- preserve current UI response shape while allowing richer fit-analysis internals
+- keep server routes stateless; store short chat history in browser `localStorage` only
+- use bundled retrieval artifacts instead of request-time filesystem scanning where possible
+- support TXT, PDF, and DOCX file ingestion plus remote page text extraction for fit analysis
+- keep deployment compatibility across Cloudflare Pages/Workers and Vercel
