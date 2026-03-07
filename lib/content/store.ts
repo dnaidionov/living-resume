@@ -6,40 +6,36 @@ import type {
   ProjectBrief,
   ResumeRole
 } from "@/types/content";
-import { loadJsonFile } from "@/lib/content/load-json";
 import type { ContentStore } from "@/types/contracts";
-
-const paths = {
-  roles: "content/resume/roles.json",
-  projects: "content/projects/projects.json",
-  caseStudies: "content/case-studies/case-studies.json",
-  faq: "content/faq/faq.json",
-  explainers: "content/ai-context/explainers.json",
-  buildDocs: "content/build-docs/build-docs.json"
-} as const;
+import roles from "@/content/resume/roles.json";
+import projects from "@/content/projects/projects.json";
+import caseStudies from "@/content/case-studies/case-studies.json";
+import faq from "@/content/faq/faq.json";
+import explainers from "@/content/ai-context/explainers.json";
+import buildDocs from "@/content/build-docs/build-docs.json";
 
 export async function loadRoles(): Promise<ResumeRole[]> {
-  return loadJsonFile<ResumeRole[]>(paths.roles);
+  return roles as ResumeRole[];
 }
 
 export async function loadProjects(): Promise<ProjectBrief[]> {
-  return loadJsonFile<ProjectBrief[]>(paths.projects);
+  return projects as ProjectBrief[];
 }
 
 export async function loadCaseStudies(): Promise<Array<{ id: string; title: string; summary: string; body: string }>> {
-  return loadJsonFile(paths.caseStudies);
+  return caseStudies as Array<{ id: string; title: string; summary: string; body: string }>;
 }
 
 export async function loadFaq(): Promise<FaqItem[]> {
-  return loadJsonFile<FaqItem[]>(paths.faq);
+  return faq as FaqItem[];
 }
 
 export async function loadExplainers(): Promise<AIContextExplainer[]> {
-  return loadJsonFile<AIContextExplainer[]>(paths.explainers);
+  return explainers as AIContextExplainer[];
 }
 
 export async function loadBuildDocs(): Promise<BuildDoc[]> {
-  return loadJsonFile<BuildDoc[]>(paths.buildDocs);
+  return buildDocs as BuildDoc[];
 }
 
 export async function buildDocuments(): Promise<ContentDocument[]> {

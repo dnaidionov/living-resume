@@ -2,10 +2,16 @@ import type { Citation, EvidenceChunk } from "@/types/content";
 
 export type ChatMode = "auto" | "resume_qa" | "fit_analysis" | "build_process";
 
+export type ChatTurn = {
+  role: "user" | "assistant";
+  text: string;
+};
+
 export type ChatRequest = {
   message: string;
   mode?: ChatMode;
   sessionId: string;
+  history?: ChatTurn[];
 };
 
 export type ChatAnswer = {
@@ -36,12 +42,18 @@ export type FitAnalysisResult = {
   interviewAngles: string[];
   confidence: "high" | "medium" | "low";
   citations: Citation[];
+  extractionWarnings?: string[];
+  metadata?: {
+    evaluatorVersion: string;
+    inputKind: "text" | "url" | "file";
+  };
 };
 
 export type ModelInput = {
   prompt: string;
   evidence: EvidenceChunk[];
   mode: ChatMode;
+  history?: ChatTurn[];
 };
 
 export type ModelOutput = ChatAnswer;
