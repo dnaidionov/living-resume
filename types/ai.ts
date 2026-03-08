@@ -26,7 +26,7 @@ export type RoleInput =
   | { kind: "url"; url: string };
 
 export type FitDimension = {
-  name: "domain" | "execution" | "ai_technical" | "leadership";
+  name: "core_match" | "execution_scope" | "leadership_collaboration" | "context_readiness";
   score: number;
   rationale: string;
   evidence: string[];

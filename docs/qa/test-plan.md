@@ -16,6 +16,8 @@
 - AI context stays aligned with source role content
 - Citations point to actual content records
 - Fit output remains candid and penalizes unsupported requirements
+- General product JDs do not receive lower fit solely because they omit specialized domain language
+- Gaps are phrased as validation points rather than premature rejection signals
 - Fallback behavior remains usable when `OPENAI_API_KEY` is missing
 
 ## Operational

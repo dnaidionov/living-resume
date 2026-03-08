@@ -28,6 +28,18 @@ The current repo uses a portable stateless AI runtime:
 
 This keeps the app deployable on both Cloudflare and Vercel without requiring a database or server-side session store.
 
+## Fit-analysis policy
+
+- The evaluator is qualification-first, not ideal-role-first.
+- Core product fit, execution scope, and cross-functional leadership should outweigh secondary context alignment in the overall score.
+- The dimension contract is:
+  - `core_match`
+  - `execution_scope`
+  - `leadership_collaboration`
+  - `context_readiness`
+- `context_readiness` should remain secondary unless the JD makes domain or technical context a true requirement.
+- A JD that does not mention AI should not be treated as lower fit for that reason alone.
+
 ## Session model
 
 - Server routes stay stateless.
