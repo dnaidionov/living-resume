@@ -95,3 +95,11 @@
 - use bundled retrieval artifacts instead of request-time filesystem scanning where possible
 - support TXT, PDF, and DOCX file ingestion plus remote page text extraction for fit analysis
 - keep deployment compatibility across Cloudflare Pages/Workers and Vercel
+
+## Ops / Release Agent -> Deployment Execution (Cloudflare Adapter Readiness 2026-03-07)
+
+- local release gates now include `npm run cf:build`, not only `npm run build`
+- Cloudflare deployment path is standardized on `@opennextjs/cloudflare` plus `wrangler`
+- `open-next.config.ts` is required so the worker bundle can be generated deterministically in-repo
+- release verification must confirm `.open-next/worker.js` and `.open-next/assets` exist before deploy
+- keep Vercel as a portable fallback path if Cloudflare smoke tests fail after deployment

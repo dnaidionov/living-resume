@@ -21,6 +21,7 @@
 ## Operational
 
 - Cloudflare and Vercel deployment paths remain documented
+- Cloudflare adapter build produces `.open-next/worker.js` before release
 - Logs avoid raw JD and uploaded-document content
 - Analytics events remain lightweight
 - Runtime dependencies remain compatible with both target hosts

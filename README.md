@@ -35,6 +35,7 @@ The site is designed to:
 npm install
 npm test
 npm run build
+npm run cf:build
 npm run dev
 ```
 
