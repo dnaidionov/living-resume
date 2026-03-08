@@ -9,6 +9,7 @@ Keep the site cheap, stateless, and portable while supporting grounded resume ch
 - Cloudflare Pages for app hosting
 - Cloudflare Workers for runtime endpoints
 - same Next.js app can also be deployed to Vercel for side-by-side evaluation
+- Cloudflare worker bundle is generated through `@opennextjs/cloudflare` into `.open-next/`
 
 ## AI
 
@@ -27,6 +28,13 @@ Keep the site cheap, stateless, and portable while supporting grounded resume ch
 - Cloudflare Workers Logs for runtime logs
 - Cloudflare Web Analytics for site analytics
 - logs should never include raw job-description or uploaded document content
+
+## Build pipeline
+
+- `npm run build` validates the standard Next.js production build
+- `npm run cf:build` generates the Cloudflare worker bundle and assets through OpenNext
+- `wrangler.jsonc` targets `.open-next/worker.js` with `.open-next/assets` bound as static assets
+- `open-next.config.ts` keeps the Cloudflare adapter contract explicit in-repo
 
 ## Why this stack
 

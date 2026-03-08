@@ -23,33 +23,46 @@
 
 ## Release procedure
 
-### Common preflight
+### Common preflight checklist
 
-1. Verify `npm test` passes.
-2. Verify `npm run build` passes.
-3. Confirm no logs or errors print raw job-description or uploaded-document content.
-4. Confirm `OPENAI_API_KEY` is configured on the target platform before release.
+- [ ] `npm test` passes.
+- [ ] `npm run build` passes.
+- [ ] `npm run cf:build` passes before any Cloudflare release.
+- [ ] No logs or errors print raw job-description or uploaded-document content.
+- [ ] `OPENAI_API_KEY` is configured on the target platform before release.
 
-### Cloudflare release
+### Cloudflare deployment checklist
 
-1. Ensure the Cloudflare project is connected to the repository or deploy with the configured `wrangler` workflow.
-2. Set `OPENAI_API_KEY` in Cloudflare project settings or with `wrangler secret put OPENAI_API_KEY`.
-3. Optionally set `OPENAI_CHAT_MODEL` and `OPENAI_FIT_MODEL`.
-4. Trigger deployment from the target branch.
-5. Smoke test the deployed `pages.dev` URL:
-   - homepage renders
-   - chat returns an answer with citations
-   - pasted-text fit analysis returns a scorecard
-   - URL fit analysis works for a readable public job page
-   - TXT, PDF, and DOCX uploads are accepted
+- [ ] `npm install` has been run for the current checkout.
+- [ ] `npm run cf:build` completes successfully.
+- [ ] `.open-next/worker.js` exists.
+- [ ] `.open-next/assets` exists.
+- [ ] `OPENAI_API_KEY` is set in Cloudflare project settings or via `wrangler secret put OPENAI_API_KEY`.
+- [ ] Optional model overrides are set if needed: `OPENAI_CHAT_MODEL`, `OPENAI_FIT_MODEL`.
+- [ ] Deployment is triggered with `npm run cf:deploy`.
+- [ ] The deployed `pages.dev` URL passes smoke tests:
+  - [ ] homepage renders
+  - [ ] chat returns an answer with citations
+  - [ ] pasted-text fit analysis returns a scorecard
+  - [ ] URL fit analysis works for a readable public job page
+  - [ ] TXT uploads are accepted
+  - [ ] PDF uploads are accepted
+  - [ ] DOCX uploads are accepted
 
-### Vercel release
+### Vercel deployment checklist
 
-1. Ensure the Vercel project is connected to the repository.
-2. Set `OPENAI_API_KEY` in Vercel project environment variables or with `vercel env add OPENAI_API_KEY`.
-3. Optionally set `OPENAI_CHAT_MODEL` and `OPENAI_FIT_MODEL`.
-4. Trigger deployment from the target branch.
-5. Smoke test the deployed `vercel.app` URL using the same checks as Cloudflare.
+- [ ] The Vercel project is connected to the repository and target branch.
+- [ ] `OPENAI_API_KEY` is set in Vercel project settings or via `vercel env add OPENAI_API_KEY`.
+- [ ] Optional model overrides are set if needed: `OPENAI_CHAT_MODEL`, `OPENAI_FIT_MODEL`.
+- [ ] Deployment is triggered from the target branch.
+- [ ] The deployed `vercel.app` URL passes smoke tests:
+  - [ ] homepage renders
+  - [ ] chat returns an answer with citations
+  - [ ] pasted-text fit analysis returns a scorecard
+  - [ ] URL fit analysis works for a readable public job page
+  - [ ] TXT uploads are accepted
+  - [ ] PDF uploads are accepted
+  - [ ] DOCX uploads are accepted
 
 ## Side-by-side deployment procedure
 
@@ -70,3 +83,4 @@
 - fit analysis returns the existing UI contract
 - no raw JD or uploaded file content is written to logs
 - analytics remain lightweight
+- `.open-next/worker.js` and `.open-next/assets` are produced for Cloudflare releases

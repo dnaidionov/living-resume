@@ -93,3 +93,25 @@ Use this log for concise, chronological records of meaningful decisions that do 
 - Decision: Refined the Acision SMS achievement to a middle-ground wording that keeps confidentiality while adding clearer user-value language.
 - Rationale: Improve readability and specificity without reintroducing product-name detail.
 - Scope impact: `content/resume/roles.json`.
+
+- Agent role: Content Strategist
+- Decision: Corrected typo in Vingis AI context approach text (`roadmaping` -> `roadmapping`).
+- Rationale: Maintain content quality and editorial consistency.
+- Scope impact: `content/ai-context/explainers.json`.
+
+### 2026-03-07
+
+- Agent role: Ops / Release Agent
+- Decision: Standardized the Cloudflare release path on an explicit OpenNext adapter build with committed repo config and a required `npm run cf:build` gate.
+- Rationale: The previous runbook and Wrangler config pointed at `.open-next` artifacts that the repo could not actually generate, which left Cloudflare deployment documented but not release-ready.
+- Scope impact: `package.json`, `wrangler.jsonc`, `open-next.config.ts`, `docs/operations/runbook.md`, `docs/architecture/deployment-cloudflare-openai.md`, `docs/qa/test-plan.md`, `docs/agents/handoffs.md`, `README.md`.
+
+- Agent role: Ops / Release Agent
+- Decision: Converted the Cloudflare and Vercel release steps in the runbook into explicit deployment checklists.
+- Rationale: The deployment path was documented, but release execution is clearer and less error-prone when operators can verify each prerequisite and smoke test as a checklist.
+- Scope impact: `docs/operations/runbook.md`.
+
+- Agent role: Content Strategist
+- Decision: Strengthened EPAM AI Experience AI-context wording to explicitly capture multi-agent orchestration, Anthropic/Claude implementation details, and added `LLM Orchestration` skill while preserving requested wording constraints.
+- Rationale: Improve precision and evidence depth for LLM orchestration claims in hero and role narrative alignment.
+- Scope impact: `content/ai-context/explainers.json`.

@@ -2,15 +2,15 @@
   {
     "id": "ctx-epam",
     "roleId": "epam",
-    "headline": "Enterprise product delivery across AI, DX, compliance, healthcare, and fintech programs.",
+    "headline": "Enterprise product delivery across AI, multi-agent orchestration, DX, compliance, healthcare, and fintech programs.",
     "summary": "Portfolio of anonymized EPAM engagements focused on measurable business outcomes and execution in complex enterprise environments.",
     "projectContexts": [
       {
         "id": "epam-ai-experience",
         "title": "AI Experience",
-        "situation": "Sales and support teams had thousands of documents across 20+ products distributed across Salesforce, SharePoint, brand websites, and an internal proprietary learning system. This slowed quote and customer-offer preparation, interfered with new-business bidding, and increased issue-resolution times.",
-        "approach": "Build a solution that aggregates relevant information across multiple data sources and presents it in client-presentation-ready form with talking points, supporting evidence, and step-by-step workflows.",
-        "work": "Led development of a conversational product knowledge assistant MVP; defined the AI evaluation framework and supported implementation to ensure response quality and prevent drift."
+        "situation": "Sales and support teams had thousands of documents across 20+ products distributed across Salesforce, SharePoint, brand websites, and an internal proprietary learning system. This slowed quote and customer offer preparation, interfered with new business bidding, and increased issue resolution times.",
+        "approach": "Design a conversational assistant using multi-agent orchestrated workflows that route retrieval and synthesis by domain, detected user intent, and other contextual factors, then return client-presentation-ready outputs with talking points, supporting evidence, and step-by-step workflows.",
+        "work": "Led development of a conversational product knowledge assistant MVP; defined the AI evaluation framework and supported implementation to ensure response quality and prevent drift. The implementation used Anthropic models with Claude app as the front end, plus custom skills to support orchestration across workflows and sources."
       },
       {
         "id": "epam-api-devex",
@@ -82,7 +82,8 @@
       "AI Product Evaluation",
       "Developer Experience",
       "Compliance Program Delivery",
-      "Workflow Transformation"
+      "Workflow Transformation",
+      "LLM Orchestration"
     ],
     "relatedProjectIds": ["fit-analysis"],
     "citations": [
@@ -239,7 +240,7 @@
         "id": "vingis-product-leadership",
         "title": "Product Leadership Across Clients",
         "situation": "Provided product consulting services to startups and enterprises.",
-        "approach": "Apply repeatable PM fundamentals: discovery, roadmaping, requirements engineering, and stakeholder alignment.",
+        "approach": "Apply repeatable PM fundamentals: discovery, roadmapping, requirements engineering, and stakeholder alignment.",
         "work": "Led multi-client product engagements across sectors and stages."
       }
     ],
