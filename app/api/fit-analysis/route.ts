@@ -2,12 +2,10 @@ import { NextResponse } from "next/server";
 import { heuristicFitAnalysisService } from "@/lib/ai/fit-analysis";
 import { logEvent } from "@/lib/logging/logger";
 import { fetchJobDescriptionFromUrl } from "@/lib/platform/url-intake";
+import type { FitAnalysisRequest } from "@/types/ai";
 
 export async function POST(request: Request) {
-  const payload = (await request.json()) as {
-    roleInput: { kind: "text"; text: string } | { kind: "url"; url: string } | { kind: "file"; fileId: string; mimeType: string };
-    sessionId: string;
-  };
+  const payload = (await request.json()) as FitAnalysisRequest;
 
   try {
     const roleInput =
@@ -18,8 +16,15 @@ export async function POST(request: Request) {
           }
         : payload.roleInput;
 
-    const result = await heuristicFitAnalysisService.analyze(roleInput, payload.sessionId);
-    logEvent("info", "fit_analysis_completed", { kind: payload.roleInput.kind });
+    const result = await heuristicFitAnalysisService.analyze(
+      roleInput,
+      payload.sessionId,
+      payload.presentationMode ?? "recruiter_brief"
+    );
+    logEvent("info", "fit_analysis_completed", {
+      kind: payload.roleInput.kind,
+      presentationMode: payload.presentationMode ?? "recruiter_brief"
+    });
     return NextResponse.json(result);
   } catch (error) {
     return NextResponse.json(

@@ -1,6 +1,6 @@
 import type { RetrievalStore } from "@/types/contracts";
 import type { EvidenceChunk } from "@/types/content";
-import embeddings from "@/embeddings.json";
+import { buildDocuments } from "@/lib/content/store";
 import { computeDeterministicEmbedding, cosineSimilarity } from "@/lib/retrieval/embeddings";
 
 function modeFilter(mode: "resume_qa" | "fit_analysis" | "build_process", chunk: EvidenceChunk): boolean {
@@ -13,7 +13,11 @@ function modeFilter(mode: "resume_qa" | "fit_analysis" | "build_process", chunk:
 export const staticRetrievalStore: RetrievalStore = {
   async searchEvidence(query, mode) {
     const queryEmbedding = computeDeterministicEmbedding(query);
-    const chunks = embeddings as EvidenceChunk[];
+    const documents = await buildDocuments();
+    const chunks: EvidenceChunk[] = documents.map((document) => ({
+      ...document,
+      embedding: computeDeterministicEmbedding(`${document.title} ${document.section} ${document.text}`)
+    }));
 
     return chunks
       .filter((chunk) => modeFilter(mode, chunk))

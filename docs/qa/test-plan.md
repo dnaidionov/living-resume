@@ -8,6 +8,7 @@
 - Chat route returns grounded answer plus citations
 - Chat route accepts short conversation history without server-side persistence
 - Fit-analysis route returns structured output from text, URL, and file inputs
+- Fit-analysis route supports both `recruiter_brief` and `scorecard` presentation modes
 - PDF and DOCX uploads parse into readable role text
 - Build page renders documented process artifacts
 
@@ -18,6 +19,7 @@
 - Fit output remains candid and penalizes unsupported requirements
 - General product JDs do not receive lower fit solely because they omit specialized domain language
 - Gaps are phrased as validation points rather than premature rejection signals
+- Recruiter-facing fit output never mentions preferred domains, absent AI wording, or internal scoring logic
 - Fallback behavior remains usable when `OPENAI_API_KEY` is missing
 
 ## Operational

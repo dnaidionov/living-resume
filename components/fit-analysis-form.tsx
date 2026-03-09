@@ -1,8 +1,17 @@
 "use client";
 
-import { useState } from "react";
+import { useMemo, useState } from "react";
 import { trackEvent } from "@/lib/analytics/events";
-import type { FitAnalysisResult, FitDimension } from "@/types/ai";
+import type {
+  FitAnalysisResult,
+  FitDimension,
+  FitPresentationMode,
+  GapBullet,
+  MatchBullet,
+  RecruiterBriefPresentation,
+  ScorecardPresentation,
+  TransferBullet
+} from "@/types/ai";
 
 const dimensionLabels: Record<FitDimension["name"], string> = {
   core_match: "Core Match",
@@ -11,14 +20,51 @@ const dimensionLabels: Record<FitDimension["name"], string> = {
   context_readiness: "Context Readiness"
 };
 
+function resolvePresentationMode(): FitPresentationMode {
+  if (typeof window !== "undefined") {
+    const mode = new URLSearchParams(window.location.search).get("fitView");
+    if (mode === "scorecard" || mode === "recruiter_brief") {
+      return mode;
+    }
+  }
+
+  const defaultMode = process.env.NEXT_PUBLIC_FIT_PRESENTATION_MODE;
+  return defaultMode === "scorecard" ? "scorecard" : "recruiter_brief";
+}
+
+function BulletList<T extends { requirement?: string; support?: string; gap?: string; skillOrExperience?: string; relevance?: string }>({
+  items,
+  render
+}: {
+  items: T[];
+  render: (item: T) => { heading: string; body: string };
+}) {
+  return (
+    <div style={{ display: "grid", gap: 12 }}>
+      {items.map((item, index) => {
+        const content = render(item);
+        return (
+          <div key={`${content.heading}-${index}`} className="pill" style={{ borderRadius: 18, padding: 14 }}>
+            <strong>{content.heading}</strong>
+            <div className="muted" style={{ marginTop: 4 }}>
+              {content.body}
+            </div>
+          </div>
+        );
+      })}
+    </div>
+  );
+}
+
 export function FitAnalysisForm() {
   const [jobText, setJobText] = useState("");
   const [jobUrl, setJobUrl] = useState("");
   const [file, setFile] = useState<File | null>(null);
   const [result, setResult] = useState<FitAnalysisResult | null>(null);
   const [loading, setLoading] = useState(false);
-  const [inputMode, setInputMode] = useState<"text" | "url" | "file">("text");
+  const [inputMode, setInputMode] = useState<"text" | "url" | "file">("url");
   const [error, setError] = useState<string | null>(null);
+  const presentationMode = useMemo(resolvePresentationMode, []);
 
   async function onSubmit(event: React.FormEvent) {
     event.preventDefault();
@@ -33,6 +79,7 @@ export function FitAnalysisForm() {
         const formData = new FormData();
         formData.append("file", file);
         formData.append("sessionId", "anonymous-session");
+        formData.append("presentationMode", presentationMode);
 
         response = await fetch("/api/fit-analysis/file", {
           method: "POST",
@@ -53,7 +100,8 @@ export function FitAnalysisForm() {
                     kind: "text",
                     text: jobText
                   },
-            sessionId: "anonymous-session"
+            sessionId: "anonymous-session",
+            presentationMode
           })
         });
       }
@@ -78,13 +126,13 @@ export function FitAnalysisForm() {
         <span className="eyebrow">Role Fit</span>
         <h3 style={{ marginBottom: 8, fontSize: "1.5rem" }}>Run a candid fit analysis</h3>
         <p className="muted body-copy">
-          Paste a job description and the system will judge whether the evidence shows strong qualification for the
-          role, then call out the few things worth validating in interview.
+          Paste a job description and the system will judge whether the evidence shows strong qualification for the role,
+          then summarize the best supporting points and any validation items for interview.
         </p>
         <div className="pill-row" style={{ marginTop: 18 }}>
           {[
-            ["text", "Paste text"],
             ["url", "Use URL"],
+            ["text", "Paste text"],
             ["file", "Upload file"]
           ].map(([value, label]) => (
             <button
@@ -155,27 +203,74 @@ export function FitAnalysisForm() {
 
       <aside className="card" style={{ padding: 28, background: "var(--surface-alt)" }}>
         <span className="eyebrow">Output</span>
-        {result ? (
-          <div style={{ display: "grid", gap: 16 }}>
-            <div>
-              <h3 style={{ marginBottom: 4, fontSize: "1.45rem" }}>Overall score: {result.overallScore}/10</h3>
-              <p className="muted body-copy" style={{ marginTop: 0 }}>
-                {result.overallSummary}
-              </p>
-            </div>
-            {result.dimensions.map((dimension) => (
-              <div key={dimension.name} className="pill" style={{ borderRadius: 18, padding: 14 }}>
-                <strong>
-                  {dimensionLabels[dimension.name]}: {dimension.score}/5
-                </strong>
-                <div className="muted">{dimension.rationale}</div>
-              </div>
-            ))}
-          </div>
-        ) : (
-          <p className="muted">The scorecard, strengths, gaps, and interview angles appear here.</p>
-        )}
+        {result ? renderPresentation(result.presentation) : <p className="muted">The fit assessment will appear here.</p>}
       </aside>
+    </div>
+  );
+}
+
+function renderPresentation(presentation: RecruiterBriefPresentation | ScorecardPresentation) {
+  if (presentation.mode === "scorecard") {
+    return (
+      <div style={{ display: "grid", gap: 16 }}>
+        <div>
+          <h3 style={{ marginBottom: 4, fontSize: "1.45rem" }}>Overall score: {presentation.overallScore}/10</h3>
+          <p className="muted body-copy" style={{ marginTop: 0 }}>
+            {presentation.overallSummary}
+          </p>
+        </div>
+        {presentation.dimensions.map((dimension) => (
+          <div key={dimension.name} className="pill" style={{ borderRadius: 18, padding: 14 }}>
+            <strong>
+              {dimensionLabels[dimension.name]}: {dimension.score}/5
+            </strong>
+            <div className="muted">{dimension.rationale}</div>
+          </div>
+        ))}
+      </div>
+    );
+  }
+
+  return (
+    <div style={{ display: "grid", gap: 18 }}>
+      <div>
+        <h3 style={{ marginBottom: 4, fontSize: "1.45rem" }}>Overall match: {presentation.overallMatch.label}</h3>
+      </div>
+
+      {presentation.whereIMatch && presentation.whereIMatch.length > 0 ? (
+        <section style={{ display: "grid", gap: 10 }}>
+          <strong>Where I match</strong>
+          <BulletList items={presentation.whereIMatch} render={(item: MatchBullet) => ({ heading: item.requirement, body: item.support })} />
+        </section>
+      ) : null}
+
+      {presentation.gapsToNote && presentation.gapsToNote.length > 0 ? (
+        <section style={{ display: "grid", gap: 10 }}>
+          <strong>Gaps to note</strong>
+          <BulletList items={presentation.gapsToNote} render={(item: GapBullet) => ({ heading: item.requirement, body: item.gap })} />
+        </section>
+      ) : null}
+
+      {presentation.whereIDontFit && presentation.whereIDontFit.length > 0 ? (
+        <section style={{ display: "grid", gap: 10 }}>
+          <strong>Where I don&apos;t fit</strong>
+          <BulletList items={presentation.whereIDontFit} render={(item: GapBullet) => ({ heading: item.requirement, body: item.gap })} />
+        </section>
+      ) : null}
+
+      {presentation.whatDoesTransfer && presentation.whatDoesTransfer.length > 0 ? (
+        <section style={{ display: "grid", gap: 10 }}>
+          <strong>What does transfer</strong>
+          <BulletList items={presentation.whatDoesTransfer} render={(item: TransferBullet) => ({ heading: item.skillOrExperience, body: item.relevance })} />
+        </section>
+      ) : null}
+
+      <section style={{ display: "grid", gap: 8 }}>
+        <strong>My recommendation</strong>
+        <p className="muted body-copy" style={{ margin: 0 }}>
+          {presentation.recommendation}
+        </p>
+      </section>
     </div>
   );
 }

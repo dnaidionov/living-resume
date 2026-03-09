@@ -26,8 +26,13 @@ export function extractReadableText(html: string): string {
     .replace(/<style[\s\S]*?<\/style>/gi, " ")
     .replace(/<noscript[\s\S]*?<\/noscript>/gi, " ")
     .replace(/<svg[\s\S]*?<\/svg>/gi, " ")
+    .replace(/<(main|article|section|div|ul|ol)[^>]*>/gi, "\n")
+    .replace(/<\/(main|article|section|div|ul|ol)>/gi, "\n")
+    .replace(/<(h1|h2|h3|h4|h5|h6)[^>]*>/gi, "\n")
+    .replace(/<\/(h1|h2|h3|h4|h5|h6)>/gi, "\n")
     .replace(/<br\s*\/?>/gi, "\n")
     .replace(/<\/p>/gi, "\n")
+    .replace(/<li[^>]*>/gi, "\n- ")
     .replace(/<\/li>/gi, "\n")
     .replace(/<[^>]+>/g, " ")
     .replace(/&nbsp;/gi, " ")
@@ -36,6 +41,8 @@ export function extractReadableText(html: string): string {
     .replace(/&gt;/gi, ">")
     .replace(/&#39;/gi, "'")
     .replace(/&quot;/gi, '"')
-    .replace(/\s+/g, " ")
+    .replace(/[ \t]+/g, " ")
+    .replace(/\n{3,}/g, "\n\n")
+    .replace(/ *\n */g, "\n")
     .trim();
 }
