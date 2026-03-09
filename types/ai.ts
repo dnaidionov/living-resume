@@ -25,6 +25,13 @@ export type RoleInput =
   | { kind: "file"; fileId: string; mimeType: string }
   | { kind: "url"; url: string };
 
+export type FitPresentationMode = "scorecard" | "recruiter_brief";
+
+export type FitVerdict =
+  | "strong_fit_lets_talk"
+  | "probably_a_good_fit"
+  | "probably_not_your_person";
+
 export type FitDimension = {
   name: "core_match" | "execution_scope" | "leadership_collaboration" | "context_readiness";
   score: number;
@@ -32,7 +39,42 @@ export type FitDimension = {
   evidence: string[];
 };
 
-export type FitAnalysisResult = {
+export type MatchBullet = {
+  requirement: string;
+  support: string;
+  citations?: Citation[];
+};
+
+export type GapBullet = {
+  requirement: string;
+  gap: string;
+  citations?: Citation[];
+};
+
+export type TransferBullet = {
+  skillOrExperience: string;
+  relevance: string;
+  citations?: Citation[];
+};
+
+export type RecruiterBriefPresentation = {
+  mode: "recruiter_brief";
+  overallMatch: {
+    verdict: FitVerdict;
+    label:
+      | "Strong Fit - Let's talk"
+      | "Probably a Good Fit"
+      | "Honest Assessment - Probably Not Your Person";
+  };
+  whereIMatch?: MatchBullet[];
+  gapsToNote?: GapBullet[];
+  whereIDontFit?: GapBullet[];
+  whatDoesTransfer?: TransferBullet[];
+  recommendation: string;
+};
+
+export type ScorecardPresentation = {
+  mode: "scorecard";
   overallSummary: string;
   overallScore: number;
   dimensions: FitDimension[];
@@ -40,13 +82,35 @@ export type FitAnalysisResult = {
   gaps: string[];
   transferableAdvantages: string[];
   interviewAngles: string[];
-  confidence: "high" | "medium" | "low";
+};
+
+export type InternalFitEvaluation = {
+  overallSummary: string;
+  overallScore: number;
+  dimensions: FitDimension[];
+  strengths: string[];
+  gaps: string[];
+  transferableAdvantages: string[];
+  interviewAngles: string[];
+};
+
+export type FitAnalysisResult = {
+  presentation: RecruiterBriefPresentation | ScorecardPresentation;
+  internal: InternalFitEvaluation;
   citations: Citation[];
+  confidence: "high" | "medium" | "low";
   extractionWarnings?: string[];
   metadata?: {
     evaluatorVersion: string;
     inputKind: "text" | "url" | "file";
+    presentationMode: FitPresentationMode;
   };
+};
+
+export type FitAnalysisRequest = {
+  roleInput: RoleInput;
+  sessionId: string;
+  presentationMode?: FitPresentationMode;
 };
 
 export type ModelInput = {

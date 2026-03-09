@@ -22,7 +22,7 @@ The current repo uses a portable stateless AI runtime:
 - `lib/retrieval` ranks static evidence from bundled artifacts.
 - `lib/ai/openai.ts` calls OpenAI through plain `fetch`, not a provider SDK.
 - `lib/ai/chat-service.ts` retrieves evidence and sends the latest chat turn plus a short history window to the model.
-- `lib/ai/fit-analysis.ts` retrieves evidence and requests a structured fit scorecard from the model.
+- `lib/ai/fit-analysis.ts` retrieves evidence and requests a structured fit evaluation from the model.
 - `lib/platform/file-intake.ts` parses TXT, PDF, and DOCX uploads.
 - `lib/platform/url-intake.ts` normalizes remote job pages into plain text.
 
@@ -39,6 +39,8 @@ This keeps the app deployable on both Cloudflare and Vercel without requiring a 
   - `context_readiness`
 - `context_readiness` should remain secondary unless the JD makes domain or technical context a true requirement.
 - A JD that does not mention AI should not be treated as lower fit for that reason alone.
+- The API retains an internal scorecard for calibration and testing, but the primary recruiter-facing presentation is a verdict-driven brief.
+- Presentation mode can switch between `recruiter_brief` and `scorecard` for experiments without changing the evaluator core.
 
 ## Session model
 
@@ -51,4 +53,4 @@ This keeps the app deployable on both Cloudflare and Vercel without requiring a 
 - Chat responses are returned as direct answers only.
 - The assistant should not prepend rationale intros like "Based on..." in the visible answer body.
 - The assistant should not echo the user's question in the answer output.
-- Fit analysis returns a stable scorecard contract so the current UI can render it unchanged.
+- Recruiter-facing fit output must not mention Dmitry's preferred domains, missing AI wording, or internal scoring logic.

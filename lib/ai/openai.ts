@@ -1,15 +1,15 @@
 import type { ChatModel } from "@/types/contracts";
-import type { FitAnalysisResult, ModelInput, ModelOutput } from "@/types/ai";
+import type { FitAnalysisResult, FitPresentationMode, ModelInput, ModelOutput } from "@/types/ai";
 import type { EvidenceChunk } from "@/types/content";
 import {
+  assembleFitAnalysisResult,
   buildChatSystemPrompt,
   buildChatUserPrompt,
   buildFallbackChatAnswer,
-  buildFallbackFitAnalysisSummary,
+  buildFallbackFitAnalysisResponse,
   buildFitAnalysisSystemPrompt,
   buildFitAnalysisUserPrompt,
-  buildCitations,
-  normalizeFitAnalysisResult
+  buildCitations
 } from "@/lib/ai/prompting";
 
 const OPENAI_URL = "https://api.openai.com/v1/chat/completions";
@@ -55,36 +55,30 @@ export class OpenAIChatModel implements ChatModel {
 export async function generateFitAnalysisWithOpenAI(
   roleText: string,
   evidence: EvidenceChunk[],
-  inputKind: "text" | "url" | "file"
+  inputKind: "text" | "url" | "file",
+  presentationMode: FitPresentationMode
 ): Promise<FitAnalysisResult> {
   if (!process.env.OPENAI_API_KEY) {
-    const fallback = buildFallbackFitAnalysisSummary(roleText, evidence);
-    return {
-      ...fallback,
-      metadata: {
-        evaluatorVersion: "v2-fallback",
-        inputKind
-      }
-    };
+    return buildFallbackFitAnalysisResponse(roleText, evidence, inputKind, presentationMode);
   }
 
   try {
-    const response = await requestJsonCompletion<Partial<FitAnalysisResult>>({
+    const response = await requestJsonCompletion<Record<string, unknown>>({
       model: defaultFitModel,
       systemPrompt: buildFitAnalysisSystemPrompt(),
-      userPrompt: buildFitAnalysisUserPrompt(roleText, evidence)
+      userPrompt: buildFitAnalysisUserPrompt(roleText, evidence, presentationMode)
     });
 
-    return normalizeFitAnalysisResult(response, evidence, inputKind);
+    return assembleFitAnalysisResult({
+      input: response as Partial<FitAnalysisResult>,
+      roleText,
+      evidence,
+      inputKind,
+      presentationMode,
+      evaluatorVersion: "v3-llm"
+    });
   } catch {
-    const fallback = buildFallbackFitAnalysisSummary(roleText, evidence);
-    return {
-      ...fallback,
-      metadata: {
-        evaluatorVersion: "v2-fallback-on-error",
-        inputKind
-      }
-    };
+    return buildFallbackFitAnalysisResponse(roleText, evidence, inputKind, presentationMode);
   }
 }
 

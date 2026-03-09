@@ -12,6 +12,7 @@
 - `OPENAI_API_KEY`
 - optional: `OPENAI_CHAT_MODEL` (defaults to `gpt-5-mini`)
 - optional: `OPENAI_FIT_MODEL` (defaults to `gpt-5-mini`)
+- optional: `NEXT_PUBLIC_FIT_PRESENTATION_MODE` (`recruiter_brief` or `scorecard`, defaults to `recruiter_brief`)
 
 ## Secret handling
 

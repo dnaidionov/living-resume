@@ -1,5 +1,5 @@
 import type { FitAnalysisService } from "@/types/contracts";
-import type { RoleInput } from "@/types/ai";
+import type { FitPresentationMode, RoleInput } from "@/types/ai";
 import { staticRetrievalStore } from "@/lib/retrieval/store";
 import { generateFitAnalysisWithOpenAI } from "@/lib/ai/openai";
 
@@ -14,9 +14,9 @@ function roleInputToText(input: RoleInput): string {
 }
 
 export const heuristicFitAnalysisService: FitAnalysisService = {
-  async analyze(roleInput) {
+  async analyze(roleInput, _sessionId, presentationMode = "recruiter_brief") {
     const roleText = roleInputToText(roleInput);
     const evidence = await staticRetrievalStore.searchEvidence(roleText, "fit_analysis");
-    return generateFitAnalysisWithOpenAI(roleText, evidence, roleInput.kind);
+    return generateFitAnalysisWithOpenAI(roleText, evidence, roleInput.kind, presentationMode);
   }
 };
