@@ -9,11 +9,14 @@ test("extractReadableText strips markup and keeps readable content", () => {
     <html>
       <head><style>.hidden { display:none; }</style></head>
       <body>
+        <header><a href="/jobs">Jobs</a><button>Apply now</button></header>
         <script>console.log("ignore")</script>
         <main>
           <h1>Senior AI Product Manager</h1>
+          <p>About the role</p>
           <p>Lead product strategy for LLM-based workflows.</p>
           <ul><li>Own roadmap</li><li>Work cross-functionally</li></ul>
+          <footer>Privacy Cookies Equal opportunity</footer>
         </main>
       </body>
     </html>
@@ -22,7 +25,9 @@ test("extractReadableText strips markup and keeps readable content", () => {
   const text = extractReadableText(html);
   assert.match(text, /Senior AI Product Manager/);
   assert.match(text, /Lead product strategy for LLM-based workflows/);
+  assert.match(text, /Own roadmap/);
   assert.doesNotMatch(text, /console\.log/);
+  assert.doesNotMatch(text, /Apply now|Privacy|Cookies|Equal opportunity/);
 });
 
 test("parseUploadedRoleFile reads plain text files", async () => {

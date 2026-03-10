@@ -117,6 +117,12 @@
 - derive fallback transfer bullets from retrieved evidence rather than generic stock phrases
 - expose evaluator stage versions in fit-analysis metadata for QA and release diagnostics
 
+## AI Systems Architect -> Application Engineer (Fit Analysis Phase 4 2026-03-09)
+
+- strengthen URL intake so main-content sections survive and nav/legal/application chrome is removed before requirement extraction
+- preserve list and heading boundaries because downstream requirement extraction depends on them
+- keep the parser generic rather than ATS-vendor-specific
+
 ## Ops / Release Agent -> Deployment Execution (Cloudflare Adapter Readiness 2026-03-07)
 
 - local release gates now include `npm run cf:build`, not only `npm run build`
