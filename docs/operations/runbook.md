@@ -18,6 +18,8 @@
 ## Semantic Retrieval Artifact
 
 - Run `npm run embeddings:build` after materially changing resume, project, FAQ, or AI-context content.
+- Do not rebuild embeddings for code-only changes such as UI work, route logic, prompt tuning, tests, deployment config, or styling when the retrieval corpus itself is unchanged.
+- The rebuild trigger is a retrieval-corpus change, not a specific agent role. Any agent that materially changes indexed content is responsible for regenerating the artifact before handoff or release.
 - This writes `content/retrieval/embeddings.generated.json`.
 - If the artifact is missing or empty in an environment with `OPENAI_API_KEY`, the app can build a live in-memory semantic index at runtime.
 - If neither the artifact nor the API key is available, retrieval falls back to deterministic local ranking.
