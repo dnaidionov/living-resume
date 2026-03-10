@@ -6,6 +6,7 @@ import {
   buildFitAnalysisUserPrompt,
   extractRoleRequirements
 } from "@/lib/ai/prompting";
+import type { ExtractedRoleRequirement } from "@/types/ai";
 import type { EvidenceChunk } from "@/types/content";
 
 const evidence: EvidenceChunk[] = [
@@ -26,6 +27,19 @@ const evidence: EvidenceChunk[] = [
     text: "Built a grounded resume experience with retrieval and fit analysis.",
     tags: ["ai", "execution"],
     embedding: [0, 1, 0]
+  }
+];
+
+const requirements: ExtractedRoleRequirement[] = [
+  {
+    text: "Own roadmap strategy and prioritization across the product area.",
+    category: "function",
+    priority: "must_have"
+  },
+  {
+    text: "Lead cross-functional stakeholder alignment across engineering and design.",
+    category: "function",
+    priority: "important"
   }
 ];
 
@@ -50,7 +64,7 @@ test("assembleFitAnalysisResult preserves internal scorecard and recruiter brief
       },
       confidence: "high"
     },
-    roleText: "Senior Product Manager responsible for roadmap strategy, cross-functional leadership, and delivery execution.",
+    requirements,
     evidence,
     inputKind: "text",
     presentationMode: "recruiter_brief",
@@ -88,7 +102,7 @@ test("extractRoleRequirements filters titles, locations, and boilerplate", () =>
     Equal opportunity employer statement and apply now content.
   `);
 
-  const labels = requirements.map((item) => item.requirement);
+  const labels = requirements.map((item) => item.text);
   assert.equal(labels.includes("Senior Product Manager, Planner"), false);
   assert.equal(labels.some((item) => /Mountain View|California|San Francisco/i.test(item)), false);
   assert.equal(labels.some((item) => /Equal opportunity|apply now/i.test(item)), false);
@@ -99,6 +113,7 @@ test("extractRoleRequirements filters titles, locations, and boilerplate", () =>
 test("fit-analysis prompt keeps anti-false-negative logic in the hidden prompt", () => {
   const prompt = buildFitAnalysisUserPrompt(
     `Senior Product Manager\nOwn roadmap, customer discovery, and cross-functional delivery for a SaaS platform.`,
+    requirements,
     evidence,
     "recruiter_brief"
   );
@@ -110,6 +125,7 @@ test("fit-analysis prompt keeps anti-false-negative logic in the hidden prompt",
 test("fallback recruiter brief does not mention preferred domains or absent AI language", () => {
   const result = buildFallbackFitAnalysisResponse(
     `Senior Product Manager\nOwn roadmap, customer discovery, and cross-functional delivery for a SaaS platform.`,
+    requirements,
     evidence,
     "text",
     "recruiter_brief"
@@ -138,6 +154,12 @@ test("strong-fit recruiter brief uses requirement titles with evidence text and 
     Must have delivery execution across product teams.
     Must have measurable business outcomes.
     Must have product discovery leadership.`,
+    extractRoleRequirements(`Senior Product Manager
+    Must have ownership of roadmap strategy.
+    Must have cross-functional stakeholder alignment.
+    Must have delivery execution across product teams.
+    Must have measurable business outcomes.
+    Must have product discovery leadership.`),
     evidence,
     "text",
     "recruiter_brief"
@@ -161,6 +183,7 @@ test("strong-fit recruiter brief uses requirement titles with evidence text and 
 test("scorecard mode remains available for A\/B testing", () => {
   const result = buildFallbackFitAnalysisResponse(
     `Senior Product Manager\nOwn roadmap, customer discovery, and cross-functional delivery for a SaaS platform.`,
+    requirements,
     evidence,
     "text",
     "scorecard"

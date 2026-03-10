@@ -2,6 +2,7 @@ import type { FitAnalysisService } from "@/types/contracts";
 import type { FitPresentationMode, RoleInput } from "@/types/ai";
 import { staticRetrievalStore } from "@/lib/retrieval/store";
 import { generateFitAnalysisWithOpenAI } from "@/lib/ai/openai";
+import { llmRequirementExtractionService } from "@/lib/ai/requirement-extraction";
 
 function roleInputToText(input: RoleInput): string {
   if (input.kind === "text") {
@@ -16,7 +17,8 @@ function roleInputToText(input: RoleInput): string {
 export const heuristicFitAnalysisService: FitAnalysisService = {
   async analyze(roleInput, _sessionId, presentationMode = "recruiter_brief") {
     const roleText = roleInputToText(roleInput);
+    const requirements = await llmRequirementExtractionService.extract(roleText);
     const evidence = await staticRetrievalStore.searchEvidence(roleText, "fit_analysis");
-    return generateFitAnalysisWithOpenAI(roleText, evidence, roleInput.kind, presentationMode);
+    return generateFitAnalysisWithOpenAI(roleText, requirements, evidence, roleInput.kind, presentationMode);
   }
 };

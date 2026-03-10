@@ -25,6 +25,7 @@ The current repo uses a portable stateless AI runtime:
 - `lib/ai/fit-analysis.ts` retrieves evidence and requests a structured fit evaluation from the model.
 - `lib/platform/file-intake.ts` parses TXT, PDF, and DOCX uploads.
 - `lib/platform/url-intake.ts` normalizes remote job pages into plain text.
+- `lib/ai/requirement-extraction.ts` extracts recruiter-relevant role requirements before fit scoring, using the LLM as the primary path and heuristics only as fallback.
 
 This keeps the app deployable on both Cloudflare and Vercel without requiring a database or server-side session store.
 
@@ -41,6 +42,8 @@ This keeps the app deployable on both Cloudflare and Vercel without requiring a 
 - A JD that does not mention AI should not be treated as lower fit for that reason alone.
 - The API retains an internal scorecard for calibration and testing, but the primary recruiter-facing presentation is a verdict-driven brief.
 - Presentation mode can switch between `recruiter_brief` and `scorecard` for experiments without changing the evaluator core.
+- Requirement extraction is now its own stage and should return structured role requirements before final fit analysis is generated.
+- Heuristic requirement extraction remains only as a fallback path when the LLM extractor is unavailable.
 
 ## Session model
 
