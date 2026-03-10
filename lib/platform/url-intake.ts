@@ -1,11 +1,8 @@
 export async function fetchJobDescriptionFromUrl(url: string): Promise<string> {
   const response = await fetch(url, {
     headers: {
-      "user-agent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/136.0.0.0 Safari/537.36",
-      accept: "text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8",
-      "accept-language": "en-US,en;q=0.9",
-      "cache-control": "no-cache",
-      pragma: "no-cache"
+      "user-agent": "LivingResumeBot/0.2",
+      accept: "text/html,application/xhtml+xml"
     }
   });
 
@@ -16,10 +13,7 @@ export async function fetchJobDescriptionFromUrl(url: string): Promise<string> {
   const html = await response.text();
   const normalized = extractReadableText(html);
 
-  if (normalized.length < 60 && scoreDocument(normalized) < 3) {
-    if (/enable javascript to run this app|javascript required|please enable javascript/i.test(html)) {
-      throw new Error("This job page is heavily JavaScript-rendered, and the current fetch could not recover enough recruiter-readable description text. Use Paste Text or Upload File for this posting.");
-    }
+  if (normalized.length < 200) {
     throw new Error("Fetched page did not contain enough readable job description content.");
   }
 
@@ -27,19 +21,13 @@ export async function fetchJobDescriptionFromUrl(url: string): Promise<string> {
 }
 
 export function extractReadableText(html: string): string {
-  const structuredText = extractStructuredJobText(html);
-  if (structuredText.length >= 80 || scoreDocument(structuredText) >= 6) {
-    return structuredText;
-  }
-
-  const metaText = extractMetaFallbackText(html);
-  if (metaText.length >= 80 || scoreDocument(metaText) >= 4) {
-    return metaText;
-  }
-
   const primaryHtml = extractPrimaryHtml(html);
   const text = htmlToReadableText(primaryHtml);
-  const sections = normalizeSegments(text);
+  const sections = text
+    .split(/\n{2,}/)
+    .map((item) => item.trim())
+    .filter(Boolean)
+    .filter((item) => !isBoilerplateSegment(item));
 
   const ranked = sections
     .map((section) => ({
@@ -58,235 +46,22 @@ export function extractReadableText(html: string): string {
     .trim();
 }
 
-function extractMetaFallbackText(html: string): string {
-  const values = [
-    extractMetaContent(html, "description"),
-    extractMetaContent(html, "og:description"),
-    extractMetaContent(html, "twitter:description"),
-    extractTitle(html)
-  ]
-    .filter(Boolean)
-    .map((item) => normalizeStructuredString(item as string));
-
-  return normalizeSegments(values.join("\n\n")).join("\n\n");
-}
-
-function extractMetaContent(html: string, name: string): string | undefined {
-  const pattern = new RegExp(`<meta[^>]+(?:name|property)=["']${escapeRegExp(name)}["'][^>]+content=["']([^"']+)["'][^>]*>`, "i");
-  return html.match(pattern)?.[1];
-}
-
-function extractTitle(html: string): string | undefined {
-  return html.match(/<title[^>]*>([\s\S]*?)<\/title>/i)?.[1]?.trim();
-}
-
-function extractStructuredJobText(html: string): string {
-  const candidates: string[] = [];
-
-  const providerSpecific = extractProviderSpecificText(html);
-  if (providerSpecific.length > 0) {
-    candidates.push(providerSpecific);
-  }
-
-  for (const script of extractJsonScripts(html)) {
-    const parsed = tryParseJson(script);
-    if (!parsed) {
-      continue;
-    }
-
-    const structuredSegments = collectStructuredJobSegments(parsed);
-    if (structuredSegments.length > 0) {
-      candidates.push(normalizeSegments(structuredSegments.join("\n\n")).join("\n\n"));
-    }
-  }
-
-  const best = candidates
-    .map((item) => item.trim())
-    .filter((item) => item.length > 0)
-    .sort((left, right) => scoreDocument(right) - scoreDocument(left))[0];
-
-  return best ?? "";
-}
-
-function extractProviderSpecificText(html: string): string {
-  const candidates: string[] = [];
-
-  const ashbyDescription = extractJsonEncodedField(html, "descriptionHtml");
-  if (ashbyDescription) {
-    candidates.push(normalizeSegments(normalizeStructuredString(ashbyDescription)).join("\n\n"));
-  }
-
-  const ldJsonDescription = extractJsonLdDescription(html);
-  if (ldJsonDescription) {
-    candidates.push(normalizeSegments(normalizeStructuredString(ldJsonDescription)).join("\n\n"));
-  }
-
-  return candidates
-    .map((item) => item.trim())
-    .filter(Boolean)
-    .sort((left, right) => scoreDocument(right) - scoreDocument(left))[0] ?? "";
-}
-
-function extractJsonLdDescription(html: string): string | undefined {
-  const scripts = Array.from(html.matchAll(/<script\b[^>]*type=["']application\/ld\+json["'][^>]*>([\s\S]*?)<\/script>/gi))
-    .map((match) => match[1]?.trim())
-    .filter(Boolean);
-
-  for (const script of scripts) {
-    const parsed = tryParseJson(script as string);
-    if (!parsed) {
-      continue;
-    }
-
-    const nodes = Array.isArray(parsed) ? parsed : [parsed];
-    for (const node of nodes) {
-      if (!node || typeof node !== "object") {
-        continue;
-      }
-      const record = node as Record<string, unknown>;
-      if (String(record["@type"] ?? "").toLowerCase() !== "jobposting") {
-        continue;
-      }
-      const description = record.description;
-      if (typeof description === "string" && description.trim()) {
-        return description;
-      }
-    }
-  }
-
-  return undefined;
-}
-
-function extractJsonEncodedField(html: string, fieldName: string): string | undefined {
-  const pattern = new RegExp(`"${escapeRegExp(fieldName)}":"((?:\\\\.|[^"\\\\])*)"`, "i");
-  const match = html.match(pattern)?.[1];
-  if (!match) {
-    return undefined;
-  }
-
-  try {
-    return JSON.parse(`"${match}"`) as string;
-  } catch {
-    return undefined;
-  }
-}
-
-function extractJsonScripts(html: string): string[] {
-  const matches = Array.from(html.matchAll(/<script\b[^>]*>([\s\S]*?)<\/script>/gi));
-  return matches
-    .map((match) => match[1]?.trim() ?? "")
-    .filter(Boolean)
-    .filter((content) => /application\/ld\+json|__NEXT_DATA__|__NUXT__|jobPosting|description|responsibilities|qualifications|lever|ashby|greenhouse|posting/i.test(content));
-}
-
-function tryParseJson(content: string): unknown {
-  const cleaned = content
-    .trim()
-    .replace(/^window\.__INITIAL_STATE__\s*=\s*/i, "")
-    .replace(/^window\.__NEXT_DATA__\s*=\s*/i, "")
-    .replace(/;$/, "");
-
-  try {
-    return JSON.parse(cleaned);
-  } catch {
-    return undefined;
-  }
-}
-
-function collectStructuredJobSegments(value: unknown, path = ""): string[] {
-  if (typeof value === "string") {
-    const normalized = normalizeStructuredString(value);
-    return isStructuredJobSegment(normalized, path) ? [normalized] : [];
-  }
-
-  if (Array.isArray(value)) {
-    return value.flatMap((item, index) => collectStructuredJobSegments(item, `${path}[${index}]`));
-  }
-
-  if (!value || typeof value !== "object") {
-    return [];
-  }
-
-  const objectValue = value as Record<string, unknown>;
-  const keys = Object.keys(objectValue);
-  const isJobPostingObject = keys.some((key) => /(description|responsibilities|qualifications|requirements|jobPosting|posting|mission|whatYouWillDo|whatYoullDo|aboutRole)/i.test(key));
-
-  return keys.flatMap((key) => {
-    const nextPath = path ? `${path}.${key}` : key;
-    const child = objectValue[key];
-
-    if (typeof child === "string") {
-      const normalized = normalizeStructuredString(child);
-      return isStructuredJobSegment(normalized, nextPath) || (isJobPostingObject && normalized.length >= 40 && !looksLikeConfigBlob(normalized))
-        ? [normalized]
-        : [];
-    }
-
-    return collectStructuredJobSegments(child, nextPath);
-  });
-}
-
-function normalizeStructuredString(value: string): string {
-  return htmlToReadableText(decodeHtmlEntities(value).replace(/\\n/g, "\n"))
-    .replace(/\\"/g, "\"")
-    .replace(/&#34;/g, "\"")
-    .replace(/&#39;/g, "'")
-    .replace(/&quot;/g, "\"")
-    .replace(/&amp;/g, "&")
-    .replace(/[ \t]+/g, " ")
-    .replace(/\n{3,}/g, "\n\n")
-    .replace(/ *\n */g, "\n")
-    .trim();
-}
-
-function decodeHtmlEntities(value: string): string {
-  return value
-    .replace(/&nbsp;/gi, " ")
-    .replace(/&amp;/gi, "&")
-    .replace(/&lt;/gi, "<")
-    .replace(/&gt;/gi, ">")
-    .replace(/&#39;/gi, "'")
-    .replace(/&quot;/gi, "\"")
-    .replace(/&#34;/gi, "\"")
-    .replace(/&#(\d+);/g, (_, code) => String.fromCodePoint(Number(code)))
-    .replace(/&#x([0-9a-f]+);/gi, (_, code) => String.fromCodePoint(parseInt(code, 16)));
-}
-
-function isStructuredJobSegment(segment: string, path: string): boolean {
-  if (segment.length < 20 || looksLikeConfigBlob(segment)) {
-    return false;
-  }
-  if (/(themeoptions|customtheme|customfonts|microsite|vscdn|font-family|border-radius|background-color|stylesheet|favicon|logo|image\/|cdn)/i.test(segment)) {
-    return false;
-  }
-  if (isBoilerplateSegment(segment)) {
-    return false;
-  }
-  if (/(description|responsibilities|qualifications|requirements|jobposting|posting|aboutrole|whatyouwilldo|whatyoulldo|mission|team|about)/i.test(path)) {
-    return true;
-  }
-  return scoreSegment(segment) >= 3;
-}
-
 function extractPrimaryHtml(html: string): string {
-  const withoutComments = html.replace(/<!--[\s\S]*?-->/g, " ");
-  const htmlWithoutNoise = withoutComments
+  const stripped = html
+    .replace(/<!--[\s\S]*?-->/g, " ")
+    .replace(/<script[\s\S]*?<\/script>/gi, " ")
     .replace(/<style[\s\S]*?<\/style>/gi, " ")
     .replace(/<noscript[\s\S]*?<\/noscript>/gi, " ")
     .replace(/<svg[\s\S]*?<\/svg>/gi, " ")
     .replace(/<(nav|header|footer|form|aside|dialog)[^>]*>[\s\S]*?<\/\1>/gi, " ");
 
-  const articleMatch = htmlWithoutNoise.match(/<(main|article)[^>]*>([\s\S]*?)<\/\1>/i);
-  if (articleMatch?.[0]) {
-    return stripScripts(articleMatch[0]);
+  const primaryMatch = stripped.match(/<(main|article)[^>]*>([\s\S]*?)<\/\1>/i);
+  if (primaryMatch?.[0]) {
+    return primaryMatch[0];
   }
 
-  const bodyMatch = htmlWithoutNoise.match(/<body[^>]*>([\s\S]*?)<\/body>/i);
-  return stripScripts(bodyMatch?.[1] ?? htmlWithoutNoise);
-}
-
-function stripScripts(html: string): string {
-  return html.replace(/<script[\s\S]*?<\/script>/gi, " ");
+  const bodyMatch = stripped.match(/<body[^>]*>([\s\S]*?)<\/body>/i);
+  return bodyMatch?.[1] ?? stripped;
 }
 
 function htmlToReadableText(html: string): string {
@@ -305,31 +80,11 @@ function htmlToReadableText(html: string): string {
     .replace(/&lt;/gi, "<")
     .replace(/&gt;/gi, ">")
     .replace(/&#39;/gi, "'")
-    .replace(/&quot;/gi, '"')
-    .replace(/&#34;/gi, '"');
-}
-
-function normalizeSegments(text: string): string[] {
-  return text
-    .split(/\n{2,}/)
-    .map((item) => item.trim())
-    .map((item) => item.replace(/\s+/g, " "))
-    .filter(Boolean)
-    .filter((item) => !isBoilerplateSegment(item))
-    .filter((item) => !looksLikeConfigBlob(item));
+    .replace(/&quot;/gi, '"');
 }
 
 function isBoilerplateSegment(segment: string): boolean {
   return /(privacy|cookies|sign in|sign-in|apply now|job alert|share this job|equal opportunity|accommodation|benefits|terms of use|page source|javascript required|skip to content|submit application)/i.test(segment);
-}
-
-function looksLikeConfigBlob(segment: string): boolean {
-  const normalized = segment.toLowerCase();
-  return (
-    /themeoptions|customtheme|customfonts|font-family|vscdn|microsite|src\\?https?:\/\/|background-color|border-radius|box-shadow|stylesheet|favicon|image\/png|cdn/.test(normalized) ||
-    /[{[]\s*"?[a-z0-9_-]+"?\s*:/.test(segment) ||
-    /&#34;/.test(segment)
-  );
 }
 
 function scoreSegment(segment: string): number {
@@ -338,7 +93,7 @@ function scoreSegment(segment: string): number {
   if (segment.length <= 90 && !isBoilerplateSegment(segment)) {
     score += 1;
   }
-  if (/(responsibilities|qualifications|requirements|you will|about the role|preferred qualifications|what you'?ll do|what you will do|about the job|about the team)/i.test(segment)) {
+  if (/(responsibilities|qualifications|requirements|you will|about the role|preferred qualifications|what you'?ll do|what you will do)/i.test(segment)) {
     score += 3;
   }
   if (/(experience|ability|develop|drive|lead|build|deliver|determine|define|gather|analy|align|strategy|road-?map|requirements|mission|goal|bring|technical|work cross-functionally|partner)/i.test(segment)) {
@@ -350,17 +105,6 @@ function scoreSegment(segment: string): number {
   if (segment.length > 400) {
     score -= 1;
   }
-  if (looksLikeConfigBlob(segment)) {
-    score -= 5;
-  }
 
   return score;
-}
-
-function scoreDocument(text: string): number {
-  return normalizeSegments(text).reduce((sum, segment) => sum + Math.max(0, scoreSegment(segment)), 0);
-}
-
-function escapeRegExp(value: string): string {
-  return value.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
 }
