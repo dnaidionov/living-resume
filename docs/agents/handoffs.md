@@ -129,6 +129,22 @@
 - use the eval harness to catch false negatives and obvious false positives before release
 - keep the harness local and deterministic so it can run in CI without live LLM calls
 
+## AI Systems Architect -> Application Engineer / QA (Fit Validation Policy 2026-03-10)
+
+- gate clearly non-product roles to a negative fit even when overlapping tools or domain terms exist
+- collapse repeated bullet evidence to `Same as above.` / `See previous point.` instead of restating the same proof
+- treat pre-2023 AI/ML or chatbot evidence as adjacent rather than direct proof for modern LLM orchestration requirements
+- validate technology matches by context, distinguishing hands-on engineering ownership from adjacent product exposure
+- use explicit employer provenance from structured content metadata when rendering recruiter-facing evidence text; never infer employer from AI-context headlines
+- when the verdict is negative, render 3 to 5 `Where I don't fit` bullets and make each gap explanation concrete to the requirement instead of generic
+- collapse repeated negative explanations to `Same as above.` and block requirement-to-gap mismatches before recruiter-facing rendering
+- render `What does transfer` as transferable capabilities rather than job titles, and never use AI-context or project headlines as employer fallbacks in recruiter-facing evidence text
+- when URL intake sees embedded structured job payloads, prefer them over raw HTML text, and explicitly block serialized theme/config blobs from downstream requirement extraction
+- if URL intake cannot recover real body content, fall back to title/meta only as a last resort and surface a distinct JS-rendered-page error when even that is insufficient
+- keep company-mission intro copy out of recruiter-facing match bullets and prefer alternative relevant evidence over reusing one chunk across unrelated positive bullets
+- prefer newer dated experience when competing evidence is otherwise comparably relevant, including project evidence linked to recent parent roles
+- restrict recruiter-facing fit evidence to actual experience-bearing sources; do not let portfolio/meta project artifacts surface as proof of prior role fit
+
 ## Ops / Release Agent -> Deployment Execution (Cloudflare Adapter Readiness 2026-03-07)
 
 - local release gates now include `npm run cf:build`, not only `npm run build`
@@ -136,3 +152,14 @@
 - `open-next.config.ts` is required so the worker bundle can be generated deterministically in-repo
 - release verification must confirm `.open-next/worker.js` and `.open-next/assets` exist before deploy
 - keep Vercel as a portable fallback path if Cloudflare smoke tests fail after deployment
+
+## Cross-agent planning intake (2026-03-10)
+
+- Source planning artifact: `docs/agents/cross-agent-plan-2026-03-10.md`
+- Content Strategist owns the requested senior-signal strengthening for EPAM, Modus, and Cardstack, including the Modus/Verizon cloud redesign addition.
+- Content Strategist also owns the broader capability-coverage audit across resume and AI-context content so underrepresented qualification areas become retrievable and recruiter-visible.
+- Experience Designer owns the recruiter-facing fit-result color system and chat-interaction UX review.
+- AI Systems Architect owns the chat-runtime review, retrieval-coverage review, and deployed LLM latency recommendations.
+- Application Engineer owns implementation after content, UX, and architecture requirements are finalized.
+- QA / Evaluations Agent owns grounding, semantic-color, capability-coverage, and chat/performance regression coverage.
+- Ops / Release Agent owns production monitoring and rollout guidance for latency-related changes.

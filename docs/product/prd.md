@@ -27,6 +27,17 @@ Build a recruiter-first living resume that acts as a grounded digital twin. The 
 - Cloudflare-compatible deployment setup
 - Public documentation of process and architecture
 
+## Planned enhancements
+
+- Strengthen later-career experience framing, especially EPAM, Modus, and Cardstack, to better signal senior product strategy and leadership.
+- Revise the Modus role to include Verizon cloud solution redesign work.
+- Add semantic fit-result coloring for recruiter-facing assessments.
+- Review and refine the chat interaction and runtime behavior.
+- Review experience and AI-context coverage so broader qualifications such as integrations, data analysis, databases, GTM, training, and cost estimation are represented and retrievable when supported by evidence.
+- Document and prioritize deployed-performance improvements, especially LLM response-time optimizations.
+
+Detailed cross-agent ownership for these items lives in [cross-agent-plan-2026-03-10.md](../agents/cross-agent-plan-2026-03-10.md).
+
 ## Non-goals
 
 - Accounts
