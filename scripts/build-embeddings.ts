@@ -1,16 +1,21 @@
 import { writeFile } from "node:fs/promises";
 import path from "node:path";
 import { buildDocuments } from "@/lib/content/store";
-import { computeDeterministicEmbedding } from "@/lib/retrieval/embeddings";
+import { requestEmbeddings } from "@/lib/ai/openai";
 
 async function main() {
+  if (!process.env.OPENAI_API_KEY) {
+    throw new Error("OPENAI_API_KEY is required to build semantic embeddings.");
+  }
+
   const documents = await buildDocuments();
-  const embeddings = documents.map((document) => ({
+  const vectors = await requestEmbeddings(documents.map((document) => `${document.title}\n${document.section}\n${document.text}`));
+  const embeddings = documents.map((document, index) => ({
     ...document,
-    embedding: computeDeterministicEmbedding(`${document.title} ${document.section} ${document.text}`)
+    embedding: vectors[index] ?? []
   }));
 
-  const outputPath = path.join(process.cwd(), "embeddings.json");
+  const outputPath = path.join(process.cwd(), "content/retrieval/embeddings.generated.json");
   await writeFile(outputPath, JSON.stringify(embeddings, null, 2), "utf8");
   console.log(`Wrote ${embeddings.length} embeddings to ${outputPath}`);
 }

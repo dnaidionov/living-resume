@@ -13,14 +13,26 @@ import {
 } from "@/lib/ai/prompting";
 
 const OPENAI_URL = "https://api.openai.com/v1/chat/completions";
+const OPENAI_EMBEDDINGS_URL = "https://api.openai.com/v1/embeddings";
 const defaultChatModel = process.env.OPENAI_CHAT_MODEL ?? "gpt-5-mini";
 const defaultFitModel = process.env.OPENAI_FIT_MODEL ?? process.env.OPENAI_CHAT_MODEL ?? "gpt-5-mini";
+const defaultEmbeddingModel = process.env.OPENAI_EMBEDDING_MODEL ?? "text-embedding-3-small";
 
 type ChatCompletionResponse = {
   choices?: Array<{
     message?: {
       content?: string | Array<{ type?: string; text?: string }>;
     };
+  }>;
+  error?: {
+    message?: string;
+  };
+};
+
+type EmbeddingsResponse = {
+  data?: Array<{
+    embedding?: number[];
+    index?: number;
   }>;
   error?: {
     message?: string;
@@ -162,4 +174,38 @@ async function requestCompletion(
   }
 
   throw new Error("OpenAI response did not include content.");
+}
+
+export async function requestEmbeddings(inputs: string[]): Promise<number[][]> {
+  const apiKey = process.env.OPENAI_API_KEY;
+  if (!apiKey) {
+    throw new Error("OPENAI_API_KEY is not configured.");
+  }
+
+  const response = await fetch(OPENAI_EMBEDDINGS_URL, {
+    method: "POST",
+    headers: {
+      "content-type": "application/json",
+      authorization: `Bearer ${apiKey}`
+    },
+    body: JSON.stringify({
+      model: defaultEmbeddingModel,
+      input: inputs
+    })
+  });
+
+  const payload = (await response.json()) as EmbeddingsResponse;
+  if (!response.ok) {
+    throw new Error(payload.error?.message ?? "OpenAI embeddings request failed.");
+  }
+
+  const vectors = (payload.data ?? [])
+    .sort((left, right) => (left.index ?? 0) - (right.index ?? 0))
+    .map((item) => item.embedding ?? []);
+
+  if (vectors.length !== inputs.length || vectors.some((vector) => vector.length === 0)) {
+    throw new Error("OpenAI embeddings response was incomplete.");
+  }
+
+  return vectors;
 }

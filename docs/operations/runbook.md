@@ -13,6 +13,14 @@
 - optional: `OPENAI_CHAT_MODEL` (defaults to `gpt-5-mini`)
 - optional: `OPENAI_FIT_MODEL` (defaults to `gpt-5-mini`)
 - optional: `NEXT_PUBLIC_FIT_PRESENTATION_MODE` (`recruiter_brief` or `scorecard`, defaults to `recruiter_brief`)
+- optional: `OPENAI_EMBEDDING_MODEL` (defaults to `text-embedding-3-small`)
+
+## Semantic Retrieval Artifact
+
+- Run `npm run embeddings:build` after materially changing resume, project, FAQ, or AI-context content.
+- This writes `content/retrieval/embeddings.generated.json`.
+- If the artifact is missing or empty in an environment with `OPENAI_API_KEY`, the app can build a live in-memory semantic index at runtime.
+- If neither the artifact nor the API key is available, retrieval falls back to deterministic local ranking.
 
 ## Secret handling
 

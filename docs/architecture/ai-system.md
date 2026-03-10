@@ -19,7 +19,7 @@
 The current repo uses a portable stateless AI runtime:
 
 - `lib/content` provides repo-managed source content.
-- `lib/retrieval` ranks static evidence from bundled artifacts.
+- `lib/retrieval` prefers bundled semantic embeddings and falls back to live semantic indexing or deterministic ranking only when needed.
 - `lib/ai/openai.ts` calls OpenAI through plain `fetch`, not a provider SDK.
 - `lib/ai/chat-service.ts` retrieves evidence and sends the latest chat turn plus a short history window to the model.
 - `lib/ai/fit-analysis.ts` retrieves evidence and requests a structured fit evaluation from the model.
@@ -44,6 +44,7 @@ This keeps the app deployable on both Cloudflare and Vercel without requiring a 
 - Presentation mode can switch between `recruiter_brief` and `scorecard` for experiments without changing the evaluator core.
 - Requirement extraction is now its own stage and should return structured role requirements before final fit analysis is generated.
 - Heuristic requirement extraction remains only as a fallback path when the LLM extractor is unavailable.
+- Retrieval should run per requirement using semantic embeddings when available, while still staying repo-backed and stateless.
 
 ## Session model
 

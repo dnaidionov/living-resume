@@ -103,6 +103,13 @@
 - pass structured role requirements into prompt assembly and fallback recruiter-brief generation
 - preserve the existing public fit-analysis response contract while upgrading evaluator internals
 
+## AI Systems Architect -> Application Engineer (Fit Analysis Phase 2 2026-03-09)
+
+- replace deterministic retrieval as the primary path with semantic retrieval
+- keep retrieval repo-backed via `content/retrieval/embeddings.generated.json`
+- allow live in-memory semantic indexing only as a fallback when the artifact is missing but `OPENAI_API_KEY` is present
+- preserve a deterministic fallback path when semantic retrieval is unavailable
+
 ## Ops / Release Agent -> Deployment Execution (Cloudflare Adapter Readiness 2026-03-07)
 
 - local release gates now include `npm run cf:build`, not only `npm run build`
