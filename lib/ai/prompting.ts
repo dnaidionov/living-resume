@@ -37,6 +37,17 @@ type FitAnalysisResponseInput = Partial<FitAnalysisResult> & {
   interviewAngles?: string[];
 };
 
+type StageVersions = {
+  requirementExtraction: string;
+  retrieval: string;
+  generation: string;
+};
+
+type RequirementEvidencePair = MatchBullet & {
+  score: number;
+  evidenceId?: string;
+};
+
 export function formatEvidencePacket(evidence: EvidenceChunk[]): string {
   if (evidence.length === 0) {
     return "No matching evidence was retrieved from the curated corpus.";
@@ -178,7 +189,12 @@ export function buildFallbackFitAnalysisResponse(
     evidence,
     inputKind,
     presentationMode,
-    evaluatorVersion: "v3-fallback"
+    evaluatorVersion: "v5-fallback-fit-analysis",
+    stageVersions: {
+      requirementExtraction: "v1-heuristic-fallback",
+      retrieval: "v1-semantic-or-deterministic",
+      generation: "v2-fallback-brief"
+    }
   });
 }
 
@@ -244,7 +260,8 @@ export function assembleFitAnalysisResult({
   evidence,
   inputKind,
   presentationMode,
-  evaluatorVersion
+  evaluatorVersion,
+  stageVersions
 }: {
   input: FitAnalysisResponseInput | null | undefined;
   requirements: ExtractedRoleRequirement[];
@@ -252,6 +269,7 @@ export function assembleFitAnalysisResult({
   inputKind: "text" | "url" | "file";
   presentationMode: FitPresentationMode;
   evaluatorVersion: string;
+  stageVersions?: StageVersions;
 }): FitAnalysisResult {
   const citations = buildCitations(evidence);
   const internalInput = input?.internal ?? pickInternalInput(input);
@@ -273,7 +291,8 @@ export function assembleFitAnalysisResult({
     metadata: {
       evaluatorVersion,
       inputKind,
-      presentationMode
+      presentationMode,
+      stageVersions
     }
   };
 }
@@ -415,6 +434,8 @@ function buildRecruiterBriefFromInternalFromRequirements(
 ): RecruiterBriefPresentation {
   const matchedRequirements = buildRequirementEvidencePairs(requirements, evidence);
   const verdict = deriveVerdict(internal);
+  const gapCandidates = buildGapCandidates(requirements, matchedRequirements);
+  const transferCandidates = buildTransferBulletsFromEvidence(evidence);
 
   if (verdict === "probably_not_your_person") {
     return {
@@ -423,28 +444,9 @@ function buildRecruiterBriefFromInternalFromRequirements(
         verdict,
         label: verdictToLabel(verdict)
       },
-      whereIDontFit: [
-        {
-          requirement: matchedRequirements[0]?.requirement ?? "Role-specific requirement fit",
-          gap: "The available evidence does not currently prove the level of direct experience this role appears to require."
-        },
-        {
-          requirement: matchedRequirements[1]?.requirement ?? "Scope of leadership",
-          gap: "The current corpus does not clearly support the exact scale or specialization implied by the role."
-        }
-      ],
-      whatDoesTransfer: [
-        {
-          skillOrExperience: "Product strategy and execution under ambiguity",
-          relevance: "This experience still transfers to adjacent product, platform, and transformation roles."
-        },
-        {
-          skillOrExperience: "Cross-functional leadership",
-          relevance: "The evidence supports strong collaboration, decision framing, and delivery alignment across teams."
-        }
-      ],
-      recommendation:
-        "You likely need someone with more direct evidence against the missing requirements above. I would still be interested in the conversation, but based on the available evidence I do not think I am the clearest fit for this role."
+      whereIDontFit: gapCandidates.slice(0, 3),
+      whatDoesTransfer: transferCandidates.slice(0, 3),
+      recommendation: buildNoFitRecommendation(gapCandidates)
     };
   }
 
@@ -458,15 +460,7 @@ function buildRecruiterBriefFromInternalFromRequirements(
       requirement: item.requirement,
       support: item.support
     })),
-    gapsToNote:
-      verdict === "probably_a_good_fit"
-        ? [
-            {
-              requirement: "Most role-specific context requirement",
-              gap: "Confirm the most specialized domain or operating-context expectation in interview."
-            }
-          ]
-        : undefined,
+    gapsToNote: verdict === "probably_a_good_fit" ? gapCandidates.slice(0, 2) : undefined,
     recommendation:
       verdict === "strong_fit_lets_talk"
         ? "I would fit this role well, and this looks like a conversation worth having. The combination of product ownership, cross-functional execution, and documented delivery outcomes makes the fit strong."
@@ -474,7 +468,7 @@ function buildRecruiterBriefFromInternalFromRequirements(
   };
 }
 
-function buildRequirementEvidencePairs(requirements: ExtractedRoleRequirement[], evidence: EvidenceChunk[]): MatchBullet[] {
+function buildRequirementEvidencePairs(requirements: ExtractedRoleRequirement[], evidence: EvidenceChunk[]): RequirementEvidencePair[] {
   const selectedRequirements =
     requirements.length > 0 ? requirements.slice(0, 5) : [{ text: "Core product ownership", category: "requirement" as const, priority: "important" as const }];
   const usedEvidenceIds = new Set<string>();
@@ -482,14 +476,79 @@ function buildRequirementEvidencePairs(requirements: ExtractedRoleRequirement[],
   return selectedRequirements.map((item) => {
     const bestEvidence = selectBestEvidenceForRequirement(item.text, evidence, usedEvidenceIds);
     if (bestEvidence) {
-      usedEvidenceIds.add(bestEvidence.id);
+      usedEvidenceIds.add(bestEvidence.chunk.id);
     }
 
     return {
       requirement: shortenRequirement(item.text),
-      support: summarizeSupportEvidence(bestEvidence) ?? "My prior work includes directly relevant product and delivery experience for this requirement."
+      support: summarizeSupportEvidence(bestEvidence?.chunk) ?? "My prior work includes directly relevant product and delivery experience for this requirement.",
+      score: bestEvidence?.score ?? 0,
+      evidenceId: bestEvidence?.chunk.id
     };
   });
+}
+
+function buildGapCandidates(
+  requirements: ExtractedRoleRequirement[],
+  matches: RequirementEvidencePair[]
+): GapBullet[] {
+  const explicitGaps = requirements
+    .slice(0, 5)
+    .map((requirement, index) => ({ requirement, match: matches[index] }))
+    .filter(({ match }) => !match || match.score < 12)
+    .map(({ requirement }) => ({
+      requirement: shortenRequirement(requirement.text),
+      gap: requirement.priority === "must_have"
+        ? "The current evidence set does not yet prove direct experience at the level this requirement appears to demand."
+        : "This looks like a useful interview validation point rather than a proven strength in the current corpus."
+    }));
+
+  if (explicitGaps.length > 0) {
+    return explicitGaps;
+  }
+
+  const nextRequirement = requirements.at(Math.min(matches.length, requirements.length - 1));
+  return nextRequirement
+    ? [{
+        requirement: shortenRequirement(nextRequirement.text),
+        gap: "This is the main role-specific point I would validate directly in interview."
+      }]
+    : [];
+}
+
+function buildTransferBulletsFromEvidence(evidence: EvidenceChunk[]): TransferBullet[] {
+  const seen = new Set<string>();
+
+  return rankEvidenceForSupport(evidence)
+    .map((item) => ({
+      skillOrExperience: buildTransferTitle(item),
+      relevance: summarizeSupportEvidence(item) ?? `My prior work includes relevant experience from ${item.title}.`
+    }))
+    .filter((item) => {
+      const key = item.skillOrExperience.toLowerCase();
+      if (!key || seen.has(key)) {
+        return false;
+      }
+      seen.add(key);
+      return true;
+    })
+    .slice(0, 3);
+}
+
+function buildTransferTitle(item: EvidenceChunk): string {
+  if (item.title.includes(" at ")) {
+    return item.title.split(" at ")[0]?.trim() || item.title;
+  }
+  return item.title;
+}
+
+function buildNoFitRecommendation(gaps: GapBullet[]): string {
+  const leadGap = gaps[0]?.requirement?.toLowerCase();
+  if (leadGap) {
+    return `You likely need someone with clearer direct evidence against ${leadGap}. I would still be interested in the conversation, but based on the current corpus I do not think I am the clearest fit for this role.`;
+  }
+
+  return "You likely need someone with more direct evidence against the missing requirements above. I would still be interested in the conversation, but based on the current corpus I do not think I am the clearest fit for this role.";
 }
 
 function rankEvidenceForSupport(evidence: EvidenceChunk[]): EvidenceChunk[] {
@@ -621,14 +680,15 @@ function selectBestEvidenceForRequirement(
   requirement: string,
   evidence: EvidenceChunk[],
   usedEvidenceIds: Set<string>
-): EvidenceChunk | undefined {
+): { chunk: EvidenceChunk; score: number } | undefined {
   const keywords = extractRequirementKeywords(requirement);
 
-  const candidates = [...evidence].sort((left, right) => {
-    const leftScore = requirementEvidenceScore(requirement, keywords, left, usedEvidenceIds.has(left.id));
-    const rightScore = requirementEvidenceScore(requirement, keywords, right, usedEvidenceIds.has(right.id));
-    return rightScore - leftScore;
-  });
+  const candidates = [...evidence]
+    .map((item) => ({
+      chunk: item,
+      score: requirementEvidenceScore(requirement, keywords, item, usedEvidenceIds.has(item.id))
+    }))
+    .sort((left, right) => right.score - left.score);
 
   return candidates[0];
 }

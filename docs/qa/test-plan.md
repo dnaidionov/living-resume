@@ -22,6 +22,7 @@
 - Recruiter-facing fit output never mentions preferred domains, absent AI wording, or internal scoring logic
 - Requirement extraction returns role requirements/functions/expectations rather than titles, locations, or ATS boilerplate
 - Retrieval prefers semantic embeddings when a generated artifact or live embedding path is available, and falls back deterministically only when semantic mode is unavailable
+- Fit-analysis metadata reports stage versions so fallback vs primary-path results can be distinguished in QA
 - Fallback behavior remains usable when `OPENAI_API_KEY` is missing
 
 ## Operational

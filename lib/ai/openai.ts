@@ -88,7 +88,12 @@ export async function generateFitAnalysisWithOpenAI(
       evidence,
       inputKind,
       presentationMode,
-      evaluatorVersion: "v4-llm-requirements"
+      evaluatorVersion: "v5-llm-fit-analysis",
+      stageVersions: {
+        requirementExtraction: "v1-llm-primary",
+        retrieval: "v1-semantic-static",
+        generation: "v2-llm-dual-format"
+      }
     });
   } catch {
     return buildFallbackFitAnalysisResponse(roleText, requirements, evidence, inputKind, presentationMode);

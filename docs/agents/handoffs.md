@@ -110,6 +110,13 @@
 - allow live in-memory semantic indexing only as a fallback when the artifact is missing but `OPENAI_API_KEY` is present
 - preserve a deterministic fallback path when semantic retrieval is unavailable
 
+## AI Systems Architect -> Application Engineer (Fit Analysis Phase 3 2026-03-09)
+
+- remove canned fallback recruiter bullets wherever role-derived requirements or evidence can be used instead
+- derive fallback gaps from requirement coverage rather than fixed copy
+- derive fallback transfer bullets from retrieved evidence rather than generic stock phrases
+- expose evaluator stage versions in fit-analysis metadata for QA and release diagnostics
+
 ## Ops / Release Agent -> Deployment Execution (Cloudflare Adapter Readiness 2026-03-07)
 
 - local release gates now include `npm run cf:build`, not only `npm run build`

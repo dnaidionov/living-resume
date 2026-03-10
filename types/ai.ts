@@ -114,6 +114,11 @@ export type FitAnalysisResult = {
     evaluatorVersion: string;
     inputKind: "text" | "url" | "file";
     presentationMode: FitPresentationMode;
+    stageVersions?: {
+      requirementExtraction: string;
+      retrieval: string;
+      generation: string;
+    };
   };
 };
 

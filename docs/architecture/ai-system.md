@@ -45,6 +45,7 @@ This keeps the app deployable on both Cloudflare and Vercel without requiring a 
 - Requirement extraction is now its own stage and should return structured role requirements before final fit analysis is generated.
 - Heuristic requirement extraction remains only as a fallback path when the LLM extractor is unavailable.
 - Retrieval should run per requirement using semantic embeddings when available, while still staying repo-backed and stateless.
+- Fit-analysis metadata should expose stage versions so QA can tell which extractor, retrieval path, and generator produced a result.
 
 ## Session model
 
