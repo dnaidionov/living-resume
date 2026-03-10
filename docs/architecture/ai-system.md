@@ -26,6 +26,7 @@ The current repo uses a portable stateless AI runtime:
 - `lib/platform/file-intake.ts` parses TXT, PDF, and DOCX uploads.
 - `lib/platform/url-intake.ts` normalizes remote job pages into plain text.
 - URL intake should isolate main-content sections and strip navigation, legal, and application boilerplate before requirement extraction runs.
+- Local regression fixtures should cover positive non-AI roles, positive AI-native roles, and obvious stretch roles so fit-calibration drift is visible without live model calls.
 - `lib/ai/requirement-extraction.ts` extracts recruiter-relevant role requirements before fit scoring, using the LLM as the primary path and heuristics only as fallback.
 
 This keeps the app deployable on both Cloudflare and Vercel without requiring a database or server-side session store.
