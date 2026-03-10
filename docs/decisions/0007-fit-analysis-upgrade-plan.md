@@ -33,6 +33,7 @@ The product still needs to remain:
 - Keep the heuristic extractor only as fallback.
 - Move retrieval toward per-requirement evidence matching.
 - Keep retrieval artifacts repo-managed and bundled into the app unless scale changes materially.
+- Use semantic embeddings via a generated artifact first, with live in-memory indexing as a secondary path and deterministic ranking only as the last fallback.
 - Preserve the public fit-analysis API while improving internal evaluator stages.
 
 ## Consequences
