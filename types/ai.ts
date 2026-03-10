@@ -32,6 +32,16 @@ export type FitVerdict =
   | "probably_a_good_fit"
   | "probably_not_your_person";
 
+export type RoleRequirementCategory = "requirement" | "function" | "expectation" | "mission";
+
+export type RoleRequirementPriority = "must_have" | "important" | "nice_to_have";
+
+export type ExtractedRoleRequirement = {
+  text: string;
+  category: RoleRequirementCategory;
+  priority: RoleRequirementPriority;
+};
+
 export type FitDimension = {
   name: "core_match" | "execution_scope" | "leadership_collaboration" | "context_readiness";
   score: number;

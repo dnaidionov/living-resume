@@ -96,6 +96,13 @@
 - support TXT, PDF, and DOCX file ingestion plus remote page text extraction for fit analysis
 - keep deployment compatibility across Cloudflare Pages/Workers and Vercel
 
+## AI Systems Architect -> Application Engineer (Fit Analysis Phase 1 2026-03-09)
+
+- add a dedicated LLM-based requirement extraction stage ahead of fit analysis
+- keep heuristic requirement extraction only as fallback
+- pass structured role requirements into prompt assembly and fallback recruiter-brief generation
+- preserve the existing public fit-analysis response contract while upgrading evaluator internals
+
 ## Ops / Release Agent -> Deployment Execution (Cloudflare Adapter Readiness 2026-03-07)
 
 - local release gates now include `npm run cf:build`, not only `npm run build`

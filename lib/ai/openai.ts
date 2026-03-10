@@ -1,5 +1,5 @@
 import type { ChatModel } from "@/types/contracts";
-import type { FitAnalysisResult, FitPresentationMode, ModelInput, ModelOutput } from "@/types/ai";
+import type { ExtractedRoleRequirement, FitAnalysisResult, FitPresentationMode, ModelInput, ModelOutput } from "@/types/ai";
 import type { EvidenceChunk } from "@/types/content";
 import {
   assembleFitAnalysisResult,
@@ -54,31 +54,32 @@ export class OpenAIChatModel implements ChatModel {
 
 export async function generateFitAnalysisWithOpenAI(
   roleText: string,
+  requirements: ExtractedRoleRequirement[],
   evidence: EvidenceChunk[],
   inputKind: "text" | "url" | "file",
   presentationMode: FitPresentationMode
 ): Promise<FitAnalysisResult> {
   if (!process.env.OPENAI_API_KEY) {
-    return buildFallbackFitAnalysisResponse(roleText, evidence, inputKind, presentationMode);
+    return buildFallbackFitAnalysisResponse(roleText, requirements, evidence, inputKind, presentationMode);
   }
 
   try {
     const response = await requestJsonCompletion<Record<string, unknown>>({
       model: defaultFitModel,
       systemPrompt: buildFitAnalysisSystemPrompt(),
-      userPrompt: buildFitAnalysisUserPrompt(roleText, evidence, presentationMode)
+      userPrompt: buildFitAnalysisUserPrompt(roleText, requirements, evidence, presentationMode)
     });
 
     return assembleFitAnalysisResult({
       input: response as Partial<FitAnalysisResult>,
-      roleText,
+      requirements,
       evidence,
       inputKind,
       presentationMode,
-      evaluatorVersion: "v3-llm"
+      evaluatorVersion: "v4-llm-requirements"
     });
   } catch {
-    return buildFallbackFitAnalysisResponse(roleText, evidence, inputKind, presentationMode);
+    return buildFallbackFitAnalysisResponse(roleText, requirements, evidence, inputKind, presentationMode);
   }
 }
 
@@ -89,7 +90,7 @@ type CompletionRequest = {
   history?: ModelInput["history"];
 };
 
-async function requestJsonCompletion<T>(request: CompletionRequest): Promise<T> {
+export async function requestJsonCompletion<T>(request: CompletionRequest): Promise<T> {
   const text = await requestCompletion({
     ...request,
     responseFormat: { type: "json_object" }

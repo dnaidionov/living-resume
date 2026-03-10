@@ -1,4 +1,5 @@
 import type {
+  ExtractedRoleRequirement,
   FitAnalysisResult,
   FitDimension,
   FitPresentationMode,
@@ -19,13 +20,6 @@ const dimensionOrder: FitDimension["name"][] = [
   "leadership_collaboration",
   "context_readiness"
 ];
-
-type RequirementPriority = "must_have" | "important" | "nice_to_have";
-
-type ExtractedRequirement = {
-  requirement: string;
-  priority: RequirementPriority;
-};
 
 type InternalFitEvaluationInput = Partial<InternalFitEvaluation> | null | undefined;
 
@@ -103,8 +97,12 @@ export function buildChatUserPrompt(message: string, evidence: EvidenceChunk[]):
   ].join("\n");
 }
 
-export function buildFitAnalysisUserPrompt(roleText: string, evidence: EvidenceChunk[], presentationMode: FitPresentationMode): string {
-  const requirements = extractRoleRequirements(roleText);
+export function buildFitAnalysisUserPrompt(
+  roleText: string,
+  requirements: ExtractedRoleRequirement[],
+  evidence: EvidenceChunk[],
+  presentationMode: FitPresentationMode
+): string {
 
   return [
     "Job description or role brief:",
@@ -164,18 +162,19 @@ export function buildFallbackChatAnswer(message: string, evidence: EvidenceChunk
 
 export function buildFallbackFitAnalysisResponse(
   roleText: string,
+  requirements: ExtractedRoleRequirement[],
   evidence: EvidenceChunk[],
   inputKind: "text" | "url" | "file",
   presentationMode: FitPresentationMode
 ): FitAnalysisResult {
-  const internal = buildFallbackInternalFit(roleText, evidence);
+  const internal = buildFallbackInternalFit(requirements, evidence);
   return assembleFitAnalysisResult({
     input: {
       internal,
-      presentation: presentationMode === "recruiter_brief" ? buildRecruiterBriefFromInternal(roleText, internal, evidence) : undefined,
+      presentation: presentationMode === "recruiter_brief" ? buildRecruiterBriefFromInternal(requirements, internal, evidence) : undefined,
       confidence: evidence.length >= 4 ? "high" : evidence.length >= 2 ? "medium" : "low"
     },
-    roleText,
+    requirements,
     evidence,
     inputKind,
     presentationMode,
@@ -183,8 +182,7 @@ export function buildFallbackFitAnalysisResponse(
   });
 }
 
-function buildFallbackInternalFit(roleText: string, evidence: EvidenceChunk[]): InternalFitEvaluation {
-  const requirements = extractRoleRequirements(roleText);
+function buildFallbackInternalFit(requirements: ExtractedRoleRequirement[], evidence: EvidenceChunk[]): InternalFitEvaluation {
   const mustHaveCount = requirements.filter((item) => item.priority === "must_have").length;
   const evidenceStrength = Math.min(3, evidence.length);
   const overallScore = Math.min(9, Math.max(5, 5 + evidenceStrength + Math.min(1, mustHaveCount)));
@@ -242,14 +240,14 @@ function buildFallbackInternalFit(roleText: string, evidence: EvidenceChunk[]): 
 
 export function assembleFitAnalysisResult({
   input,
-  roleText,
+  requirements,
   evidence,
   inputKind,
   presentationMode,
   evaluatorVersion
 }: {
   input: FitAnalysisResponseInput | null | undefined;
-  roleText: string;
+  requirements: ExtractedRoleRequirement[];
   evidence: EvidenceChunk[];
   inputKind: "text" | "url" | "file";
   presentationMode: FitPresentationMode;
@@ -261,7 +259,7 @@ export function assembleFitAnalysisResult({
   const presentation = normalizePresentation(
     input?.presentation,
     internal,
-    extractRoleRequirements(roleText),
+    requirements,
     evidence,
     presentationMode
   );
@@ -304,7 +302,7 @@ export function buildCitations(evidence: EvidenceChunk[]): Citation[] {
   }));
 }
 
-export function extractRoleRequirements(roleText: string): ExtractedRequirement[] {
+export function extractRoleRequirementsHeuristically(roleText: string): ExtractedRoleRequirement[] {
   const segments = roleText
     .split(/\n+|[•\-]\s+|\d+\.\s+/)
     .map((item) => item.trim())
@@ -313,7 +311,8 @@ export function extractRoleRequirements(roleText: string): ExtractedRequirement[
     .filter(isLikelyRequirementSegment);
 
   const prioritized = dedupeRequirements(segments).slice(0, 8).map((segment) => ({
-    requirement: segment,
+    text: segment,
+    category: inferRequirementCategory(segment),
     priority: inferRequirementPriority(segment)
   }));
 
@@ -323,10 +322,15 @@ export function extractRoleRequirements(roleText: string): ExtractedRequirement[
 
   return [
     {
-      requirement: roleText.slice(0, 180).replace(/\s+/g, " ").trim(),
+      text: roleText.slice(0, 180).replace(/\s+/g, " ").trim(),
+      category: "requirement" as const,
       priority: "important" as const
     }
-  ].filter((item) => item.requirement.length > 0);
+  ].filter((item) => item.text.length > 0);
+}
+
+export function extractRoleRequirements(roleText: string): ExtractedRoleRequirement[] {
+  return extractRoleRequirementsHeuristically(roleText);
 }
 
 function normalizeInternalFitEvaluation(input: InternalFitEvaluationInput, evidence: EvidenceChunk[]): InternalFitEvaluation {
@@ -361,7 +365,7 @@ function normalizeInternalFitEvaluation(input: InternalFitEvaluationInput, evide
 function normalizePresentation(
   input: RecruiterBriefInput | Partial<ScorecardPresentation> | null | undefined,
   internal: InternalFitEvaluation,
-  requirements: ExtractedRequirement[],
+  requirements: ExtractedRoleRequirement[],
   evidence: EvidenceChunk[],
   mode: FitPresentationMode
 ): RecruiterBriefPresentation | ScorecardPresentation {
@@ -396,12 +400,16 @@ function normalizePresentation(
   };
 }
 
-function buildRecruiterBriefFromInternal(roleText: string, internal: InternalFitEvaluation, evidence: EvidenceChunk[]): RecruiterBriefPresentation {
-  return buildRecruiterBriefFromInternalFromRequirements(extractRoleRequirements(roleText), internal, evidence);
+function buildRecruiterBriefFromInternal(
+  requirements: ExtractedRoleRequirement[],
+  internal: InternalFitEvaluation,
+  evidence: EvidenceChunk[]
+): RecruiterBriefPresentation {
+  return buildRecruiterBriefFromInternalFromRequirements(requirements, internal, evidence);
 }
 
 function buildRecruiterBriefFromInternalFromRequirements(
-  requirements: ExtractedRequirement[],
+  requirements: ExtractedRoleRequirement[],
   internal: InternalFitEvaluation,
   evidence: EvidenceChunk[]
 ): RecruiterBriefPresentation {
@@ -466,19 +474,19 @@ function buildRecruiterBriefFromInternalFromRequirements(
   };
 }
 
-function buildRequirementEvidencePairs(requirements: ExtractedRequirement[], evidence: EvidenceChunk[]): MatchBullet[] {
+function buildRequirementEvidencePairs(requirements: ExtractedRoleRequirement[], evidence: EvidenceChunk[]): MatchBullet[] {
   const selectedRequirements =
-    requirements.length > 0 ? requirements.slice(0, 5) : [{ requirement: "Core product ownership", priority: "important" as const }];
+    requirements.length > 0 ? requirements.slice(0, 5) : [{ text: "Core product ownership", category: "requirement" as const, priority: "important" as const }];
   const usedEvidenceIds = new Set<string>();
 
   return selectedRequirements.map((item) => {
-    const bestEvidence = selectBestEvidenceForRequirement(item.requirement, evidence, usedEvidenceIds);
+    const bestEvidence = selectBestEvidenceForRequirement(item.text, evidence, usedEvidenceIds);
     if (bestEvidence) {
       usedEvidenceIds.add(bestEvidence.id);
     }
 
     return {
-      requirement: shortenRequirement(item.requirement),
+      requirement: shortenRequirement(item.text),
       support: summarizeSupportEvidence(bestEvidence) ?? "My prior work includes directly relevant product and delivery experience for this requirement."
     };
   });
@@ -671,7 +679,7 @@ function deriveVerdict(internal: InternalFitEvaluation): FitVerdict {
   return "probably_not_your_person";
 }
 
-function inferRequirementPriority(segment: string): RequirementPriority {
+function inferRequirementPriority(segment: string): ExtractedRoleRequirement["priority"] {
   const normalized = segment.toLowerCase();
   if (/(must|required|requirement|need to|needs to|minimum|proven|hands-on)/.test(normalized)) {
     return "must_have";
@@ -682,8 +690,22 @@ function inferRequirementPriority(segment: string): RequirementPriority {
   return "important";
 }
 
-function formatRequirements(requirements: ExtractedRequirement[]): string {
-  return requirements.map((item, index) => `${index + 1}. [${item.priority}] ${item.requirement}`).join("\n");
+function inferRequirementCategory(segment: string): ExtractedRoleRequirement["category"] {
+  const normalized = segment.toLowerCase();
+  if (/(mission|goal|bring .* to market|transform|advance|enable)/.test(normalized)) {
+    return "mission";
+  }
+  if (/(develop|drive|lead|build|deliver|determine|define|gather|align|partner|work cross-functionally|own)/.test(normalized)) {
+    return "function";
+  }
+  if (/(experience|ability|familiarity|preferred|hands-on|proven)/.test(normalized)) {
+    return "requirement";
+  }
+  return "expectation";
+}
+
+function formatRequirements(requirements: ExtractedRoleRequirement[]): string {
+  return requirements.map((item, index) => `${index + 1}. [${item.priority}/${item.category}] ${item.text}`).join("\n");
 }
 
 function buildDimensionFallback(name: FitDimension["name"]): string {

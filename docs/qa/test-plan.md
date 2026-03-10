@@ -20,6 +20,7 @@
 - General product JDs do not receive lower fit solely because they omit specialized domain language
 - Gaps are phrased as validation points rather than premature rejection signals
 - Recruiter-facing fit output never mentions preferred domains, absent AI wording, or internal scoring logic
+- Requirement extraction returns role requirements/functions/expectations rather than titles, locations, or ATS boilerplate
 - Fallback behavior remains usable when `OPENAI_API_KEY` is missing
 
 ## Operational

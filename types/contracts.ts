@@ -4,7 +4,14 @@ import type {
   EvidenceChunk,
   ResumeRole
 } from "@/types/content";
-import type { FitAnalysisResult, FitPresentationMode, ModelInput, ModelOutput, RoleInput } from "@/types/ai";
+import type {
+  ExtractedRoleRequirement,
+  FitAnalysisResult,
+  FitPresentationMode,
+  ModelInput,
+  ModelOutput,
+  RoleInput
+} from "@/types/ai";
 
 export type ContentStore = {
   getRole(roleId: string): Promise<ResumeRole | null>;
@@ -25,4 +32,8 @@ export type ChatModel = {
 
 export type FitAnalysisService = {
   analyze(roleInput: RoleInput, sessionId: string, presentationMode?: FitPresentationMode): Promise<FitAnalysisResult>;
+};
+
+export type RequirementExtractionService = {
+  extract(roleText: string): Promise<ExtractedRoleRequirement[]>;
 };
