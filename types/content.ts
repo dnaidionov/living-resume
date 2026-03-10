@@ -81,6 +81,13 @@ export type ContentDocument = {
   section: string;
   text: string;
   tags: string[];
+  metadata?: {
+    startDate?: string;
+    endDate?: string;
+    relatedRoleId?: string;
+    company?: string;
+    roleTitle?: string;
+  };
 };
 
 export type EvidenceChunk = ContentDocument & {

@@ -46,7 +46,10 @@ type StageVersions = {
 type RequirementEvidencePair = MatchBullet & {
   score: number;
   evidenceId?: string;
+  direct: boolean;
 };
+
+type RoleFamily = "product_management" | "adjacent_product" | "non_product";
 
 export function formatEvidencePacket(evidence: EvidenceChunk[]): string {
   if (evidence.length === 0) {
@@ -88,8 +91,12 @@ export function buildFitAnalysisSystemPrompt(): string {
     "Your goal is top-of-funnel qualification screening, not ideal-role matching.",
     "Prioritize whether the evidence shows Dmitry can perform the role's core work.",
     "Treat transferable product, strategy, execution, and cross-functional leadership evidence as valid support.",
+    "Reject clearly non-product roles even if some tools or domain terms overlap with Dmitry's background.",
     "Do not penalize the role for not mentioning AI or Dmitry's preferred domains unless those are explicit job requirements.",
     "Penalize unsupported must-have requirements and clear scope mismatches.",
+    "Do not treat repeated evidence as separate proof points; repeated bullets should reference the earlier point instead of restating the same evidence.",
+    "Do not treat older pre-LLM AI/ML or chatbot work as direct proof of modern LLM orchestration, RAG, evals, or agent workflows.",
+    "Technology matches must respect context: integration or product-adjacent exposure is not the same as hands-on engineering ownership unless the evidence proves that depth.",
     "Recruiter-facing output must never mention Dmitry's preferred domains, preferred technologies, absent AI wording, or internal scoring logic.",
     "Use gaps as validation points for interview follow-up, not as premature rejection language.",
     "Return valid JSON only with the requested fields."
@@ -127,9 +134,13 @@ export function buildFitAnalysisUserPrompt(
     "",
     "Internal evaluation policy:",
     "- Evaluate qualification for the role's core work before specialization alignment.",
+    "- If the role is clearly outside product management, it should be treated as a bad fit even when some skills overlap.",
     "- Context readiness should be secondary unless domain or technical context is explicitly required.",
     "- A role that does not mention AI should not be treated as lower fit for that reason alone.",
     "- Lower the score only for unsupported must-haves, real scope mismatches, or clearly missing required context.",
+    "- If the same evidence supports multiple bullets, show the first bullet normally and use 'Same as above.' or 'See previous point.' for later bullets.",
+    "- Do not count pre-2023 AI/ML or chatbot work as direct evidence for modern LLM orchestration, RAG, evals, or agent workflows.",
+    "- When a requirement names a technology, distinguish product-adjacent exposure from hands-on engineering implementation.",
     "",
     `Primary presentation mode: ${presentationMode}`,
     "Return JSON with these top-level fields:",
@@ -141,9 +152,14 @@ export function buildFitAnalysisUserPrompt(
     "Allowed recruiter_brief labels are exactly: Strong Fit - Let's talk, Probably a Good Fit, Honest Assessment - Probably Not Your Person.",
     "For Strong Fit or Probably a Good Fit, include whereIMatch and optional gapsToNote.",
     "For Honest Assessment - Probably Not Your Person, include whereIDontFit and whatDoesTransfer.",
+    "For Honest Assessment - Probably Not Your Person, whereIDontFit must contain at least 3 bullets and at most 5.",
     "Extract up to 5 main job requirements, functions, or expectations that are a proven fit when the verdict is positive.",
     "For whereIMatch bullets, use the matched requirement as the title and the supporting evidence as the text.",
     "Supporting evidence should be a concise example of matching prior experience, outcome, result, or accomplishment, not a raw situation setup.",
+    "For whereIDontFit bullets, explain the specific difference in experience or the missing qualification directly, such as missing mobile-development depth, required certification, clearance, or hands-on implementation context.",
+    "For whereIDontFit bullets, if two points rely on the same explanation, show the first explanation fully and use 'Same as above.' or 'See previous point.' for the later bullet.",
+    "For whereIDontFit bullets, keep each explanation tied to the specific requirement text. Do not attach certification or clearance gaps to unrelated technology requirements.",
+    "For whereIDontFit bullets, if no specific mismatch can be supported, fall back to a generic statement that the current resume corpus does not show direct evidence for that requirement.",
     "Each bullet must reference a specific requirement and a concise support/gap explanation.",
     "Recommendation must be one paragraph, no more than 4 sentences.",
     "Recommendation should be a short call to action or fit statement, not a recap of the bullets above.",
@@ -199,6 +215,7 @@ export function buildFallbackFitAnalysisResponse(
 }
 
 function buildFallbackInternalFit(requirements: ExtractedRoleRequirement[], evidence: EvidenceChunk[]): InternalFitEvaluation {
+  const roleFamily = classifyRoleFamily(requirements);
   const matches = buildRequirementEvidencePairs(requirements, evidence);
   const strongMatchCount = matches.filter((item) => item.score >= 15).length;
   const weakMatchCount = matches.filter((item) => item.score < 12).length;
@@ -210,7 +227,10 @@ function buildFallbackInternalFit(requirements: ExtractedRoleRequirement[], evid
   const evidenceStrength = Math.min(2, evidence.length);
   const overallScore = Math.min(
     9,
-    Math.max(2, 5 + strongMatchCount + evidenceStrength - weakMatchCount - (mustHaveWeakCount * 2) - (leadershipScopeMismatch ? 3 : 0))
+    Math.max(
+      1,
+      5 + strongMatchCount + evidenceStrength - weakMatchCount - (mustHaveWeakCount * 2) - (leadershipScopeMismatch ? 3 : 0) - (roleFamily === "non_product" ? 4 : 0)
+    )
   );
 
   return {
@@ -220,13 +240,13 @@ function buildFallbackInternalFit(requirements: ExtractedRoleRequirement[], evid
     dimensions: [
       {
         name: "core_match",
-        score: clampInteger(2 + strongMatchCount - mustHaveWeakCount, 1, 5, 3),
+        score: clampInteger(2 + strongMatchCount - mustHaveWeakCount - (roleFamily === "non_product" ? 2 : 0), 1, 5, 3),
         rationale: "The retrieved evidence supports the central product, strategy, and ownership responsibilities implied by the role.",
         evidence: evidence.slice(0, 3).map((item) => item.title)
       },
       {
         name: "execution_scope",
-        score: clampInteger(2 + evidenceStrength + Math.min(1, strongMatchCount), 1, 5, 3),
+        score: clampInteger(2 + evidenceStrength + Math.min(1, strongMatchCount) - (roleFamily === "non_product" ? 1 : 0), 1, 5, 3),
         rationale: "The corpus shows repeated evidence of turning ambiguity into shipped outcomes, measurable impact, and structured delivery across multiple contexts.",
         evidence: evidence.slice(0, 3).map((item) => item.title)
       },
@@ -238,7 +258,7 @@ function buildFallbackInternalFit(requirements: ExtractedRoleRequirement[], evid
       },
       {
         name: "context_readiness",
-        score: clampInteger(4 - mustHaveWeakCount, 1, 5, 3),
+        score: clampInteger(4 - mustHaveWeakCount - (roleFamily === "non_product" ? 1 : 0), 1, 5, 3),
         rationale: "The evidence suggests solid readiness for the role's operating context, with any highly specific domain or technical requirements best validated directly in interview.",
         evidence: evidence.slice(0, 2).map((item) => item.title)
       }
@@ -335,23 +355,25 @@ export function extractRoleRequirementsHeuristically(roleText: string): Extracte
   const segments = roleText
     .split(/\n+|[•\-]\s+|\d+\.\s+/)
     .map((item) => item.trim())
-    .map((item) => item.replace(/\s+/g, " "))
+    .map(sanitizeRequirementSegment)
     .filter((item) => item.length >= 20)
     .filter(isLikelyRequirementSegment);
 
-  const prioritized = dedupeRequirements(segments).slice(0, 8).map((segment) => ({
-    text: segment,
-    category: inferRequirementCategory(segment),
-    priority: inferRequirementPriority(segment)
-  }));
+  const prioritized = prioritizeRequirements(
+    dedupeRequirements(segments).map((segment) => ({
+      text: segment,
+      category: inferRequirementCategory(segment),
+      priority: inferRequirementPriority(segment)
+    }))
+  ).slice(0, 8);
 
   if (prioritized.length > 0) {
-    return prioritized;
+      return prioritized;
   }
 
   return [
     {
-      text: roleText.slice(0, 180).replace(/\s+/g, " ").trim(),
+      text: sanitizeRequirementSegment(roleText.slice(0, 180)),
       category: "requirement" as const,
       priority: "important" as const
     }
@@ -423,7 +445,9 @@ function normalizePresentation(
     },
     whereIMatch: verdict === "probably_not_your_person" ? undefined : normalizeMatchBullets((input as RecruiterBriefInput)?.whereIMatch, fallback.whereIMatch),
     gapsToNote: verdict === "probably_not_your_person" ? undefined : normalizeGapBullets((input as RecruiterBriefInput)?.gapsToNote, fallback.gapsToNote),
-    whereIDontFit: verdict === "probably_not_your_person" ? normalizeGapBullets((input as RecruiterBriefInput)?.whereIDontFit, fallback.whereIDontFit) : undefined,
+    whereIDontFit: verdict === "probably_not_your_person"
+      ? normalizeNoFitBullets((input as RecruiterBriefInput)?.whereIDontFit, fallback.whereIDontFit, requirements)
+      : undefined,
     whatDoesTransfer: verdict === "probably_not_your_person" ? normalizeTransferBullets((input as RecruiterBriefInput)?.whatDoesTransfer, fallback.whatDoesTransfer) : undefined,
     recommendation: sanitizeRecommendation((input as RecruiterBriefInput)?.recommendation, fallback.recommendation)
   };
@@ -444,19 +468,21 @@ function buildRecruiterBriefFromInternalFromRequirements(
 ): RecruiterBriefPresentation {
   const matchedRequirements = buildRequirementEvidencePairs(requirements, evidence);
   const verdict = deriveVerdict(internal);
+  const roleFamily = classifyRoleFamily(requirements);
   const gapCandidates = buildGapCandidates(requirements, matchedRequirements);
+  const noFitBullets = buildNoFitBullets(requirements, matchedRequirements, evidence, roleFamily);
   const transferCandidates = buildTransferBulletsFromEvidence(evidence);
 
-  if (verdict === "probably_not_your_person") {
+  if (verdict === "probably_not_your_person" || roleFamily === "non_product") {
     return {
       mode: "recruiter_brief",
       overallMatch: {
-        verdict,
-        label: verdictToLabel(verdict)
+        verdict: "probably_not_your_person",
+        label: verdictToLabel("probably_not_your_person")
       },
-      whereIDontFit: gapCandidates.slice(0, 3),
+      whereIDontFit: noFitBullets,
       whatDoesTransfer: transferCandidates.slice(0, 3),
-      recommendation: buildNoFitRecommendation(gapCandidates)
+      recommendation: buildNoFitRecommendation(noFitBullets)
     };
   }
 
@@ -480,22 +506,38 @@ function buildRecruiterBriefFromInternalFromRequirements(
 
 function buildRequirementEvidencePairs(requirements: ExtractedRoleRequirement[], evidence: EvidenceChunk[]): RequirementEvidencePair[] {
   const selectedRequirements =
-    requirements.length > 0 ? requirements.slice(0, 5) : [{ text: "Core product ownership", category: "requirement" as const, priority: "important" as const }];
+    requirements.length > 0
+      ? prioritizeRequirements(requirements).slice(0, 8)
+      : [{ text: "Core product ownership", category: "requirement" as const, priority: "important" as const }];
   const usedEvidenceIds = new Set<string>();
+  const pairs: RequirementEvidencePair[] = [];
 
-  return selectedRequirements.map((item) => {
+  for (const item of selectedRequirements) {
     const bestEvidence = selectBestEvidenceForRequirement(item.text, evidence, usedEvidenceIds);
     if (bestEvidence) {
       usedEvidenceIds.add(bestEvidence.chunk.id);
     }
 
-    return {
+    const support = summarizeSupportEvidence(bestEvidence?.chunk, item.text, evidence);
+    const score = bestEvidence?.score ?? 0;
+    if (!support || (!bestEvidence && !isGenericProductRequirement(item.text)) || score < minimumEvidenceScore(item.text)) {
+      continue;
+    }
+
+    pairs.push({
       requirement: shortenRequirement(item.text),
-      support: summarizeSupportEvidence(bestEvidence?.chunk) ?? "My prior work includes directly relevant product and delivery experience for this requirement.",
-      score: bestEvidence?.score ?? 0,
-      evidenceId: bestEvidence?.chunk.id
-    };
-  });
+      support,
+      score,
+      evidenceId: bestEvidence?.chunk.id,
+      direct: score >= 12
+    });
+
+    if (pairs.length >= 5) {
+      break;
+    }
+  }
+
+  return pairs;
 }
 
 function buildGapCandidates(
@@ -505,7 +547,7 @@ function buildGapCandidates(
   const explicitGaps = requirements
     .slice(0, 5)
     .map((requirement, index) => ({ requirement, match: matches[index] }))
-    .filter(({ match }) => !match || match.score < 12)
+    .filter(({ match }) => !match || !match.direct)
     .map(({ requirement }) => ({
       requirement: shortenRequirement(requirement.text),
       gap: requirement.priority === "must_have"
@@ -526,13 +568,110 @@ function buildGapCandidates(
     : [];
 }
 
+function buildNoFitBullets(
+  requirements: ExtractedRoleRequirement[],
+  matches: RequirementEvidencePair[],
+  evidence: EvidenceChunk[],
+  roleFamily: RoleFamily
+): GapBullet[] {
+  const bullets = requirements
+    .slice(0, 5)
+    .map((requirement, index) => ({
+      requirement: shortenRequirement(requirement.text),
+      gap: explainNoFitGap(requirement.text, matches[index], evidence, roleFamily)
+    }))
+    .filter((item) => item.requirement && item.gap);
+
+  if (bullets.length >= 3) {
+    return dedupeRepeatedGaps(bullets).slice(0, 5);
+  }
+
+  const padded = [...bullets];
+  const genericFallbacks: GapBullet[] = [
+    {
+      requirement: "Role scope",
+      gap: roleFamily === "non_product"
+        ? "My background is product management rather than hands-on delivery in the primary function this role requires."
+        : "The current corpus does not prove the scope this role appears to require."
+    },
+    {
+      requirement: "Required implementation depth",
+      gap: "I do not have enough direct hands-on implementation evidence for the depth this role asks for."
+    },
+    {
+      requirement: "Specialized qualification",
+      gap: "I do not currently have the exact specialized qualification or experience this role requires."
+    }
+  ];
+
+  for (const fallback of genericFallbacks) {
+    if (padded.length >= 3) {
+      break;
+    }
+    padded.push(fallback);
+  }
+
+  return dedupeRepeatedGaps(padded).slice(0, 5);
+}
+
+function explainNoFitGap(
+  requirement: string,
+  match: RequirementEvidencePair | undefined,
+  evidence: EvidenceChunk[],
+  roleFamily: RoleFamily
+): string {
+  const normalizedRequirement = requirement.toLowerCase();
+  const topEvidence = match?.evidenceId ? evidence.find((item) => item.id === match.evidenceId) : undefined;
+  const evidenceText = `${topEvidence?.title ?? ""} ${topEvidence?.text ?? ""}`.toLowerCase();
+  const specificTechnology = extractSpecificTechnology(requirement);
+  const article = startsWithVowelSound(specificTechnology) ? "an" : "a";
+
+  if (/(android|ios|mobile development|mobile application)/i.test(normalizedRequirement)) {
+    return "Although my career has been mostly about enterprise software and SaaS, I do not have enough hands-on mobile development experience for this requirement.";
+  }
+  if (/salesforce/.test(normalizedRequirement) && /(extension|apex|developer|hands-on|implementation)/i.test(normalizedRequirement) && /salesforce/.test(evidenceText)) {
+    return "My experience references Salesforce in an integration and workflow context, not building Salesforce extensions directly.";
+  }
+  if (/(aws|kubernetes|k8s|typescript|java|python|go|react)/i.test(normalizedRequirement) && /(developer|engineer|hands-on|implementation|coding|operate|cluster|infra)/i.test(normalizedRequirement)) {
+    if (specificTechnology) {
+      return `I do not have enough direct hands-on engineering experience with ${specificTechnology} in the context this role requires.`;
+    }
+    return "I do not have enough direct hands-on engineering experience with this technology in the context the role requires.";
+  }
+  if (/(certification|certified|clearance|secret|top secret|ts\/sci)/i.test(normalizedRequirement) && !specificTechnology) {
+    return "I do not have the required certification or clearance.";
+  }
+  if (roleFamily === "non_product") {
+    if (specificTechnology) {
+      return `My background is in product management rather than hands-on implementation, and I do not have enough direct ${specificTechnology} delivery experience for this requirement.`;
+    }
+    return "My background is in product management rather than hands-on execution in this role family.";
+  }
+  if (match?.support) {
+    return `My closest evidence is adjacent rather than direct here: ${stripLeadIn(match.support)}`;
+  }
+
+  if (/(certification|certified|clearance|secret|top secret|ts\/sci)/i.test(normalizedRequirement)) {
+    return "I do not have the required certification or clearance.";
+  }
+  if (specificTechnology) {
+    return `The current resume corpus does not show direct evidence that I have ${article} ${specificTechnology} background at the level this requirement appears to demand.`;
+  }
+
+  return "The current resume corpus does not show direct evidence for this requirement at the level the role appears to demand.";
+}
+
+function stripLeadIn(text: string): string {
+  return text.replace(/^At [^,]+, I /, "").replace(/^I /, "");
+}
+
 function buildTransferBulletsFromEvidence(evidence: EvidenceChunk[]): TransferBullet[] {
   const seen = new Set<string>();
 
   return rankEvidenceForSupport(evidence)
     .map((item) => ({
       skillOrExperience: buildTransferTitle(item),
-      relevance: summarizeSupportEvidence(item) ?? `My prior work includes relevant experience from ${item.title}.`
+      relevance: summarizeSupportEvidence(item) ?? "My prior work includes directly relevant experience that would transfer to this role."
     }))
     .filter((item) => {
       const key = item.skillOrExperience.toLowerCase();
@@ -546,10 +685,36 @@ function buildTransferBulletsFromEvidence(evidence: EvidenceChunk[]): TransferBu
 }
 
 function buildTransferTitle(item: EvidenceChunk): string {
-  if (item.title.includes(" at ")) {
-    return item.title.split(" at ")[0]?.trim() || item.title;
+  const normalizedText = `${item.section} ${item.text}`.toLowerCase();
+
+  if (/\b(workflow|process|operating model|delivery model|transformation|redesign)\b/.test(normalizedText)) {
+    return "Workflow redesign and operating-model delivery";
   }
-  return item.title;
+  if (/\b(vendor|stakeholder|cross-functional|alignment|coordination)\b/.test(normalizedText)) {
+    return "Cross-functional and stakeholder coordination";
+  }
+  if (/\b(cloud|migration|aws|infrastructure|deployment)\b/.test(normalizedText)) {
+    return "Cloud and platform transformation";
+  }
+  if (/\b(roadmap|prioritization|strategy|vision|discovery)\b/.test(normalizedText)) {
+    return "Product strategy and prioritization";
+  }
+  if (/\b(ai|llm|evaluation|orchestration|retrieval|assistant)\b/.test(normalizedText)) {
+    return "AI product strategy and evaluation";
+  }
+  if (/\b(healthcare|regulated|compliance|kyc|risk)\b/.test(normalizedText)) {
+    return "Regulated product delivery";
+  }
+  if (/\b(customer|enterprise|saas|platform)\b/.test(normalizedText)) {
+    return "Enterprise product delivery";
+  }
+
+  const tagTitle = buildTransferTitleFromTags(item.tags);
+  if (tagTitle) {
+    return tagTitle;
+  }
+
+  return "Transferable product and delivery experience";
 }
 
 function buildNoFitRecommendation(gaps: GapBullet[]): string {
@@ -559,6 +724,44 @@ function buildNoFitRecommendation(gaps: GapBullet[]): string {
   }
 
   return "You likely need someone with more direct evidence against the missing requirements above. I would still be interested in the conversation, but based on the current corpus I do not think I am the clearest fit for this role.";
+}
+
+function dedupeRepeatedGaps(gaps: GapBullet[]): GapBullet[] {
+  const seen = new Set<string>();
+
+  return gaps.map((item) => {
+    const key = item.gap.trim().toLowerCase();
+    if (!key) {
+      return item;
+    }
+    if (seen.has(key)) {
+      return {
+        ...item,
+        gap: "Same as above."
+      };
+    }
+    seen.add(key);
+    return item;
+  });
+}
+
+function classifyRoleFamily(requirements: ExtractedRoleRequirement[]): RoleFamily {
+  const text = requirements.map((item) => item.text).join(" ").toLowerCase();
+
+  const nonProductSignals = /(software engineer|engineering manager|devops|sre|site reliability|sales engineer|account executive|support engineer|tech support|customer support|developer advocate|solutions architect|security engineer|data engineer|ml engineer|backend engineer|frontend engineer|full stack|android application development|android engineer|ios development|kotlin application architecture|mobile development)/;
+  const productSignals = /(product manager|product management|roadmap|product requirements|customer discovery|stakeholder alignment|go-to-market|product strategy|prioritization|user research|product vision|cross-functional)/;
+  const adjacentSignals = /(platform strategy|business analysis|program management|project management|product operations|product marketing)/;
+
+  if (productSignals.test(text)) {
+    return "product_management";
+  }
+  if (nonProductSignals.test(text) && !productSignals.test(text)) {
+    return "non_product";
+  }
+  if (adjacentSignals.test(text)) {
+    return "adjacent_product";
+  }
+  return "product_management";
 }
 
 function hasLeadershipScopeMismatch(requirements: ExtractedRoleRequirement[], evidence: EvidenceChunk[]): boolean {
@@ -590,8 +793,14 @@ function evidencePreferenceScore(item: EvidenceChunk): number {
   if (section.startsWith("action")) {
     return 3;
   }
-  if (section === "summary") {
+  if (section === "project-work") {
+    return 4;
+  }
+  if (section === "project-approach") {
     return 2;
+  }
+  if (section === "summary") {
+    return 1;
   }
   if (section === "situation" || section === "problem") {
     return 0;
@@ -599,38 +808,103 @@ function evidencePreferenceScore(item: EvidenceChunk): number {
   return 1;
 }
 
-function summarizeSupportEvidence(item: EvidenceChunk | undefined): string | undefined {
+function summarizeSupportEvidence(
+  item: EvidenceChunk | undefined,
+  requirement?: string,
+  evidencePool: EvidenceChunk[] = []
+): string | undefined {
   if (!item) {
+    if (requirement && isGenericProductRequirement(requirement)) {
+      const recentCompany = findMostRecentCompany(evidencePool);
+      return recentCompany
+        ? `In my recent product roles, including ${recentCompany}, I led discovery, defined requirements, prioritized work, and drove delivery with engineering teams.`
+        : "In my previous product roles, I led discovery, defined requirements, prioritized work, and drove delivery with engineering teams.";
+    }
     return undefined;
   }
 
+  if (requirement && isGenericProductRequirement(requirement)) {
+    const company = item.metadata?.company ?? inferCompanyFromTitle(item);
+    return company
+      ? `In my recent product roles, including ${company}, I led discovery, defined requirements, prioritized work, and drove delivery with engineering teams.`
+      : "In my previous product roles, I led discovery, defined requirements, prioritized work, and drove delivery with engineering teams.";
+  }
+
   const text = item.text.trim().replace(/\s+/g, " ");
-  const company = item.title.includes(" at ") ? item.title.split(" at ").at(-1) : item.title;
+  const company = item.metadata?.company ?? inferCompanyFromTitle(item);
+  const portfolioSummary = summarizePortfolioEvidence(item, evidencePool);
+  if (portfolioSummary) {
+    return portfolioSummary;
+  }
   const normalized = lowerCaseFirstAlpha(text);
 
   if (/^(led|built|defined|delivered|owned|ran|performed|managed|created|launched|introduced|contributed|coordinated|redesigned|implemented|developed|supported)/i.test(text)) {
-    return `At ${company}, I ${normalized}`;
+    return company ? `At ${company}, I ${normalized}` : `In a prior role, I ${normalized}`;
   }
 
-  return `At ${company}, I worked on ${normalized}`;
+  return company ? `At ${company}, I worked on ${normalized}` : `In a prior role, I worked on ${normalized}`;
+}
+
+function isGenericProductRequirement(requirement: string): boolean {
+  const normalized = requirement.toLowerCase();
+  return (
+    /(product manager|product owner|saas business|discovery|requirements|grooming backlogs|backlog|delivery with engineering|partner with engineering|roadmap|prioritization)/.test(normalized) &&
+    !/(aws|kubernetes|salesforce|typescript|python|java|go|react|android|ios|llm|rag|retrieval|evaluation|buy vs\.? build|travel technology|autonomous|healthcare|compliance|clearance|certification)/.test(normalized)
+  );
+}
+
+function buildTransferTitleFromTags(tags: string[]): string | undefined {
+  const normalized = tags.map((tag) => tag.toLowerCase());
+
+  if (normalized.includes("strategy") || normalized.includes("roadmap")) {
+    return "Product strategy and roadmap ownership";
+  }
+  if (normalized.includes("leadership") || normalized.includes("stakeholders")) {
+    return "Cross-functional leadership";
+  }
+  if (normalized.includes("ai")) {
+    return "AI product strategy and delivery";
+  }
+  if (normalized.includes("execution")) {
+    return "Execution under ambiguity";
+  }
+  if (normalized.includes("compliance")) {
+    return "Compliance-aware product delivery";
+  }
+
+  return undefined;
+}
+
+function inferCompanyFromTitle(item: EvidenceChunk): string | undefined {
+  if (item.metadata?.company) {
+    return item.metadata.company;
+  }
+  if (item.sourceType === "resume" && item.title.includes(" at ")) {
+    return item.title.split(" at ").at(-1)?.trim() || undefined;
+  }
+  return undefined;
 }
 
 function isLikelyRequirementSegment(segment: string): boolean {
-  const normalized = segment.toLowerCase();
+  const cleanedSegment = sanitizeRequirementSegment(segment);
+  const normalized = cleanedSegment.toLowerCase();
 
-  if (segment.length > 320) {
+  if (cleanedSegment.length > 320 || cleanedSegment.length < 20) {
     return false;
   }
-  if (isLikelyLocationSegment(segment)) {
+  if (/[{}[\]]|themeoptions|customtheme|customfonts|vscdn|font-family|cdn/i.test(cleanedSegment)) {
+    return false;
+  }
+  if (isLikelyLocationSegment(cleanedSegment)) {
     return false;
   }
   if (/(equal opportunity|accommodation|benefits|privacy|cookies|sign in|apply now|job alert|share this job|page source|javascript|greenhouse|greenhouse\.io)/i.test(normalized)) {
     return false;
   }
-  if (isLikelyTitleSegment(segment)) {
+  if (isLikelyTitleSegment(cleanedSegment)) {
     return false;
   }
-  if (!/(experience|ability|develop|drive|lead|build|deliver|determine|define|gather|analy|align|work cross-functionally|vision|strategy|road-?map|requirements|mission|goal|bring|technical|familiarity|preferred)/i.test(normalized)) {
+  if (!/(experience|ability|develop|drive|lead|build|deliver|determine|define|gather|analy|align|work cross-functionally|vision|strategy|road-?map|requirements|mission|goal|bring|technical|familiarity|preferred|certification|certified|clearance)/i.test(normalized)) {
     return false;
   }
 
@@ -691,13 +965,44 @@ function isLikelyTitleSegment(segment: string): boolean {
 function dedupeRequirements(segments: string[]): string[] {
   const seen = new Set<string>();
   return segments.filter((segment) => {
-    const key = segment.toLowerCase().replace(/[^a-z0-9]+/g, " ").trim();
+    const key = sanitizeRequirementSegment(segment).toLowerCase().replace(/[^a-z0-9]+/g, " ").trim();
     if (seen.has(key)) {
       return false;
     }
     seen.add(key);
     return true;
   });
+}
+
+function prioritizeRequirements(requirements: ExtractedRoleRequirement[]): ExtractedRoleRequirement[] {
+  return [...requirements]
+    .filter((item) => !isCompanyMissionIntro(item.text))
+    .sort((left, right) => requirementPriorityScore(right) - requirementPriorityScore(left));
+}
+
+function requirementPriorityScore(requirement: ExtractedRoleRequirement): number {
+  const priorityScore =
+    requirement.priority === "must_have" ? 30 : requirement.priority === "important" ? 20 : 10;
+  const categoryScore =
+    requirement.category === "requirement"
+      ? 12
+      : requirement.category === "function"
+        ? 10
+        : requirement.category === "expectation"
+          ? 8
+          : 2;
+  const specificityScore = Math.min(8, extractRequirementKeywords(requirement.text).length);
+  const missionPenalty = requirement.category === "mission" ? 8 : 0;
+
+  return priorityScore + categoryScore + specificityScore - missionPenalty;
+}
+
+function isCompanyMissionIntro(segment: string): boolean {
+  const normalized = segment.toLowerCase();
+  return (
+    /our mission is|together, we are writing|come be a part of what'?s next|we are a dream team|we'?re a fast-growing|we are transforming the \$?\d/i.test(normalized) &&
+    !/(you will|responsibilities|requirements|qualifications|experience|ability|develop|drive|lead|build|deliver|define|own)/i.test(normalized)
+  );
 }
 
 function selectBestEvidenceForRequirement(
@@ -714,13 +1019,20 @@ function selectBestEvidenceForRequirement(
     }))
     .sort((left, right) => right.score - left.score);
 
-  return candidates[0];
+  const bestUnused = candidates.find((candidate) => !usedEvidenceIds.has(candidate.chunk.id));
+
+  if (!bestUnused) {
+    return undefined;
+  }
+
+  return bestUnused.score >= minimumEvidenceScore(requirement) ? bestUnused : undefined;
 }
 
 function extractRequirementKeywords(requirement: string): string[] {
   const stopwords = new Set([
     "the", "and", "for", "with", "from", "that", "this", "will", "have", "has", "your", "their", "across",
-    "into", "through", "about", "role", "team", "teams", "product", "products", "manager", "senior"
+    "into", "through", "about", "role", "team", "teams", "product", "products", "manager", "senior",
+    "years", "year", "experience", "proven", "track", "record", "business"
   ]);
 
   return requirement
@@ -738,9 +1050,234 @@ function requirementEvidenceScore(
   const haystack = `${item.title} ${item.section} ${item.text} ${item.tags.join(" ")}`.toLowerCase();
   const keywordHits = keywords.reduce((sum, keyword) => sum + (haystack.includes(keyword) ? 1 : 0), 0);
   const directPhraseBonus = haystack.includes(requirement.toLowerCase()) ? 4 : 0;
-  const reusePenalty = alreadyUsed ? 1 : 0;
+  const reusePenalty = alreadyUsed ? 25 : 0;
+  const rolePenalty = roleFamilyPenalty(requirement, item);
+  const recencyPenalty = technologyRecencyPenalty(requirement, item);
+  const recencyBonus = generalRecencyBonus(item);
+  const contextPenalty = technologyContextPenalty(requirement, item);
+  const specificityPenalty = specificityCoveragePenalty(keywords, keywordHits);
+  const domainBonus = domainSpecificEvidenceBonus(requirement, haystack);
 
-  return evidencePreferenceScore(item) * 10 + keywordHits * 3 + directPhraseBonus - reusePenalty;
+  return evidencePreferenceScore(item) * 10 + keywordHits * 5 + directPhraseBonus + recencyBonus + domainBonus - reusePenalty - rolePenalty - recencyPenalty - contextPenalty - specificityPenalty;
+}
+
+function specificityCoveragePenalty(keywords: string[], keywordHits: number): number {
+  if (keywords.length >= 4 && keywordHits === 0) {
+    return 16;
+  }
+  if (keywords.length >= 3 && keywordHits <= 1) {
+    return 10;
+  }
+  return 0;
+}
+
+function domainSpecificEvidenceBonus(requirement: string, haystack: string): number {
+  const req = requirement.toLowerCase();
+  let bonus = 0;
+
+  if (/\benterprise\b/.test(req) && /\benterprise\b/.test(haystack)) {
+    bonus += 4;
+  }
+  if (/\bintegration\b/.test(req) && /\bintegration\b/.test(haystack)) {
+    bonus += 5;
+  }
+  if (/\b(requirements|backlog|grooming|discovery)\b/.test(req) && /\b(requirements|backlog|discovery|prioritization)\b/.test(haystack)) {
+    bonus += 3;
+  }
+  if (/\b(technical development|product testing|launch|training|rollout)\b/.test(req) && /\b(testing|launch|training|rollout|implementation|delivery)\b/.test(haystack)) {
+    bonus += 4;
+  }
+  if (/\b(tradeoffs?|edge cases|implementation details|scalable solutions)\b/.test(req) && /\b(tradeoffs?|architecture|implementation|scalable|platform)\b/.test(haystack)) {
+    bonus += 4;
+  }
+
+  return bonus;
+}
+
+function roleFamilyPenalty(requirement: string, item: EvidenceChunk): number {
+  if (!/product|roadmap|stakeholder|discovery|prioritization|vision/i.test(requirement)) {
+    return 0;
+  }
+
+  const haystack = `${item.title} ${item.text}`.toLowerCase();
+  if (/\bsoftware development roles\b|\bengineer\b|\bengineering\b/.test(haystack) && !/\bproduct\b/.test(haystack)) {
+    return 8;
+  }
+  return 0;
+}
+
+function technologyRecencyPenalty(requirement: string, item: EvidenceChunk): number {
+  if (!/\b(llm|large language model|rag|retrieval augmented|agent workflow|agentic|evals?|orchestration)\b/i.test(requirement)) {
+    return 0;
+  }
+
+  const evidenceText = `${item.title} ${item.text} ${item.tags.join(" ")}`.toLowerCase();
+  const endDate = item.metadata?.endDate ?? item.metadata?.startDate;
+  const looksModern = /\b(llm|claude|gpt|anthropic|rag|retrieval augmented|agent workflow|orchestration|evaluation framework)\b/i.test(evidenceText);
+  const isOlder = !!endDate && endDate < "2023-01";
+
+  if (looksModern) {
+    return 0;
+  }
+  if (isOlder && /\b(ai|ml|machine learning|chatbot|conversational assistant|predictive analytics)\b/i.test(evidenceText)) {
+    return 12;
+  }
+  return 6;
+}
+
+function technologyContextPenalty(requirement: string, item: EvidenceChunk): number {
+  const req = requirement.toLowerCase();
+  const evidenceText = `${item.title} ${item.text} ${item.tags.join(" ")}`.toLowerCase();
+
+  if (/salesforce/.test(req) && /(extension|apex|developer|hands-on|implementation)/.test(req) && /salesforce/.test(evidenceText) && /integration|distributed|across salesforce/.test(evidenceText)) {
+    return 10;
+  }
+  if (/typescript/.test(req) && /(developer|engineer|hands-on|coding|implementation)/.test(req) && !/typescript|ts|implemented|built|developed/.test(evidenceText)) {
+    return 8;
+  }
+  if (/(aws|kubernetes|k8s)/.test(req) && /(hands-on|operate|cluster|infra|infrastructure|engineering)/.test(req) && !/(hands-on|implemented|built|operated|cluster|infra|infrastructure|engineering)/.test(evidenceText)) {
+    return 8;
+  }
+
+  return 0;
+}
+
+function generalRecencyBonus(item: EvidenceChunk): number {
+  const referenceDate = item.metadata?.endDate ?? item.metadata?.startDate;
+  if (!referenceDate) {
+    return 0;
+  }
+
+  if (referenceDate >= "2024-01") {
+    return 4;
+  }
+  if (referenceDate >= "2021-01") {
+    return 3;
+  }
+  if (referenceDate >= "2018-01") {
+    return 2;
+  }
+  if (referenceDate >= "2015-01") {
+    return 1;
+  }
+
+  return 0;
+}
+
+function minimumEvidenceScore(requirement: string): number {
+  return isGenericProductRequirement(requirement) ? 10 : 14;
+}
+
+function sanitizeRequirementSegment(segment: string): string {
+  return segment
+    .replace(/&#(\d+);/g, (_, code) => String.fromCodePoint(Number(code)))
+    .replace(/&#x([0-9a-f]+);/gi, (_, code) => String.fromCodePoint(parseInt(code, 16)))
+    .replace(/&quot;/gi, "\"")
+    .replace(/&#34;/gi, "\"")
+    .replace(/&amp;/gi, "&")
+    .replace(/\s+/g, " ")
+    .trim();
+}
+
+function findMostRecentCompany(evidencePool: EvidenceChunk[]): string | undefined {
+  return [...evidencePool]
+    .filter((item) => item.metadata?.company)
+    .sort((left, right) => (right.metadata?.endDate ?? right.metadata?.startDate ?? "").localeCompare(left.metadata?.endDate ?? left.metadata?.startDate ?? ""))
+    .at(0)?.metadata?.company;
+}
+
+function summarizePortfolioEvidence(item: EvidenceChunk, evidencePool: EvidenceChunk[]): string | undefined {
+  const text = item.text.toLowerCase();
+  const company = item.metadata?.company ?? inferCompanyFromTitle(item);
+  if (!company || !/portfolio of anonymized .*engagements/.test(text)) {
+    return undefined;
+  }
+
+  const examples = Array.from(new Set(
+    evidencePool
+      .filter((candidate) => candidate.metadata?.company === company && candidate.section === "project-work")
+      .map(inferProjectEssence)
+      .filter((value): value is string => !!value)
+  )).slice(0, 3);
+
+  if (examples.length === 0) {
+    return `At ${company}, I worked across a portfolio of enterprise product engagements with measurable business outcomes in complex operating environments.`;
+  }
+
+  return `At ${company}, I worked across a portfolio of enterprise product engagements, including ${formatExampleList(examples)}.`;
+}
+
+function inferProjectEssence(item: EvidenceChunk): string | undefined {
+  const text = `${item.title} ${item.text}`.toLowerCase();
+
+  if (/conversational (product knowledge )?assistant|knowledge assistant/.test(text)) {
+    return "a conversational AI assistant";
+  }
+  if (/fleet management portal/.test(text)) {
+    return "a fleet management portal";
+  }
+  if (/\bkyc\b/.test(text)) {
+    return "a KYC workflow";
+  }
+  if (/api docs portal|external api docs portal/.test(text)) {
+    return "an API docs portal";
+  }
+  if (/regulated portfolio|service management compliance/.test(text)) {
+    return "regulated service-management initiatives";
+  }
+
+  return undefined;
+}
+
+function formatExampleList(examples: string[]): string {
+  if (examples.length === 1) {
+    return examples[0] ?? "";
+  }
+  if (examples.length === 2) {
+    return `${examples[0]} and ${examples[1]}`;
+  }
+  return `${examples.slice(0, -1).join(", ")}, and ${examples.at(-1)}`;
+}
+
+function extractSpecificTechnology(requirement: string): string | undefined {
+  const technologies = [
+    "asyncio",
+    "pydantic",
+    "rest api",
+    "rest apis",
+    "docker",
+    "serverless containers",
+    "aws",
+    "ecs",
+    "iam",
+    "api gateway",
+    "vpc",
+    "secrets manager",
+    "python",
+    "kotlin",
+    "android",
+    "ios",
+    "typescript",
+    "salesforce",
+    "kubernetes",
+    "k8s",
+    "react",
+    "java",
+    "go"
+  ];
+
+  const normalized = requirement.toLowerCase();
+  const matched = technologies.filter((item) => normalized.includes(item));
+  if (matched.length === 0) {
+    return undefined;
+  }
+
+  const unique = Array.from(new Set(matched));
+  return unique.slice(0, 3).join(", ");
+}
+
+function startsWithVowelSound(value: string | undefined): boolean {
+  return !!value && /^[aeiou]/i.test(value);
 }
 
 function shortenRequirement(requirement: string): string {
@@ -822,6 +1359,28 @@ function normalizeGapBullets(values: GapBullet[] | undefined, fallback: GapBulle
   return normalized.length > 0 ? normalized : fallbackNormalized.length > 0 ? fallbackNormalized : undefined;
 }
 
+function normalizeNoFitBullets(
+  values: GapBullet[] | undefined,
+  fallback: GapBullet[] | undefined,
+  requirements: ExtractedRoleRequirement[]
+): GapBullet[] | undefined {
+  const normalized = dedupeRepeatedGaps(
+    (values ?? [])
+      .filter((item) => item.requirement?.trim() && item.gap?.trim())
+      .filter((item) => isConsistentNoFitBullet(item, requirements))
+  ).slice(0, 5);
+
+  if (normalized.length >= 3) {
+    return normalized;
+  }
+
+  const fallbackNormalized = dedupeRepeatedGaps(
+    (fallback ?? []).filter((item) => item.requirement?.trim() && item.gap?.trim())
+  ).slice(0, 5);
+
+  return fallbackNormalized.length > 0 ? fallbackNormalized : undefined;
+}
+
 function normalizeTransferBullets(values: TransferBullet[] | undefined, fallback: TransferBullet[] | undefined): TransferBullet[] | undefined {
   const normalized = (values ?? [])
     .filter((item) => item.skillOrExperience?.trim() && item.relevance?.trim())
@@ -853,6 +1412,39 @@ function normalizeVerdict(value: string | undefined, fallback: FitVerdict): FitV
   return value === "strong_fit_lets_talk" || value === "probably_a_good_fit" || value === "probably_not_your_person"
     ? value
     : fallback;
+}
+
+function isConsistentNoFitBullet(item: GapBullet, requirements: ExtractedRoleRequirement[]): boolean {
+  const requirement = item.requirement.toLowerCase();
+  const gap = item.gap.toLowerCase();
+
+  if (gap === "same as above." || gap === "see previous point.") {
+    return true;
+  }
+
+  const knownRequirement = requirements.some((candidate) => shortenRequirement(candidate.text).toLowerCase() === requirement);
+  if (!knownRequirement) {
+    return false;
+  }
+
+  if (/(certification|certified|clearance|secret|top secret|ts\/sci)/.test(gap) && !/(certification|certified|clearance|secret|top secret|ts\/sci)/.test(requirement)) {
+    return false;
+  }
+  if (/(android|ios|mobile development|mobile application)/.test(gap) && !/(android|ios|mobile development|mobile application)/.test(requirement)) {
+    return false;
+  }
+
+  const requirementTechnology = extractSpecificTechnology(requirement);
+  const leadTechnology = requirementTechnology?.split(",")[0]?.trim();
+  if (
+    leadTechnology &&
+    /(asyncio|pydantic|rest api|docker|serverless containers|aws|ecs|iam|api gateway|vpc|secrets manager|python|kotlin|android|ios|typescript|salesforce|kubernetes|k8s|react|java|go)/.test(gap) &&
+    !gap.includes(leadTechnology)
+  ) {
+    return false;
+  }
+
+  return true;
 }
 
 function verdictToLabel(verdict: FitVerdict): RecruiterBriefPresentation["overallMatch"]["label"] {

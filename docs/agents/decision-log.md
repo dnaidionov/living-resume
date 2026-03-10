@@ -111,7 +111,22 @@ Use this log for concise, chronological records of meaningful decisions that do 
 - Rationale: The deployment path was documented, but release execution is clearer and less error-prone when operators can verify each prerequisite and smoke test as a checklist.
 - Scope impact: `docs/operations/runbook.md`.
 
+- Agent role: Ops / Release Agent
+- Decision: Made the embeddings rebuild trigger explicit: rebuild only when indexed content changes, regardless of agent role, and skip rebuilds for code-only changes.
+- Rationale: Prevent unnecessary OpenAI embedding spend during normal app development while keeping retrieval artifacts current when the corpus changes.
+- Scope impact: `docs/operations/runbook.md`, `docs/agents/handoffs.md`.
+
 - Agent role: Content Strategist
 - Decision: Strengthened EPAM AI Experience AI-context wording to explicitly capture multi-agent orchestration, Anthropic/Claude implementation details, and added `LLM Orchestration` skill while preserving requested wording constraints.
 - Rationale: Improve precision and evidence depth for LLM orchestration claims in hero and role narrative alignment.
 - Scope impact: `content/ai-context/explainers.json`.
+
+- Agent role: Content Strategist
+- Decision: Removed the word `anonymized` from EPAM AI-context summary wording.
+- Rationale: Align wording with requested tone while keeping confidentiality handled implicitly through client naming choices.
+- Scope impact: `content/ai-context/explainers.json`.
+
+- Agent role: Content Strategist
+- Decision: Updated EPAM achievement phrasing from `fleet-management` to `fleet management`.
+- Rationale: Match requested style preference for this term.
+- Scope impact: `content/resume/roles.json`.

@@ -109,6 +109,7 @@
 - keep retrieval repo-backed via `content/retrieval/embeddings.generated.json`
 - allow live in-memory semantic indexing only as a fallback when the artifact is missing but `OPENAI_API_KEY` is present
 - preserve a deterministic fallback path when semantic retrieval is unavailable
+- require whichever agent materially changes indexed content to regenerate embeddings before release or handoff; code-only changes do not trigger an embeddings rebuild
 
 ## AI Systems Architect -> Application Engineer (Fit Analysis Phase 3 2026-03-09)
 
@@ -144,6 +145,10 @@
 - keep company-mission intro copy out of recruiter-facing match bullets and prefer alternative relevant evidence over reusing one chunk across unrelated positive bullets
 - prefer newer dated experience when competing evidence is otherwise comparably relevant, including project evidence linked to recent parent roles
 - restrict recruiter-facing fit evidence to actual experience-bearing sources; do not let portfolio/meta project artifacts surface as proof of prior role fit
+- sanitize numeric HTML entities and other encoded artifacts before JD segments are promoted to recruiter-facing bullet titles
+- require one-to-one positive evidence assignment: if a bullet cannot be supported by its own defensible proof point, drop it instead of showing `Same as above.`
+- tighten evidence ranking for enterprise/integration/rollout/tradeoff requirements so generic PM evidence does not outrank more relevant technical-operating proof
+- rewrite anonymized portfolio-summary evidence into concrete engagement examples such as conversational AI assistant or fleet management portal instead of exposing internal anonymization phrasing
 
 ## Ops / Release Agent -> Deployment Execution (Cloudflare Adapter Readiness 2026-03-07)
 
