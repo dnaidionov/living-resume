@@ -146,6 +146,19 @@ test("fallback recruiter brief does not mention preferred domains or absent AI l
   assert.doesNotMatch(visibleText, /absence of ai language/i);
 });
 
+test("fallback fit-analysis metadata exposes stage versions", () => {
+  const result = buildFallbackFitAnalysisResponse(
+    `Senior Product Manager\nOwn roadmap, customer discovery, and cross-functional delivery for a SaaS platform.`,
+    requirements,
+    evidence,
+    "text",
+    "recruiter_brief"
+  );
+
+  assert.equal(result.metadata?.stageVersions?.requirementExtraction, "v1-heuristic-fallback");
+  assert.equal(result.metadata?.stageVersions?.generation, "v2-fallback-brief");
+});
+
 test("strong-fit recruiter brief uses requirement titles with evidence text and a non-redundant recommendation", () => {
   const result = buildFallbackFitAnalysisResponse(
     `Senior Product Manager
@@ -178,6 +191,44 @@ test("strong-fit recruiter brief uses requirement titles with evidence text and 
   assert.match(brief.whereIMatch?.[0]?.support ?? "", /^At .+, I /);
   assert.doesNotMatch(brief.whereIMatch?.[0]?.support ?? "", /Sales and support teams had thousands of documents/i);
   assert.doesNotMatch(brief.recommendation, /The evidence points|The strongest support comes from/i);
+});
+
+test("fallback no-fit brief uses role-derived gaps instead of canned transfer bullets", () => {
+  const result = assembleFitAnalysisResult({
+    input: {
+      internal: {
+        overallSummary: "Weak fit.",
+        overallScore: 3,
+        dimensions: [
+          { name: "core_match", score: 2, rationale: "Low direct match.", evidence: [] },
+          { name: "execution_scope", score: 3, rationale: "Some execution evidence.", evidence: [] },
+          { name: "leadership_collaboration", score: 3, rationale: "Some leadership evidence.", evidence: [] },
+          { name: "context_readiness", score: 2, rationale: "Low context readiness.", evidence: [] }
+        ],
+        strengths: [],
+        gaps: [],
+        transferableAdvantages: [],
+        interviewAngles: []
+      }
+    },
+    requirements: extractRoleRequirements(`
+      Must have hands-on automotive planning experience.
+      Must have direct autonomous driving product ownership.
+      Lead cross-functional roadmap execution.
+    `),
+    evidence,
+    inputKind: "text",
+    presentationMode: "recruiter_brief",
+    evaluatorVersion: "v5-fallback-fit-analysis"
+  });
+
+  assert.equal(result.presentation.mode, "recruiter_brief");
+  if (result.presentation.overallMatch.verdict !== "probably_not_your_person") {
+    assert.fail("Expected a negative recruiter brief.");
+  }
+
+  assert.ok((result.presentation.whereIDontFit?.[0]?.requirement ?? "").length > 0);
+  assert.doesNotMatch(result.presentation.whatDoesTransfer?.[0]?.skillOrExperience ?? "", /Product strategy and execution under ambiguity|Cross-functional leadership/i);
 });
 
 test("scorecard mode remains available for A\/B testing", () => {
