@@ -199,9 +199,19 @@ export function buildFallbackFitAnalysisResponse(
 }
 
 function buildFallbackInternalFit(requirements: ExtractedRoleRequirement[], evidence: EvidenceChunk[]): InternalFitEvaluation {
-  const mustHaveCount = requirements.filter((item) => item.priority === "must_have").length;
-  const evidenceStrength = Math.min(3, evidence.length);
-  const overallScore = Math.min(9, Math.max(5, 5 + evidenceStrength + Math.min(1, mustHaveCount)));
+  const matches = buildRequirementEvidencePairs(requirements, evidence);
+  const strongMatchCount = matches.filter((item) => item.score >= 15).length;
+  const weakMatchCount = matches.filter((item) => item.score < 12).length;
+  const mustHaveWeakCount = requirements
+    .slice(0, 5)
+    .filter((item, index) => item.priority === "must_have" && (matches[index]?.score ?? 0) < 18)
+    .length;
+  const leadershipScopeMismatch = hasLeadershipScopeMismatch(requirements, evidence);
+  const evidenceStrength = Math.min(2, evidence.length);
+  const overallScore = Math.min(
+    9,
+    Math.max(2, 5 + strongMatchCount + evidenceStrength - weakMatchCount - (mustHaveWeakCount * 2) - (leadershipScopeMismatch ? 3 : 0))
+  );
 
   return {
     overallSummary:
@@ -210,25 +220,25 @@ function buildFallbackInternalFit(requirements: ExtractedRoleRequirement[], evid
     dimensions: [
       {
         name: "core_match",
-        score: evidence.length >= 3 ? 5 : 4,
+        score: clampInteger(2 + strongMatchCount - mustHaveWeakCount, 1, 5, 3),
         rationale: "The retrieved evidence supports the central product, strategy, and ownership responsibilities implied by the role.",
         evidence: evidence.slice(0, 3).map((item) => item.title)
       },
       {
         name: "execution_scope",
-        score: evidence.length >= 3 ? 4 : 3,
+        score: clampInteger(2 + evidenceStrength + Math.min(1, strongMatchCount), 1, 5, 3),
         rationale: "The corpus shows repeated evidence of turning ambiguity into shipped outcomes, measurable impact, and structured delivery across multiple contexts.",
         evidence: evidence.slice(0, 3).map((item) => item.title)
       },
       {
         name: "leadership_collaboration",
-        score: evidence.length >= 2 ? 4 : 3,
+        score: clampInteger(2 + Math.min(2, strongMatchCount) - (leadershipScopeMismatch ? 2 : 0), 1, 5, 3),
         rationale: "The evidence supports cross-functional leadership, stakeholder framing, and decision-making across complex initiatives.",
         evidence: evidence.slice(0, 2).map((item) => item.title)
       },
       {
         name: "context_readiness",
-        score: requirements.some((item) => item.priority === "must_have") ? 3 : 4,
+        score: clampInteger(4 - mustHaveWeakCount, 1, 5, 3),
         rationale: "The evidence suggests solid readiness for the role's operating context, with any highly specific domain or technical requirements best validated directly in interview.",
         evidence: evidence.slice(0, 2).map((item) => item.title)
       }
@@ -551,6 +561,20 @@ function buildNoFitRecommendation(gaps: GapBullet[]): string {
   return "You likely need someone with more direct evidence against the missing requirements above. I would still be interested in the conversation, but based on the current corpus I do not think I am the clearest fit for this role.";
 }
 
+function hasLeadershipScopeMismatch(requirements: ExtractedRoleRequirement[], evidence: EvidenceChunk[]): boolean {
+  const requiresExecutiveScope = requirements.some((item) =>
+    /\b(vp|vice president|p&l|general manager|manage directors|multi-layer|org leadership|enterprise scale|large consumer marketplace)\b/i.test(item.text)
+  );
+
+  if (!requiresExecutiveScope) {
+    return false;
+  }
+
+  return !evidence.some((item) =>
+    /\b(vp|vice president|director|portfolio|gm|general manager|p&l|org leadership|enterprise scale)\b/i.test(`${item.title} ${item.text}`)
+  );
+}
+
 function rankEvidenceForSupport(evidence: EvidenceChunk[]): EvidenceChunk[] {
   return [...evidence].sort((left, right) => evidencePreferenceScore(right) - evidencePreferenceScore(left));
 }
@@ -729,9 +753,14 @@ function lowerCaseFirstAlpha(text: string): string {
 
 function deriveVerdict(internal: InternalFitEvaluation): FitVerdict {
   const coreMatchScore = internal.dimensions.find((item) => item.name === "core_match")?.score ?? 0;
+  const contextReadinessScore = internal.dimensions.find((item) => item.name === "context_readiness")?.score ?? 0;
+  const weakDimensionCount = internal.dimensions.filter((item) => item.score <= 2).length;
 
   if (internal.overallScore >= 8 && coreMatchScore >= 4) {
     return "strong_fit_lets_talk";
+  }
+  if (internal.overallScore <= 4 || (coreMatchScore <= 3 && contextReadinessScore <= 2) || weakDimensionCount >= 2) {
+    return "probably_not_your_person";
   }
   if (internal.overallScore >= 5) {
     return "probably_a_good_fit";

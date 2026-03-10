@@ -123,6 +123,12 @@
 - preserve list and heading boundaries because downstream requirement extraction depends on them
 - keep the parser generic rather than ATS-vendor-specific
 
+## AI Systems Architect -> QA / Evaluations Agent (Fit Analysis Phase 5 2026-03-09)
+
+- add eval fixtures for non-AI product roles, AI-native roles, and clear stretch roles
+- use the eval harness to catch false negatives and obvious false positives before release
+- keep the harness local and deterministic so it can run in CI without live LLM calls
+
 ## Ops / Release Agent -> Deployment Execution (Cloudflare Adapter Readiness 2026-03-07)
 
 - local release gates now include `npm run cf:build`, not only `npm run build`
