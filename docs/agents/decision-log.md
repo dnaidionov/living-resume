@@ -116,6 +116,11 @@ Use this log for concise, chronological records of meaningful decisions that do 
 - Rationale: Prevent unnecessary OpenAI embedding spend during normal app development while keeping retrieval artifacts current when the corpus changes.
 - Scope impact: `docs/operations/runbook.md`, `docs/agents/handoffs.md`.
 
+- Agent role: Ops / Release Agent
+- Decision: Standardized standalone repo scripts to load `.env.local` automatically.
+- Rationale: Keep local secret handling out of git while making script behavior consistent across shell sessions and future threads.
+- Scope impact: `lib/env/load-local-env.ts`, `scripts/build-embeddings.ts`, `scripts/build-content-index.ts`, `docs/operations/runbook.md`.
+
 - Agent role: Content Strategist
 - Decision: Strengthened EPAM AI Experience AI-context wording to explicitly capture multi-agent orchestration, Anthropic/Claude implementation details, and added `LLM Orchestration` skill while preserving requested wording constraints.
 - Rationale: Improve precision and evidence depth for LLM orchestration claims in hero and role narrative alignment.

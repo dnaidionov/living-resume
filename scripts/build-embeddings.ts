@@ -1,9 +1,12 @@
 import { writeFile } from "node:fs/promises";
 import path from "node:path";
 import { buildDocuments } from "@/lib/content/store";
+import { loadLocalEnv } from "@/lib/env/load-local-env";
 import { requestEmbeddings } from "@/lib/ai/openai";
 
 async function main() {
+  loadLocalEnv();
+
   if (!process.env.OPENAI_API_KEY) {
     throw new Error("OPENAI_API_KEY is required to build semantic embeddings.");
   }
