@@ -2,8 +2,8 @@
   {
     "id": "ctx-epam",
     "roleId": "epam",
-    "headline": "Enterprise product delivery across AI, multi-agent orchestration, DX, compliance, healthcare, and fintech programs.",
-    "summary": "Portfolio of anonymized EPAM engagements focused on measurable business outcomes and execution in complex enterprise environments.",
+    "headline": "Strategic product ownership across AI, multi-agent orchestration, DX, compliance, healthcare, and fintech programs.",
+    "summary": "Portfolio of EPAM engagements focused on portfolio-level prioritization, cross-functional decision governance, and measurable outcomes in complex enterprise environments.",
     "projectContexts": [
       {
         "id": "epam-ai-experience",
@@ -43,7 +43,7 @@
         "work": "Led initiatives across multiple products; implemented B2B2C KYC workflow; supported new product-line launch workshops."
       }
     ],
-    "situation": "Anonymized enterprise engagements required measurable outcomes in regulated and integration-heavy environments.",
+    "situation": "Enterprise engagements required prioritization under ambiguity across regulated and integration-heavy environments with competing delivery pressures.",
     "goal": "Deliver product improvements that combine operational impact, compliance readiness, and scalable execution.",
     "constraints": [
       "Client confidentiality requirements.",
@@ -51,25 +51,30 @@
       "Strict compliance and timeline constraints."
     ],
     "approach": [
-      "Run portfolio-style discovery and prioritization.",
-      "Sequence high-risk and compliance-sensitive workflows first.",
-      "Anchor delivery on measurable operational outcomes."
+      "Run portfolio-level discovery and prioritization across competing initiatives.",
+      "Sequence high-risk and compliance-sensitive workflows first when deadlines introduce systemic risk.",
+      "Anchor execution on measurable operational and revenue outcomes."
     ],
     "keyDecisions": [
-      "Use anonymized client references across all EPAM contexts.",
-      "Prioritize compliance-critical initiatives when deadlines impose systemic risk.",
-      "Treat AI evaluation as a first-class product requirement."
+      "Prioritize compliance-critical initiatives when deadlines impose systemic business risk.",
+      "Treat AI evaluation and response quality controls as first-class product requirements.",
+      "Use cross-functional governance to reduce implementation risk."
     ],
     "execution": [
       "Led cross-functional alignment across product, engineering, design, compliance, and operations.",
-      "Defined metrics and validation criteria before rollout where possible.",
-      "Coordinated delivery across multiple workflows and systems."
+      "Led integration-heavy product delivery across enterprise systems, including CRM, content repositories, proprietary learning platforms, legacy systems, and external APIs.",
+      "Defined metrics and validation criteria before rollout to reduce ambiguity.",
+      "Partnered with Learning and Development teams to produce training and enablement materials supporting rollout and adoption.",
+      "Contributed to GTM planning and phased rollout across developer-experience and compliance-sensitive product launches.",
+      "Coordinated cross-product delivery across multiple workflows and systems."
     ],
     "outcomes": [
       "40% call-center load reduction in fintech workflows.",
       "35% operational cost reduction in fintech operations.",
       "70% fraud reduction in customer-facing services.",
-      "Projected $8-10M first-year savings in healthcare and medtech self-service operations."
+      "Projected $8-10M first-year savings in healthcare and medtech self-service operations.",
+      "Built and validated cost-savings estimates with delivery stakeholders, then tracked realized impact against projected outcomes.",
+      "Shifted teams from fragmented information retrieval to orchestrated, intent-routed workflow support."
     ],
     "metrics": [
       "25% lower support handling time (UAT indicator).",
@@ -81,6 +86,11 @@
       "Enterprise Product Management",
       "AI Product Evaluation",
       "Developer Experience",
+      "Integration Strategy",
+      "SQL and Database Operations",
+      "Training and Enablement",
+      "GTM Planning and Rollout",
+      "Cost Estimation and Value Modeling",
       "Compliance Program Delivery",
       "Workflow Transformation",
       "LLM Orchestration"
@@ -97,9 +107,17 @@
   {
     "id": "ctx-modus-create",
     "roleId": "modus-create",
-    "headline": "Productized workshop-led strategy for idea-to-MVP execution.",
-    "summary": "Role focused on creating repeatable strategic alignment programs for clients with recurring product dysfunction patterns.",
+    "headline": "Productized series of strategy workshops for idea-to-MVP execution, while working on client-facing projects.",
+    "summary": "Role combined client-facing transformation work with productized strategy execution, turning research and workshops into adopted roadmap decisions.",
     "projectContexts": [
+      {
+        "id": "modus-telecom-cloud-services-redesign",
+        "title": "Telecom White-Label Cloud Services Redesign",
+        "situation": "A major telecom services provider noticed falling client satisfaction scores and wanted to address that through adding new features to their white-label cloud services solution.",
+        "approach": "Run structured workshops to align business and product goals, define KPI framework, and shape a roadmap; pair this with ethnographic and UX research. Map service-reliability dependencies and feature tradeoffs before prioritization. Ensure all recommendations and decisions are data-supported.",
+        "work": "Led workshop series and ethnographic/UX research, developed KPI and roadmap deliverables, produced a data-backed prioritized roadmap, and drove recommendation adoption through presentations to major US and European telecom leadership.",
+        "lessonsLearned": "The fastest path to higher user satisfaction was improving reliability of existing services before adding new offerings; customers prioritized dependable core services over feature expansion."
+      },
       {
         "id": "modus-product-strategy-kickstart",
         "title": "Product Strategy and Kickstart",
@@ -124,9 +142,10 @@
       "Anchor exercises on measurable outcomes, not feature wishlists."
     ],
     "execution": [
-      "Led strategy sessions across multiple clients.",
-      "Mapped business goals to validated offering definitions.",
-      "Documented roadmap decisions for downstream delivery teams."
+      "Led strategy and research sessions across client engagements.",
+      "Combined qualitative research with structured data analysis to support KPI framing and prioritization decisions.",
+      "Mapped business goals to validated offering definitions and KPI frameworks.",
+      "Converted workshop outputs into adopted roadmap decisions for downstream delivery teams."
     ],
     "outcomes": [
       "Clearer product direction and execution boundaries for participating clients.",
@@ -136,7 +155,18 @@
       "Consistent strategy-to-roadmap handoff artifacts.",
       "Reduced ambiguity during kickoff phases."
     ],
-    "skillsDemonstrated": ["Product Strategy", "Facilitation", "Roadmapping", "KPI Framing"],
+    "skillsDemonstrated": [
+      "Product Strategy",
+      "Facilitation",
+      "Roadmapping",
+      "KPI Framing",
+      "Data Analysis",
+      "SQL and Database Fluency",
+      "Ethnographic Research",
+      "UX Research",
+      "Executive Communication",
+      "Data-Informed Decision Making"
+    ],
     "relatedProjectIds": [],
     "citations": [
       {
@@ -409,7 +439,7 @@
       "Need to coordinate product, engineering, and UX changes in parallel."
     ],
     "approach": [
-      "Use retention analytics to identify highest-impact friction patterns.",
+      "Use retention analytics and SQL-driven data analysis to identify highest-impact friction patterns.",
       "Redesign UX workflows and delivery requirements around those patterns."
     ],
     "keyDecisions": [
@@ -417,7 +447,7 @@
       "Use data-backed requirement framing for redesign scope."
     ],
     "execution": [
-      "Ran data analysis and pattern discovery.",
+      "Ran SQL-based data analysis and pattern discovery across customer behavior datasets.",
       "Defined redesign requirements with UX and engineering teams.",
       "Led implementation of updated customer portal experience."
     ],
@@ -426,7 +456,7 @@
       "Improved alignment between telecom product value and user experience flow."
     ],
     "metrics": ["60% customer attrition reduction."],
-    "skillsDemonstrated": ["Retention Strategy", "Product Analytics", "UX Redesign", "Delivery Leadership"],
+    "skillsDemonstrated": ["Retention Strategy", "Product Analytics", "SQL and Database Operations", "UX Redesign", "Delivery Leadership"],
     "relatedProjectIds": [],
     "citations": [
       {
