@@ -29,6 +29,7 @@
 - Never commit API keys to the repository.
 - Never place production secrets in tracked files such as `next.config.ts`, JSON config, or docs.
 - For local development, use an untracked `.env.local`.
+- Standalone repo scripts such as `npm run embeddings:build` and `npm run content:build` load `.env.local` automatically.
 - For Cloudflare, store secrets in the project or Worker settings, or use `wrangler secret put OPENAI_API_KEY`.
 - For Vercel, store secrets in the project environment settings, or use `vercel env add OPENAI_API_KEY`.
 
