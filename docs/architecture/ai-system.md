@@ -49,8 +49,7 @@ This keeps the app deployable on both Cloudflare and Vercel without requiring a 
 - Presentation mode can switch between `recruiter_brief` and `scorecard` for experiments without changing the evaluator core.
 - Requirement extraction is now its own stage and should return structured role requirements before final fit analysis is generated.
 - Heuristic requirement extraction remains only as a fallback path when the LLM extractor is unavailable.
-- Retrieval should run per requirement using semantic embeddings when available, while still staying repo-backed and stateless.
-- Until per-requirement retrieval is implemented, fit analysis should retrieve a broader evidence set than chat so requirement-to-evidence matching has enough recall for leadership, process, and context-specific bullets.
+- Retrieval now resolves fit-analysis evidence from a broad role-text query plus prioritized per-requirement queries, using semantic embeddings when available while staying repo-backed and stateless.
 - Recruiter-facing `Where I match` output should be selected after ranking the broader candidate pool; render only the strongest 3 to 5 bullets with the clearest senior-signal support instead of the first few passing matches.
 - Fit-analysis metadata should expose stage versions so QA can tell which extractor, retrieval path, and generator produced a result.
 - Fit analysis should gate clearly non-product roles to a negative outcome even when some tool or domain overlap exists.
@@ -67,6 +66,7 @@ This keeps the app deployable on both Cloudflare and Vercel without requiring a 
 - Requirement extraction must sanitize encoded artifacts such as numeric HTML entities before the segment can become a recruiter-facing bullet title.
 - Evidence ranking should require meaningful keyword/domain coverage for specific requirements such as enterprise systems, integration, rollout, and technical tradeoffs; generic PM evidence is not enough on its own.
 - Leadership, player-coach, team-building, and product-process requirements should prefer management/process/operating evidence over isolated technical workflow examples.
+- For leadership/team/process requirements, explicit management/process evidence and management-titled roles should outrank outcome-heavy product/project evidence when both are otherwise relevant.
 - When recruiter-visible evidence comes from an anonymized portfolio summary, the formatter should rewrite it into a portfolio-of-engagements statement with concrete project examples rather than exposing internal anonymization language.
 - Broad catch-all consulting evidence should remain available, but when all else is equal it should lose to more concrete project or role evidence. In this repo, Vingis is treated that way in ranking.
 - For generic product-management expectations, recruiter-facing evidence should prefer named recent product roles like EPAM and Modus Create. Vingis should not be used as the named example unless no stronger named role exists, and even then the sentence should stay generic rather than calling Vingis out.

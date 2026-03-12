@@ -1068,8 +1068,9 @@ function selectBestEvidenceForRequirement(
   usedEvidenceIds: Set<string>
 ): { chunk: EvidenceChunk; score: number } | undefined {
   const keywords = extractRequirementKeywords(requirement);
+  const candidatePool = leadershipQualifiedEvidencePool(requirement, evidence);
 
-  const candidates = [...evidence]
+  const candidates = [...candidatePool]
     .map((item) => ({
       chunk: item,
       score: requirementEvidenceScore(requirement, keywords, item, usedEvidenceIds.has(item.id))
@@ -1083,6 +1084,24 @@ function selectBestEvidenceForRequirement(
   }
 
   return bestUnused.score >= minimumEvidenceScore(requirement) ? bestUnused : undefined;
+}
+
+function leadershipQualifiedEvidencePool(requirement: string, evidence: EvidenceChunk[]): EvidenceChunk[] {
+  if (!isLeadershipRequirement(requirement.toLowerCase())) {
+    return evidence;
+  }
+
+  const leadershipCandidates = evidence.filter((item) => {
+    const roleTitle = item.metadata?.roleTitle?.toLowerCase() ?? "";
+    const haystack = `${item.title} ${item.section} ${item.text} ${item.tags.join(" ")}`.toLowerCase();
+
+    return (
+      hasPeopleManagementTitle(roleTitle) ||
+      /\b(team|manager|leadership|process|agile|workshop|governance|alignment|mentor|delivery model|cadence|operating|team building)\b/.test(haystack)
+    );
+  });
+
+  return leadershipCandidates.length > 0 ? leadershipCandidates : evidence;
 }
 
 function extractRequirementKeywords(requirement: string): string[] {
@@ -1117,8 +1136,11 @@ function requirementEvidenceScore(
   const domainBonus = domainSpecificEvidenceBonus(requirement, haystack);
   const leadershipBonus = leadershipProcessEvidenceBonus(requirement, haystack);
   const leadershipPenalty = leadershipMismatchPenalty(requirement, haystack);
+  const leadershipRoleBonus = leadershipRoleTitleBonus(requirement, item);
+  const leadershipOutcomePenalty = leadershipOutcomeOnlyPenalty(requirement, item);
+  const leadershipSectionAdjustment = leadershipEvidenceSectionAdjustment(requirement, item);
 
-  return evidencePreferenceScore(item) * 10 + keywordHits * 5 + directPhraseBonus + recencyBonus + domainBonus + leadershipBonus - reusePenalty - rolePenalty - recencyPenalty - contextPenalty - catchAllRolePenalty - specificityPenalty - leadershipPenalty;
+  return evidencePreferenceScore(item) * 10 + keywordHits * 5 + directPhraseBonus + recencyBonus + domainBonus + leadershipBonus + leadershipRoleBonus + leadershipSectionAdjustment - reusePenalty - rolePenalty - recencyPenalty - contextPenalty - catchAllRolePenalty - specificityPenalty - leadershipPenalty - leadershipOutcomePenalty;
 }
 
 function roleSpecificityPenalty(item: EvidenceChunk): number {
@@ -1166,12 +1188,15 @@ function leadershipProcessEvidenceBonus(requirement: string, haystack: string): 
   const req = requirement.toLowerCase();
   let bonus = 0;
 
-  if (/\b(player.?coach|leadership|lead product team|mentor|develop a small product team|high-performing product function|product processes?|operating rhythms?)\b/.test(req)) {
+  if (isLeadershipRequirement(req)) {
     if (/\b(team building|team leadership|built local team|manager|product development manager|leadership|mentor|coordinated|governance|alignment|agile|process|operating|workshop|prioritization)\b/.test(haystack)) {
-      bonus += 8;
+      bonus += 10;
+    }
+    if (/\b(team|manager|mento?r|leadership|agile|process|operating|governance|alignment|coordination|delivery model|cadence)\b/.test(haystack)) {
+      bonus += 5;
     }
     if (/\b(discovery|requirements|roadmap|stakeholder|delivery)\b/.test(haystack)) {
-      bonus += 3;
+      bonus += 2;
     }
   }
 
@@ -1185,19 +1210,96 @@ function leadershipProcessEvidenceBonus(requirement: string, haystack: string): 
 function leadershipMismatchPenalty(requirement: string, haystack: string): number {
   const req = requirement.toLowerCase();
 
-  if (!/\b(player.?coach|leadership|lead product team|mentor|develop a small product team|high-performing product function|product processes?|operating rhythms?)\b/.test(req)) {
+  if (!isLeadershipRequirement(req)) {
     return 0;
   }
 
-  if (/\b(api|workflow|kyc|integration|provider|portal|assistant)\b/.test(haystack) && !/\b(team|manager|leadership|process|agile|workshop|governance|alignment|mentor|delivery)\b/.test(haystack)) {
+  if (/\b(api|workflow|kyc|integration|provider|portal|assistant)\b/.test(haystack) && !/\b(team|manager|leadership|process|agile|workshop|governance|alignment|mentor|delivery|cadence|operating)\b/.test(haystack)) {
+    return 14;
+  }
+
+  if (!/\b(team|manager|leadership|process|agile|workshop|governance|alignment|mentor|delivery|prioritization|cadence|operating)\b/.test(haystack)) {
     return 10;
   }
 
-  if (!/\b(team|manager|leadership|process|agile|workshop|governance|alignment|mentor|delivery|prioritization)\b/.test(haystack)) {
-    return 6;
+  return 0;
+}
+
+function leadershipRoleTitleBonus(requirement: string, item: EvidenceChunk): number {
+  const req = requirement.toLowerCase();
+  if (!isLeadershipRequirement(req)) {
+    return 0;
+  }
+
+  const roleTitle = item.metadata?.roleTitle?.toLowerCase() ?? "";
+  const title = item.title.toLowerCase();
+  let bonus = 0;
+
+  if (hasPeopleManagementTitle(roleTitle) || hasPeopleManagementTitle(title)) {
+    bonus += 34;
+  }
+  if (/\b(team building|agile|process)\b/.test(`${title} ${item.text}`.toLowerCase())) {
+    bonus += 8;
+  }
+
+  return bonus;
+}
+
+function isLeadershipRequirement(requirement: string): boolean {
+  return /\b(player.?coach|leadership|lead product team|mentor|develop a small product team|high-performing product function|product processes?|operating rhythms?|operating rhythm|team|product function)\b/.test(requirement);
+}
+
+function leadershipEvidenceSectionAdjustment(requirement: string, item: EvidenceChunk): number {
+  if (!isLeadershipRequirement(requirement.toLowerCase())) {
+    return 0;
+  }
+
+  const section = item.section.toLowerCase();
+  const haystack = `${item.title} ${item.text} ${item.tags.join(" ")}`.toLowerCase();
+  const roleTitle = item.metadata?.roleTitle?.toLowerCase() ?? "";
+  const hasLeadershipMarkers = /\b(team|manager|leadership|process|agile|workshop|governance|alignment|mentor|delivery model|cadence|operating|team building)\b/.test(haystack);
+  const hasManagementTitle = hasPeopleManagementTitle(roleTitle);
+
+  if ((section === "summary" || section.startsWith("achievement")) && hasLeadershipMarkers && hasManagementTitle) {
+    return 26;
+  }
+  if (section === "summary" && hasLeadershipMarkers) {
+    return 14;
+  }
+  if (section === "project-work" || section === "project-approach") {
+    return -14;
+  }
+  if (section.startsWith("achievement") && !hasLeadershipMarkers) {
+    return -20;
   }
 
   return 0;
+}
+
+function leadershipOutcomeOnlyPenalty(requirement: string, item: EvidenceChunk): number {
+  if (!isLeadershipRequirement(requirement.toLowerCase())) {
+    return 0;
+  }
+
+  const haystack = `${item.title} ${item.section} ${item.text} ${item.tags.join(" ")}`.toLowerCase();
+  const roleTitle = item.metadata?.roleTitle?.toLowerCase() ?? "";
+  const hasLeadershipMarkers = /\b(team|manager|leadership|process|agile|workshop|governance|alignment|mentor|delivery model|cadence|operating|team building)\b/.test(haystack);
+  const looksOutcomeHeavy = /\b(\$[0-9]|savings|reduction|improvement|projected|adoption|portal product work|workflow adoption)\b/.test(haystack);
+  const hasManagementTitle = hasPeopleManagementTitle(roleTitle);
+
+  if (looksOutcomeHeavy && !hasLeadershipMarkers && !hasManagementTitle) {
+    return 34;
+  }
+
+  if (looksOutcomeHeavy && !hasLeadershipMarkers) {
+    return 20;
+  }
+
+  return 0;
+}
+
+function hasPeopleManagementTitle(value: string): boolean {
+  return /\b(director|head|team lead|lead\b|manager,|manager of|development manager|engineering manager|product development manager)\b/.test(value);
 }
 
 function roleFamilyPenalty(requirement: string, item: EvidenceChunk): number {

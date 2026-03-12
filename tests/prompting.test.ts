@@ -223,7 +223,7 @@ test("strong-fit recruiter brief uses requirement titles with evidence text and 
   assert.ok((brief.whereIMatch?.length ?? 0) >= 3);
   assert.ok((brief.whereIMatch?.[0]?.requirement ?? "").length > 0);
   assert.ok((brief.whereIMatch?.[0]?.support ?? "").length > 0);
-  assert.match(brief.whereIMatch?.[0]?.support ?? "", /^At .+, I /);
+  assert.match(brief.whereIMatch?.[0]?.support ?? "", /^(At .+, I |In my recent product roles, )/);
   assert.doesNotMatch(brief.whereIMatch?.[0]?.support ?? "", /Sales and support teams had thousands of documents/i);
   assert.doesNotMatch(brief.recommendation, /The evidence points|The strongest support comes from/i);
 });
@@ -1099,4 +1099,44 @@ test("player-coach requirements prefer leadership and process evidence over isol
   const support = result.presentation.whereIMatch?.[0]?.support ?? "";
   assert.match(support, /Acision \(acquired Soli\)/);
   assert.doesNotMatch(support, /KYC workflow/i);
+});
+
+test("leadership requirements prefer explicit management/process evidence over outcome-heavy portal work", () => {
+  const leadershipEvidence: EvidenceChunk[] = [
+    {
+      id: "epam-portal",
+      sourceType: "resume",
+      title: "Senior Product Manager at EPAM",
+      section: "achievement-4",
+      text: "Led healthcare fleet management portal product work for a major medical device manufacturer, with projected first-year savings of $8-10M from self-service workflow adoption.",
+      tags: ["product", "healthcare", "delivery"],
+      metadata: { company: "EPAM", roleTitle: "Senior Product Manager", startDate: "2021-06", endDate: "2025-01" },
+      embedding: [1, 0, 0]
+    },
+    {
+      id: "acision-manager",
+      sourceType: "resume",
+      title: "Manager, Product Development at Acision (acquired Soli)",
+      section: "summary",
+      text: "Product Development Manager leading telecom product delivery and retention-focused workflow redesign. Built team and process foundations and introduced agile practices.",
+      tags: ["manager", "team building", "agile", "process"],
+      metadata: { company: "Acision (acquired Soli)", roleTitle: "Manager, Product Development", startDate: "2011-01", endDate: "2013-01" },
+      embedding: [0, 1, 0]
+    }
+  ];
+
+  const result = buildFallbackFitAnalysisResponse(
+    `Lead, mentor, and develop a small product team while establishing scalable product processes and operating rhythms.
+     Operate effectively in a player-coach capacity—comfortable zooming between strategy and execution.`,
+    extractRoleRequirements(`Lead, mentor, and develop a small product team while establishing scalable product processes and operating rhythms.
+     Operate effectively in a player-coach capacity—comfortable zooming between strategy and execution.`),
+    leadershipEvidence,
+    "text",
+    "recruiter_brief"
+  );
+
+  assert.equal(result.presentation.mode, "recruiter_brief");
+  const support = result.presentation.whereIMatch?.[0]?.support ?? "";
+  assert.match(support, /Acision \(acquired Soli\)/);
+  assert.doesNotMatch(support, /\$8-10M|fleet management portal/i);
 });

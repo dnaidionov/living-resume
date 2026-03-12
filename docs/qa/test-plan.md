@@ -23,7 +23,7 @@
 - Recruiter-facing fit output never mentions preferred domains, absent AI wording, or internal scoring logic
 - Requirement extraction returns role requirements/functions/expectations rather than titles, locations, or ATS boilerplate
 - Retrieval prefers semantic embeddings when a generated artifact or live embedding path is available, and falls back deterministically only when semantic mode is unavailable
-- Fit-analysis retrieval should return a broader candidate pool than chat so downstream requirement matching can choose distinct, role-appropriate evidence rather than overfitting to the top few chunks
+- Fit-analysis retrieval should merge a broad role-text query with prioritized per-requirement queries so downstream requirement matching can choose distinct, role-appropriate evidence instead of overfitting to the top few broad-query chunks
 - Fit-analysis regressions must verify that recruiter-facing `Where I match` output selects the strongest 3 to 5 supported bullets from the broader candidate pool and does not surface lower-value culture/environment statements
 - Fit-analysis metadata reports stage versions so fallback vs primary-path results can be distinguished in QA
 - URL intake removes generic header/footer/application/legal boilerplate while preserving role headings and bullet lists
@@ -37,6 +37,7 @@
 - `What does transfer` must render capability-based titles instead of prior role titles, and its evidence text must never use an AI-context or project headline as a fake employer name
 - Fit-analysis regressions must verify that company-mission/brand-intro prose does not surface as a match bullet, that encoded HTML artifacts do not appear in bullet headers, and that positive bullets do not reuse the same evidence chunk
 - Fit-analysis regressions must verify that culture/work-environment lines do not surface as match bullets and that player-coach/team-process requirements prefer leadership/process evidence over isolated technical workflows
+- Fit-analysis regressions must verify that leadership/team/process requirements prefer explicit management/process evidence over outcome-heavy portal/project evidence when both are available
 - Fit-analysis regressions must verify that repeated positive explanations are grouped into one evidence block with multiple requirement bullets instead of rendering duplicate cards
 - Fit-analysis regressions must verify that anonymized portfolio-summary evidence is rewritten into concrete engagement examples instead of surfacing internal anonymization wording
 - Fit-analysis regressions must verify that, when evidence is otherwise comparable, newer experience is preferred over older experience in recruiter-facing support selection
