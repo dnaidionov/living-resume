@@ -47,6 +47,7 @@ This keeps the app deployable on both Cloudflare and Vercel without requiring a 
 - A JD that does not mention AI should not be treated as lower fit for that reason alone.
 - The API retains an internal scorecard for calibration and testing, but the primary recruiter-facing presentation is a verdict-driven brief.
 - Presentation mode can switch between `recruiter_brief` and `scorecard` for experiments without changing the evaluator core.
+- Recruiter-brief evidence bullets are deterministic. The LLM may contribute verdict calibration, internal scorecard synthesis, and recommendation text, but `whereIMatch`, `gapsToNote`, `whereIDontFit`, and `whatDoesTransfer` must be assembled from deterministic requirement/evidence selection.
 - Requirement extraction is now its own stage and should return structured role requirements before final fit analysis is generated.
 - Heuristic requirement extraction remains only as a fallback path when the LLM extractor is unavailable.
 - Retrieval now resolves fit-analysis evidence from a broad role-text query plus prioritized per-requirement queries, using semantic embeddings when available while staying repo-backed and stateless.
@@ -67,9 +68,14 @@ This keeps the app deployable on both Cloudflare and Vercel without requiring a 
 - Evidence ranking should require meaningful keyword/domain coverage for specific requirements such as enterprise systems, integration, rollout, and technical tradeoffs; generic PM evidence is not enough on its own.
 - Leadership, player-coach, team-building, and product-process requirements should prefer management/process/operating evidence over isolated technical workflow examples.
 - For leadership/team/process requirements, explicit management/process evidence and management-titled roles should outrank outcome-heavy product/project evidence when both are otherwise relevant.
+- Direct people-management requirements should only appear in `Where I match` when the selected evidence proves direct team management or mentoring; adjacent senior-product leadership without that proof should move into `Gaps to note` instead.
 - When recruiter-visible evidence comes from an anonymized portfolio summary, the formatter should rewrite it into a portfolio-of-engagements statement with concrete project examples rather than exposing internal anonymization language.
 - Broad catch-all consulting evidence should remain available, but when all else is equal it should lose to more concrete project or role evidence. In this repo, Vingis is treated that way in ranking.
-- For generic product-management expectations, recruiter-facing evidence should prefer named recent product roles like EPAM and Modus Create. Vingis should not be used as the named example unless no stronger named role exists, and even then the sentence should stay generic rather than calling Vingis out.
+- When catch-all consulting evidence such as Vingis is selected anyway, recruiter-facing support text should still avoid naming it directly and fall back to a neutral `In my previous roles...` phrasing.
+- For generic product-management expectations, recruiter-facing evidence should prefer the latest relevant named product role when available; otherwise it should fall back to a neutral `In my previous roles...` sentence rather than naming Vingis.
+- When strong generic PM evidence is shared across multiple grouped requirements, recruiter-facing evidence should prefer a recent dual-role summary such as `EPAM and Modus Create` over a single-role `latest role` sentence when both roles are available.
+- Broad senior-product qualification requirements should use a cross-role leadership summary rather than a narrow one-off explainer when the JD is asking for tenure plus generic PM leadership depth.
+- Strategic-execution requirements should prefer explicit strategy/discovery/roadmap evidence over outcome-heavy delivery examples when both are available.
 - When multiple evidence candidates are comparably relevant, newer experience should be preferred over older experience, using structured role/project dates as a secondary ranking signal rather than overriding stronger relevance.
 - Recruiter-facing fit evidence should come from actual experience-bearing sources only. In this repo, that means `resume` and `ai_context`; portfolio/meta project artifacts should not appear as proof of prior role fit.
 

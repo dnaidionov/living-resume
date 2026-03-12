@@ -47,6 +47,7 @@ type RequirementEvidencePair = MatchBullet & {
   score: number;
   evidenceId?: string;
   direct: boolean;
+  sourceRequirement: string;
 };
 
 type RoleFamily = "product_management" | "adjacent_product" | "non_product";
@@ -148,19 +149,9 @@ export function buildFitAnalysisUserPrompt(
     "internal must contain overallSummary, overallScore, dimensions, strengths, gaps, transferableAdvantages, interviewAngles.",
     "internal.dimensions must include core_match, execution_scope, leadership_collaboration, context_readiness.",
     "presentation.mode must be either recruiter_brief or scorecard.",
-    "For recruiter_brief, return overallMatch, recommendation, and the verdict-appropriate sections.",
+    "For recruiter_brief, return overallMatch and recommendation only.",
     "Allowed recruiter_brief labels are exactly: Strong Fit - Let's talk, Probably a Good Fit, Honest Assessment - Probably Not Your Person.",
-    "For Strong Fit or Probably a Good Fit, include whereIMatch and optional gapsToNote.",
-    "For Honest Assessment - Probably Not Your Person, include whereIDontFit and whatDoesTransfer.",
-    "For Honest Assessment - Probably Not Your Person, whereIDontFit must contain at least 3 bullets and at most 5.",
-    "Extract up to 5 main job requirements, functions, or expectations that are a proven fit when the verdict is positive.",
-    "For whereIMatch bullets, use the matched requirement as the title and the supporting evidence as the text.",
-    "Supporting evidence should be a concise example of matching prior experience, outcome, result, or accomplishment, not a raw situation setup.",
-    "For whereIDontFit bullets, explain the specific difference in experience or the missing qualification directly, such as missing mobile-development depth, required certification, clearance, or hands-on implementation context.",
-    "For whereIDontFit bullets, if two points rely on the same explanation, show the first explanation fully and use 'Same as above.' or 'See previous point.' for the later bullet.",
-    "For whereIDontFit bullets, keep each explanation tied to the specific requirement text. Do not attach certification or clearance gaps to unrelated technology requirements.",
-    "For whereIDontFit bullets, if no specific mismatch can be supported, fall back to a generic statement that the current resume corpus does not show direct evidence for that requirement.",
-    "Each bullet must reference a specific requirement and a concise support/gap explanation.",
+    "Do not generate recruiter-brief bullets; those are assembled deterministically from the retrieved evidence and requirement set.",
     "Recommendation must be one paragraph, no more than 4 sentences.",
     "Recommendation should be a short call to action or fit statement, not a recap of the bullets above.",
     "Recruiter-facing text must not mention preferred domains, preferred technologies, absent AI wording, or internal scoring logic.",
@@ -443,12 +434,12 @@ function normalizePresentation(
       verdict,
       label
     },
-    whereIMatch: verdict === "probably_not_your_person" ? undefined : normalizeMatchBullets((input as RecruiterBriefInput)?.whereIMatch, fallback.whereIMatch),
-    gapsToNote: verdict === "probably_not_your_person" ? undefined : normalizeGapBullets((input as RecruiterBriefInput)?.gapsToNote, fallback.gapsToNote),
+    whereIMatch: verdict === "probably_not_your_person" ? undefined : fallback.whereIMatch,
+    gapsToNote: verdict === "probably_not_your_person" ? undefined : fallback.gapsToNote,
     whereIDontFit: verdict === "probably_not_your_person"
-      ? normalizeNoFitBullets((input as RecruiterBriefInput)?.whereIDontFit, fallback.whereIDontFit, requirements)
+      ? fallback.whereIDontFit
       : undefined,
-    whatDoesTransfer: verdict === "probably_not_your_person" ? normalizeTransferBullets((input as RecruiterBriefInput)?.whatDoesTransfer, fallback.whatDoesTransfer) : undefined,
+    whatDoesTransfer: verdict === "probably_not_your_person" ? fallback.whatDoesTransfer : undefined,
     recommendation: sanitizeRecommendation((input as RecruiterBriefInput)?.recommendation, fallback.recommendation)
   };
 }
@@ -466,11 +457,12 @@ function buildRecruiterBriefFromInternalFromRequirements(
   internal: InternalFitEvaluation,
   evidence: EvidenceChunk[]
 ): RecruiterBriefPresentation {
-  const matchedRequirements = buildRequirementEvidencePairs(requirements, evidence);
+  const prioritizedRequirements = prioritizeRequirements(requirements).slice(0, 12);
+  const matchedRequirements = buildRequirementEvidencePairs(prioritizedRequirements, evidence);
   const verdict = deriveVerdict(internal);
   const roleFamily = classifyRoleFamily(requirements);
-  const gapCandidates = buildGapCandidates(requirements, matchedRequirements);
-  const noFitBullets = buildNoFitBullets(requirements, matchedRequirements, evidence, roleFamily);
+  const gapCandidates = buildGapCandidates(prioritizedRequirements, matchedRequirements);
+  const noFitBullets = buildNoFitBullets(prioritizedRequirements, matchedRequirements, evidence, roleFamily);
   const transferCandidates = buildTransferBulletsFromEvidence(evidence);
 
   if (verdict === "probably_not_your_person" || roleFamily === "non_product") {
@@ -504,7 +496,7 @@ function buildRecruiterBriefFromInternalFromRequirements(
 function buildRequirementEvidencePairs(requirements: ExtractedRoleRequirement[], evidence: EvidenceChunk[]): RequirementEvidencePair[] {
   const selectedRequirements =
     requirements.length > 0
-      ? prioritizeRequirements(requirements).slice(0, 12)
+      ? requirements.slice(0, 12)
       : [{ text: "Core product ownership", category: "requirement" as const, priority: "important" as const }];
   const candidates: RequirementEvidencePair[] = [];
 
@@ -512,11 +504,17 @@ function buildRequirementEvidencePairs(requirements: ExtractedRoleRequirement[],
     const bestEvidence = selectBestEvidenceForRequirement(item.text, evidence, new Set<string>());
 
     const support = summarizeSupportEvidence(bestEvidence?.chunk, item.text, evidence);
+    const qualifiesAsPositiveMatch = qualifiesPositiveMatch(item.text, bestEvidence?.chunk, bestEvidence?.score ?? 0);
     const score =
       (bestEvidence?.score ?? 0) +
       Math.round(requirementPriorityScore(item) / 10) +
       seniorSignalBonus(item.text, bestEvidence?.chunk);
-    if (!support || (!bestEvidence && !isGenericProductRequirement(item.text)) || score < minimumEvidenceScore(item.text)) {
+    if (
+      !support ||
+      (!bestEvidence && !isGenericProductRequirement(item.text)) ||
+      score < minimumEvidenceScore(item.text) ||
+      !qualifiesAsPositiveMatch
+    ) {
       continue;
     }
 
@@ -525,7 +523,8 @@ function buildRequirementEvidencePairs(requirements: ExtractedRoleRequirement[],
       support,
       score,
       evidenceId: bestEvidence?.chunk.id,
-      direct: score >= 12
+      direct: score >= 12,
+      sourceRequirement: item.text
     });
   }
 
@@ -558,15 +557,14 @@ function buildGapCandidates(
   requirements: ExtractedRoleRequirement[],
   matches: RequirementEvidencePair[]
 ): GapBullet[] {
+  const matchByRequirement = new Map(matches.map((match) => [match.sourceRequirement, match]));
   const explicitGaps = requirements
     .slice(0, 5)
-    .map((requirement, index) => ({ requirement, match: matches[index] }))
+    .map((requirement) => ({ requirement, match: matchByRequirement.get(requirement.text) }))
     .filter(({ match }) => !match || !match.direct)
     .map(({ requirement }) => ({
       requirement: shortenRequirement(requirement.text),
-      gap: requirement.priority === "must_have"
-        ? "The current evidence set does not yet prove direct experience at the level this requirement appears to demand."
-        : "This looks like a useful interview validation point rather than a proven strength in the current corpus."
+      gap: gapExplanationForRequirement(requirement)
     }));
 
   if (explicitGaps.length > 0) {
@@ -859,14 +857,13 @@ function summarizeSupportEvidence(
   evidencePool: EvidenceChunk[] = []
 ): string | undefined {
   if (!item) {
+    if (requirement && isBroadSeniorProductRequirement(requirement)) {
+      return buildBroadSeniorProductEvidenceSentence(evidencePool);
+    }
     if (requirement && isGenericProductRequirement(requirement)) {
-      return buildGenericProductEvidenceSentence(evidencePool);
+      return buildGenericProductEvidenceSentence(requirement, evidencePool);
     }
     return undefined;
-  }
-
-  if (requirement && isGenericProductRequirement(requirement)) {
-    return buildGenericProductEvidenceSentence(evidencePool);
   }
 
   const text = item.text.trim().replace(/\s+/g, " ");
@@ -875,10 +872,26 @@ function summarizeSupportEvidence(
   if (portfolioSummary) {
     return portfolioSummary;
   }
+
+  if (requirement && isBroadSeniorProductRequirement(requirement)) {
+    return buildBroadSeniorProductEvidenceSentence(evidencePool);
+  }
+
+  if (requirement && isGenericProductRequirement(requirement)) {
+    return buildGenericProductEvidenceSentence(requirement, evidencePool);
+  }
   const normalized = lowerCaseFirstAlpha(text);
+  const isCatchAllVingis = company?.toLowerCase() === "vingis";
 
   if (/^(led|built|defined|delivered|owned|ran|performed|managed|created|launched|introduced|contributed|coordinated|redesigned|implemented|developed|supported)/i.test(text)) {
+    if (isCatchAllVingis) {
+      return `In my previous roles, I ${normalized}`;
+    }
     return company ? `At ${company}, I ${normalized}` : `In a prior role, I ${normalized}`;
+  }
+
+  if (isCatchAllVingis) {
+    return `In my previous roles, I worked on ${normalized}`;
   }
 
   return company ? `At ${company}, I worked on ${normalized}` : `In a prior role, I worked on ${normalized}`;
@@ -890,6 +903,13 @@ function isGenericProductRequirement(requirement: string): boolean {
     /(product manager|product owner|saas business|discovery|requirements|grooming backlogs|backlog|delivery with engineering|partner with engineering|roadmap|prioritization)/.test(normalized) &&
     !/(aws|kubernetes|salesforce|typescript|python|java|go|react|android|ios|llm|rag|retrieval|evaluation|buy vs\.? build|travel technology|autonomous|healthcare|compliance|clearance|certification)/.test(normalized)
   );
+}
+
+function isBroadSeniorProductRequirement(requirement: string): boolean {
+  const normalized = requirement.toLowerCase();
+  const hasPmTenure = /\b(\d+\+?\s+years of product management experience|years of product management experience)\b/.test(normalized);
+  const hasLeadershipQualifier = /\b(managing or leading product teams|leading product teams|product teams|saas environment)\b/.test(normalized);
+  return hasPmTenure && hasLeadershipQualifier;
 }
 
 function buildTransferTitleFromTags(tags: string[]): string | undefined {
@@ -1087,21 +1107,55 @@ function selectBestEvidenceForRequirement(
 }
 
 function leadershipQualifiedEvidencePool(requirement: string, evidence: EvidenceChunk[]): EvidenceChunk[] {
-  if (!isLeadershipRequirement(requirement.toLowerCase())) {
+  const subtype = leadershipRequirementSubtype(requirement.toLowerCase());
+  if (subtype === "none") {
     return evidence;
   }
 
   const leadershipCandidates = evidence.filter((item) => {
     const roleTitle = item.metadata?.roleTitle?.toLowerCase() ?? "";
     const haystack = `${item.title} ${item.section} ${item.text} ${item.tags.join(" ")}`.toLowerCase();
-
-    return (
+    const hasMgmtMarkers =
       hasPeopleManagementTitle(roleTitle) ||
-      /\b(team|manager|leadership|process|agile|workshop|governance|alignment|mentor|delivery model|cadence|operating|team building)\b/.test(haystack)
-    );
+      /\b(team|manager|leadership|process|agile|workshop|governance|alignment|mentor|delivery model|cadence|operating|team building)\b/.test(haystack);
+    const hasStrategyMarkers =
+      /\b(strategy|strategic|roadmap|discovery|requirements|execution|delivery|stakeholder|ownership)\b/.test(haystack);
+
+    if (subtype === "people_management") {
+      return hasMgmtMarkers;
+    }
+    if (subtype === "process_leadership") {
+      return hasMgmtMarkers;
+    }
+    return hasMgmtMarkers || hasStrategyMarkers;
   });
 
   return leadershipCandidates.length > 0 ? leadershipCandidates : evidence;
+}
+
+function qualifiesPositiveMatch(
+  requirement: string,
+  chunk: EvidenceChunk | undefined,
+  baseScore: number
+): boolean {
+  if (!chunk) {
+    return isGenericProductRequirement(requirement);
+  }
+
+  const subtype = leadershipRequirementSubtype(requirement.toLowerCase());
+  if (subtype === "none") {
+    return baseScore >= minimumEvidenceScore(requirement);
+  }
+
+  if (subtype === "people_management") {
+    return hasDirectPeopleManagementSupport(chunk) && baseScore >= 18;
+  }
+
+  if (subtype === "process_leadership") {
+    return hasProcessLeadershipSupport(chunk) && baseScore >= 16;
+  }
+
+  return (hasProcessLeadershipSupport(chunk) || hasStrategyExecutionSupport(chunk)) && baseScore >= 14;
 }
 
 function extractRequirementKeywords(requirement: string): string[] {
@@ -1139,8 +1193,10 @@ function requirementEvidenceScore(
   const leadershipRoleBonus = leadershipRoleTitleBonus(requirement, item);
   const leadershipOutcomePenalty = leadershipOutcomeOnlyPenalty(requirement, item);
   const leadershipSectionAdjustment = leadershipEvidenceSectionAdjustment(requirement, item);
+  const strategicExecutionBonus = strategicExecutionEvidenceBonus(requirement, item);
+  const strategicExecutionPenalty = strategicExecutionMismatchPenalty(requirement, item);
 
-  return evidencePreferenceScore(item) * 10 + keywordHits * 5 + directPhraseBonus + recencyBonus + domainBonus + leadershipBonus + leadershipRoleBonus + leadershipSectionAdjustment - reusePenalty - rolePenalty - recencyPenalty - contextPenalty - catchAllRolePenalty - specificityPenalty - leadershipPenalty - leadershipOutcomePenalty;
+  return evidencePreferenceScore(item) * 10 + keywordHits * 5 + directPhraseBonus + recencyBonus + domainBonus + leadershipBonus + leadershipRoleBonus + leadershipSectionAdjustment + strategicExecutionBonus - reusePenalty - rolePenalty - recencyPenalty - contextPenalty - catchAllRolePenalty - specificityPenalty - leadershipPenalty - leadershipOutcomePenalty - strategicExecutionPenalty;
 }
 
 function roleSpecificityPenalty(item: EvidenceChunk): number {
@@ -1186,9 +1242,10 @@ function domainSpecificEvidenceBonus(requirement: string, haystack: string): num
 
 function leadershipProcessEvidenceBonus(requirement: string, haystack: string): number {
   const req = requirement.toLowerCase();
+  const subtype = leadershipRequirementSubtype(req);
   let bonus = 0;
 
-  if (isLeadershipRequirement(req)) {
+  if (subtype !== "none") {
     if (/\b(team building|team leadership|built local team|manager|product development manager|leadership|mentor|coordinated|governance|alignment|agile|process|operating|workshop|prioritization)\b/.test(haystack)) {
       bonus += 10;
     }
@@ -1207,19 +1264,70 @@ function leadershipProcessEvidenceBonus(requirement: string, haystack: string): 
   return bonus;
 }
 
-function leadershipMismatchPenalty(requirement: string, haystack: string): number {
-  const req = requirement.toLowerCase();
-
-  if (!isLeadershipRequirement(req)) {
+function strategicExecutionEvidenceBonus(requirement: string, item: EvidenceChunk): number {
+  const subtype = leadershipRequirementSubtype(requirement.toLowerCase());
+  if (subtype !== "strategic_execution") {
     return 0;
   }
 
-  if (/\b(api|workflow|kyc|integration|provider|portal|assistant)\b/.test(haystack) && !/\b(team|manager|leadership|process|agile|workshop|governance|alignment|mentor|delivery|cadence|operating)\b/.test(haystack)) {
+  const roleTitle = item.metadata?.roleTitle?.toLowerCase() ?? "";
+  const haystack = `${item.title} ${item.section} ${item.text} ${item.tags.join(" ")}`.toLowerCase();
+  let bonus = 0;
+
+  if (/\b(strategy|strategic|roadmap|discovery|requirements|stakeholder|prioritization|vision|alignment|workshop)\b/.test(haystack)) {
+    bonus += 10;
+  }
+  if (/\b(product strategist|senior product manager|product manager|technical product manager)\b/.test(roleTitle)) {
+    bonus += 3;
+  }
+
+  return bonus;
+}
+
+function leadershipMismatchPenalty(requirement: string, haystack: string): number {
+  const req = requirement.toLowerCase();
+  const subtype = leadershipRequirementSubtype(req);
+
+  if (subtype === "none") {
+    return 0;
+  }
+
+  const hasMgmtMarkers = /\b(team|manager|leadership|process|agile|workshop|governance|alignment|mentor|delivery|prioritization|cadence|operating)\b/.test(haystack);
+  const hasStrategyMarkers = /\b(strategy|strategic|roadmap|discovery|requirements|stakeholder|execution|delivery)\b/.test(haystack);
+
+  if (subtype === "people_management" && !hasMgmtMarkers) {
+    return 24;
+  }
+  if (subtype === "process_leadership" && !hasMgmtMarkers) {
+    return 18;
+  }
+
+  if (/\b(api|workflow|kyc|integration|provider|portal|assistant)\b/.test(haystack) && !hasMgmtMarkers && !hasStrategyMarkers) {
     return 14;
   }
 
-  if (!/\b(team|manager|leadership|process|agile|workshop|governance|alignment|mentor|delivery|prioritization|cadence|operating)\b/.test(haystack)) {
+  if (!hasMgmtMarkers && !hasStrategyMarkers) {
     return 10;
+  }
+
+  return 0;
+}
+
+function strategicExecutionMismatchPenalty(requirement: string, item: EvidenceChunk): number {
+  const subtype = leadershipRequirementSubtype(requirement.toLowerCase());
+  if (subtype !== "strategic_execution") {
+    return 0;
+  }
+
+  const haystack = `${item.title} ${item.section} ${item.text} ${item.tags.join(" ")}`.toLowerCase();
+  const hasStrategyMarkers = /\b(strategy|strategic|roadmap|discovery|requirements|stakeholder|prioritization|vision|alignment|workshop)\b/.test(haystack);
+  const looksOutcomeHeavy = /\b(\$[0-9]|savings|reduction|improvement|projected|adoption|portal product work|workflow adoption)\b/.test(haystack);
+
+  if (looksOutcomeHeavy && !hasStrategyMarkers) {
+    return 16;
+  }
+  if (!hasStrategyMarkers && /\b(player.?coach|strategy|strategic|individual contributor)\b/.test(requirement.toLowerCase())) {
+    return 8;
   }
 
   return 0;
@@ -1227,7 +1335,8 @@ function leadershipMismatchPenalty(requirement: string, haystack: string): numbe
 
 function leadershipRoleTitleBonus(requirement: string, item: EvidenceChunk): number {
   const req = requirement.toLowerCase();
-  if (!isLeadershipRequirement(req)) {
+  const subtype = leadershipRequirementSubtype(req);
+  if (subtype === "none") {
     return 0;
   }
 
@@ -1245,12 +1354,45 @@ function leadershipRoleTitleBonus(requirement: string, item: EvidenceChunk): num
   return bonus;
 }
 
+function hasDirectPeopleManagementSupport(item: EvidenceChunk): boolean {
+  const roleTitle = item.metadata?.roleTitle?.toLowerCase() ?? "";
+  const haystack = `${item.title} ${item.section} ${item.text} ${item.tags.join(" ")}`.toLowerCase();
+  return (
+    hasPeopleManagementTitle(roleTitle) ||
+    /\b(mentor|mentoring|coached|coaching|manage(?:d|ment)? team|built team|hired|people manager|team leadership|develop(?:ed)? a small product team)\b/.test(haystack)
+  );
+}
+
+function hasProcessLeadershipSupport(item: EvidenceChunk): boolean {
+  const haystack = `${item.title} ${item.section} ${item.text} ${item.tags.join(" ")}`.toLowerCase();
+  return /\b(agile|process|operating rhythm|operating rhythms|cadence|governance|alignment|workshop|prioritization|delivery model|team building)\b/.test(haystack);
+}
+
+function hasStrategyExecutionSupport(item: EvidenceChunk): boolean {
+  const haystack = `${item.title} ${item.section} ${item.text} ${item.tags.join(" ")}`.toLowerCase();
+  return /\b(strategy|strategic|roadmap|discovery|requirements|stakeholder|execution|delivery|ownership)\b/.test(haystack);
+}
+
 function isLeadershipRequirement(requirement: string): boolean {
   return /\b(player.?coach|leadership|lead product team|mentor|develop a small product team|high-performing product function|product processes?|operating rhythms?|operating rhythm|team|product function)\b/.test(requirement);
 }
 
+function leadershipRequirementSubtype(requirement: string): "none" | "people_management" | "process_leadership" | "strategic_execution" {
+  if (!isLeadershipRequirement(requirement)) {
+    return "none";
+  }
+  if (/\b(mentor|develop a small product team|lead product team|small product team|team)\b/.test(requirement)) {
+    return "people_management";
+  }
+  if (/\b(product processes?|operating rhythms?|operating rhythm|cadence|process)\b/.test(requirement)) {
+    return "process_leadership";
+  }
+  return "strategic_execution";
+}
+
 function leadershipEvidenceSectionAdjustment(requirement: string, item: EvidenceChunk): number {
-  if (!isLeadershipRequirement(requirement.toLowerCase())) {
+  const subtype = leadershipRequirementSubtype(requirement.toLowerCase());
+  if (subtype === "none") {
     return 0;
   }
 
@@ -1265,6 +1407,9 @@ function leadershipEvidenceSectionAdjustment(requirement: string, item: Evidence
   }
   if (section === "summary" && hasLeadershipMarkers) {
     return 14;
+  }
+  if ((subtype === "people_management" || subtype === "process_leadership") && section.startsWith("achievement") && !hasManagementTitle) {
+    return -24;
   }
   if (section === "project-work" || section === "project-approach") {
     return -14;
@@ -1373,7 +1518,28 @@ function generalRecencyBonus(item: EvidenceChunk): number {
 }
 
 function minimumEvidenceScore(requirement: string): number {
+  const subtype = leadershipRequirementSubtype(requirement.toLowerCase());
+  if (subtype === "people_management") {
+    return 18;
+  }
+  if (subtype === "process_leadership") {
+    return 16;
+  }
   return isGenericProductRequirement(requirement) ? 10 : 14;
+}
+
+function gapExplanationForRequirement(requirement: ExtractedRoleRequirement): string {
+  const subtype = leadershipRequirementSubtype(requirement.text.toLowerCase());
+  if (subtype === "people_management") {
+    return "The current evidence shows product leadership and cross-functional execution, but it does not yet clearly prove direct people management or mentoring of a product team at the level this role appears to require.";
+  }
+  if (subtype === "process_leadership") {
+    return "The current evidence suggests adjacent process and delivery leadership, but this is still a point I would validate directly in interview rather than treat as proven at face value.";
+  }
+
+  return requirement.priority === "must_have"
+    ? "The current evidence set does not yet prove direct experience at the level this requirement appears to demand."
+    : "This looks like a useful interview validation point rather than a proven strength in the current corpus.";
 }
 
 function seniorSignalBonus(requirement: string, item: EvidenceChunk | undefined): number {
@@ -1424,15 +1590,59 @@ function findMostRecentCompany(evidencePool: EvidenceChunk[]): string | undefine
     .at(0)?.metadata?.company;
 }
 
-function buildGenericProductEvidenceSentence(evidencePool: EvidenceChunk[]): string {
-  const examples = selectGenericProductRoleExamples(evidencePool);
-  if (examples.length >= 2) {
-    return `In my recent product roles, including ${examples[0]} and ${examples[1]}, I led discovery, defined requirements, prioritized work, and drove delivery with engineering teams.`;
+function buildGenericProductEvidenceSentence(requirement: string, evidencePool: EvidenceChunk[]): string {
+  const preferredRecentRoles = selectPreferredRecentProductRoles(evidencePool);
+  if (preferredRecentRoles.length >= 2) {
+    return `In my recent product roles at ${preferredRecentRoles[0]} and ${preferredRecentRoles[1]}, I led discovery, defined requirements, prioritized work, and drove delivery with engineering teams.`;
   }
-  if (examples.length === 1) {
-    return `In my recent product roles, including ${examples[0]}, I led discovery, defined requirements, prioritized work, and drove delivery with engineering teams.`;
+
+  if (preferredRecentRoles.length === 1 && preferredRecentRoles[0] === "EPAM") {
+    return "In my latest product role at EPAM, I led discovery, defined requirements, prioritized work, and drove delivery with engineering teams.";
   }
-  return "In my recent product roles, I led discovery, defined requirements, prioritized work, and drove delivery with engineering teams.";
+
+  if (hasPreviousRoleGenericProductEvidence(evidencePool)) {
+    return /\b(cross-functional|stakeholder|communications?)\b/i.test(requirement)
+      ? "In my previous roles, I worked cross-functionally with engineering and business stakeholders to turn product needs into delivery priorities."
+      : "In my previous roles, I led discovery, defined requirements, prioritized work, and drove delivery with engineering teams.";
+  }
+
+  return /\b(cross-functional|stakeholder|communications?)\b/i.test(requirement)
+    ? "In my previous roles, I worked cross-functionally with engineering and business stakeholders to turn product needs into delivery priorities."
+    : "In my previous roles, I led discovery, defined requirements, prioritized work, and drove delivery with engineering teams.";
+}
+
+function buildBroadSeniorProductEvidenceSentence(evidencePool: EvidenceChunk[]): string {
+  const preferredRoles = selectPreferredRecentProductRoles(evidencePool);
+  if (preferredRoles.length >= 2) {
+    return `Across recent product roles at ${preferredRoles[0]} and ${preferredRoles[1]}, I owned roadmap direction, led discovery and requirements, prioritized delivery with engineering teams, and coordinated cross-functional execution across SaaS and enterprise product work.`;
+  }
+
+  const namedRoles = selectGenericProductRoleExamples(evidencePool);
+  if (namedRoles.length >= 2) {
+    return `Across product roles at ${namedRoles[0]} and ${namedRoles[1]}, I owned roadmap direction, led discovery and requirements, prioritized delivery with engineering teams, and coordinated cross-functional execution across SaaS and enterprise product work.`;
+  }
+
+  return "Across my previous product roles, I owned roadmap direction, led discovery and requirements, prioritized delivery with engineering teams, and coordinated cross-functional execution across SaaS and enterprise product work.";
+}
+
+function selectLatestGenericProductRoleExample(evidencePool: EvidenceChunk[]): string | undefined {
+  return [...evidencePool]
+    .filter((item) => isNamedGenericProductRoleCandidate(item))
+    .sort((left, right) => (right.metadata?.endDate ?? right.metadata?.startDate ?? "").localeCompare(left.metadata?.endDate ?? left.metadata?.startDate ?? ""))
+    .map((item) => item.metadata?.company)
+    .find((company): company is string => !!company);
+}
+
+function selectPreferredRecentProductRoles(evidencePool: EvidenceChunk[]): string[] {
+  const preferred = ["EPAM", "Modus Create"];
+  const available = new Set(
+    evidencePool
+      .filter((item) => isNamedGenericProductRoleCandidate(item))
+      .map((item) => item.metadata?.company)
+      .filter((company): company is string => !!company)
+  );
+
+  return preferred.filter((company) => available.has(company));
 }
 
 function selectGenericProductRoleExamples(evidencePool: EvidenceChunk[]): string[] {
@@ -1452,6 +1662,14 @@ function selectGenericProductRoleExamples(evidencePool: EvidenceChunk[]): string
       return true;
     })
     .slice(0, 2);
+}
+
+function hasPreviousRoleGenericProductEvidence(evidencePool: EvidenceChunk[]): boolean {
+  return evidencePool.some((item) => {
+    const roleTitle = item.metadata?.roleTitle?.toLowerCase() ?? "";
+    const text = `${item.title} ${item.text} ${item.tags.join(" ")}`.toLowerCase();
+    return /\bproduct\b/.test(roleTitle) && /\b(discovery|requirements|roadmap|prioritization|stakeholder|delivery|execution)\b/.test(text);
+  });
 }
 
 function isNamedGenericProductRoleCandidate(item: EvidenceChunk): boolean {

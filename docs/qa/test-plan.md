@@ -21,6 +21,7 @@
 - General product JDs do not receive lower fit solely because they omit specialized domain language
 - Gaps are phrased as validation points rather than premature rejection signals
 - Recruiter-facing fit output never mentions preferred domains, absent AI wording, or internal scoring logic
+- Recruiter-brief bullets must remain deterministic even when the LLM returns weaker recruiter-facing bullet content; tests should verify that LLM-provided bullets do not override deterministic evidence selection
 - Requirement extraction returns role requirements/functions/expectations rather than titles, locations, or ATS boilerplate
 - Retrieval prefers semantic embeddings when a generated artifact or live embedding path is available, and falls back deterministically only when semantic mode is unavailable
 - Fit-analysis retrieval should merge a broad role-text query with prioritized per-requirement queries so downstream requirement matching can choose distinct, role-appropriate evidence instead of overfitting to the top few broad-query chunks
@@ -38,12 +39,17 @@
 - Fit-analysis regressions must verify that company-mission/brand-intro prose does not surface as a match bullet, that encoded HTML artifacts do not appear in bullet headers, and that positive bullets do not reuse the same evidence chunk
 - Fit-analysis regressions must verify that culture/work-environment lines do not surface as match bullets and that player-coach/team-process requirements prefer leadership/process evidence over isolated technical workflows
 - Fit-analysis regressions must verify that leadership/team/process requirements prefer explicit management/process evidence over outcome-heavy portal/project evidence when both are available
+- Fit-analysis regressions must verify that direct people-management requirements move into `Gaps to note` when the corpus shows only adjacent senior-product leadership rather than explicit team-management or mentoring proof
 - Fit-analysis regressions must verify that repeated positive explanations are grouped into one evidence block with multiple requirement bullets instead of rendering duplicate cards
 - Fit-analysis regressions must verify that anonymized portfolio-summary evidence is rewritten into concrete engagement examples instead of surfacing internal anonymization wording
 - Fit-analysis regressions must verify that, when evidence is otherwise comparable, newer experience is preferred over older experience in recruiter-facing support selection
 - Fit-analysis regressions must verify that recruiter-facing evidence excludes portfolio/meta project artifacts and other non-experience repo content
 - Fit-analysis regressions must verify that broad catch-all consulting evidence such as Vingis loses tie-breaks against more concrete matching role/project evidence
-- Fit-analysis regressions must verify that generic PM-evidence sentences prefer EPAM/Modus-style named recent roles and omit Vingis as the named example when it is the only available source
+- Fit-analysis regressions must verify that generic PM-evidence sentences prefer the latest relevant named role when available and otherwise fall back to a neutral `In my previous roles...` phrasing without naming Vingis
+- Fit-analysis regressions must verify that grouped generic PM bullets prefer a recent dual-role summary such as `EPAM and Modus Create` when those roles are available
+- Fit-analysis regressions must verify that broad senior-product qualification bullets use a cross-role leadership summary rather than a narrow one-off explainer
+- Fit-analysis regressions must verify that catch-all Vingis evidence is rendered with neutral `In my previous roles...` phrasing instead of naming Vingis directly in recruiter-facing support text
+- Fit-analysis regressions must verify that strategic-execution requirements prefer explicit strategy/discovery/roadmap evidence over outcome-heavy portal/project evidence
 - Fallback behavior remains usable when `OPENAI_API_KEY` is missing
 
 ## Operational

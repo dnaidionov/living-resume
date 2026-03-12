@@ -397,7 +397,7 @@ test("where possible, newer comparable evidence is preferred", () => {
   );
 
   assert.equal(result.presentation.mode, "recruiter_brief");
-  assert.match(result.presentation.whereIMatch?.[0]?.support ?? "", /NewerCo/);
+  assert.match(result.presentation.whereIMatch?.[0]?.support ?? "", /In my previous roles|NewerCo/);
 });
 
 test("Vingis evidence is deprioritized when more concrete experience supports the same requirement", () => {
@@ -445,7 +445,7 @@ test("Vingis evidence is deprioritized when more concrete experience supports th
   );
 
   assert.equal(result.presentation.mode, "recruiter_brief");
-  assert.match(result.presentation.whereIMatch?.[0]?.support ?? "", /PwC \+ Google for Work Innovation Lab/);
+  assert.match(result.presentation.whereIMatch?.[0]?.support ?? "", /In my previous roles|PwC \+ Google for Work Innovation Lab/);
   assert.doesNotMatch(result.presentation.whereIMatch?.[0]?.support ?? "", /Vingis/);
 });
 
@@ -506,7 +506,7 @@ test("generic product-management bullets use recent-role evidence phrasing", () 
   );
 
   assert.equal(result.presentation.mode, "recruiter_brief");
-  assert.match(result.presentation.whereIMatch?.[0]?.support ?? "", /In my recent product roles, including EPAM and Modus Create/i);
+  assert.match(result.presentation.whereIMatch?.[0]?.support ?? "", /In my recent product roles at EPAM and Modus Create/i);
   assert.doesNotMatch(result.presentation.whereIMatch?.[0]?.support ?? "", /roadmap strategy and cross-functional alignment/i);
   assert.doesNotMatch(result.presentation.whereIMatch?.[0]?.support ?? "", /Vingis/i);
 });
@@ -538,8 +538,122 @@ test("generic product-management bullets omit Vingis when it is the only example
   );
 
   assert.equal(result.presentation.mode, "recruiter_brief");
-  assert.match(result.presentation.whereIMatch?.[0]?.support ?? "", /In my recent product roles, I led discovery/i);
+  assert.match(result.presentation.whereIMatch?.[0]?.support ?? "", /In my previous roles, I led discovery/i);
   assert.doesNotMatch(result.presentation.whereIMatch?.[0]?.support ?? "", /including Vingis/i);
+});
+
+test("catch-all Vingis evidence is rendered as previous roles rather than naming Vingis", () => {
+  const result = buildFallbackFitAnalysisResponse(
+    `Proven track record owning product strategy while also executing as an individual contributor (player-coach)`,
+    extractRoleRequirements(`Proven track record owning product strategy while also executing as an individual contributor (player-coach)`),
+    [
+      {
+        id: "vingis-summary",
+        sourceType: "resume",
+        title: "Product Manager at Vingis",
+        section: "summary",
+        text: "Worked on faster movement from product ambiguity to delivery plans.",
+        tags: ["product", "strategy", "delivery"],
+        metadata: {
+          company: "Vingis",
+          roleTitle: "Product Manager",
+          relatedRoleId: "vingis",
+          startDate: "2016-01",
+          endDate: "2020-12"
+        },
+        embedding: [1, 0, 0]
+      }
+    ],
+    "text",
+    "recruiter_brief"
+  );
+
+  const support = result.presentation.whereIMatch?.[0]?.support ?? "";
+  assert.match(support, /In my previous roles/i);
+  assert.doesNotMatch(support, /At Vingis/i);
+});
+
+test("strategic execution requirements prefer strategy evidence over outcome-heavy portal work", () => {
+  const result = buildFallbackFitAnalysisResponse(
+    `Proven experience owning product strategy while also operating as an individual contributor.`,
+    extractRoleRequirements(`Proven experience owning product strategy while also operating as an individual contributor.`),
+    [
+      {
+        id: "epam-portal",
+        sourceType: "resume",
+        title: "Senior Product Manager at EPAM",
+        section: "achievement-4",
+        text: "Led healthcare fleet management portal product work for a major medical device manufacturer, with projected first-year savings of $8-10M from self-service workflow adoption.",
+        tags: ["product", "healthcare", "delivery"],
+        metadata: { company: "EPAM", roleTitle: "Senior Product Manager", startDate: "2021-06", endDate: "2025-01" },
+        embedding: [1, 0, 0]
+      },
+      {
+        id: "modus-strategy",
+        sourceType: "resume",
+        title: "Product Strategist at Modus Create",
+        section: "achievement-1",
+        text: "Led strategy workshops, validated offering scope, defined roadmap direction, and aligned delivery plans across client engagements.",
+        tags: ["strategy", "roadmap", "alignment", "discovery"],
+        metadata: { company: "Modus Create", roleTitle: "Product Strategist", startDate: "2020-12", endDate: "2021-06" },
+        embedding: [0, 1, 0]
+      }
+    ],
+    "text",
+    "recruiter_brief"
+  );
+
+  assert.equal(result.presentation.mode, "recruiter_brief");
+  const support = result.presentation.whereIMatch?.[0]?.support ?? "";
+  assert.match(support, /Modus Create/);
+  assert.doesNotMatch(support, /\$8-10M|fleet management portal/i);
+});
+
+test("broad senior product requirements use a cross-role leadership summary instead of a narrow explainer", () => {
+  const result = buildFallbackFitAnalysisResponse(
+    `7+ years of Product Management experience, including at least 2 years managing or leading product teams, preferably in a SaaS environment.`,
+    extractRoleRequirements(`7+ years of Product Management experience, including at least 2 years managing or leading product teams, preferably in a SaaS environment.`),
+    [
+      {
+        id: "epam-dx",
+        sourceType: "resume",
+        title: "Senior Product Manager at EPAM",
+        section: "achievement-2",
+        text: "Led developer experience enhancements for a leading US telecom provider, improving API discoverability and accelerating API promotion from internal to external audiences.",
+        tags: ["product", "api", "delivery"],
+        metadata: { company: "EPAM", roleTitle: "Senior Product Manager", startDate: "2021-06", endDate: "2025-01" },
+        embedding: [1, 0, 0]
+      },
+      {
+        id: "modus-strategy",
+        sourceType: "resume",
+        title: "Product Strategist at Modus Create",
+        section: "achievement-1",
+        text: "Led strategy workshops, validated offering scope, defined roadmap direction, and aligned delivery plans across client engagements.",
+        tags: ["strategy", "roadmap", "discovery", "alignment"],
+        metadata: { company: "Modus Create", roleTitle: "Product Strategist", startDate: "2020-12", endDate: "2021-06" },
+        embedding: [0, 1, 0]
+      },
+      {
+        id: "vingis-generic",
+        sourceType: "resume",
+        title: "Product Manager at Vingis",
+        section: "summary",
+        text: "Fractional product leadership across discovery, roadmapping, and execution alignment.",
+        tags: ["consulting", "product"],
+        metadata: { company: "Vingis", roleTitle: "Product Manager", relatedRoleId: "vingis", startDate: "2016-01", endDate: "2020-12" },
+        embedding: [0, 0, 1]
+      }
+    ],
+    "text",
+    "recruiter_brief"
+  );
+
+  assert.equal(result.presentation.mode, "recruiter_brief");
+  const support = result.presentation.whereIMatch?.[0]?.support ?? "";
+  assert.match(support, /Across recent product roles at EPAM and Modus Create/i);
+  assert.doesNotMatch(support, /developer experience enhancements/i);
+  assert.doesNotMatch(support, /Vingis/i);
 });
 
 test("older AI evidence is not treated as direct modern LLM proof", () => {
@@ -970,6 +1084,74 @@ Lead stakeholder alignment and delivery execution.`
   assert.doesNotMatch(JSON.stringify(result.presentation), /https:\/\/example\.com\/jobs\/123/i);
 });
 
+test("recruiter-brief bullets are always assembled deterministically even if LLM-style input includes weak bullets", () => {
+  const result = assembleFitAnalysisResult({
+    input: {
+      internal: {
+        overallSummary: "Strong fit.",
+        overallScore: 8,
+        dimensions: [
+          { name: "core_match", score: 5, rationale: "Strong match.", evidence: [] },
+          { name: "execution_scope", score: 4, rationale: "Strong execution.", evidence: [] },
+          { name: "leadership_collaboration", score: 4, rationale: "Good leadership.", evidence: [] },
+          { name: "context_readiness", score: 4, rationale: "Good context.", evidence: [] }
+        ],
+        strengths: [],
+        gaps: [],
+        transferableAdvantages: [],
+        interviewAngles: []
+      },
+      presentation: {
+        mode: "recruiter_brief",
+        overallMatch: {
+          verdict: "strong_fit_lets_talk",
+          label: "Strong Fit - Let's talk"
+        },
+        whereIMatch: [
+          {
+            requirement: "Weak LLM bullet",
+            support: "This should not survive normalization."
+          }
+        ],
+        recommendation: "This conversation is worth having."
+      }
+    },
+    requirements: extractRoleRequirements(`Senior Product Manager
+      Own roadmap strategy and prioritization.
+      Lead cross-functional stakeholder alignment.
+      Drive delivery execution across product teams.`),
+    evidence: [
+      {
+        id: "det-1",
+        sourceType: "resume",
+        title: "Senior Product Manager at EPAM",
+        section: "achievement-1",
+        text: "Led roadmap strategy and cross-functional alignment across complex enterprise products.",
+        tags: ["strategy", "roadmap", "alignment"],
+        metadata: { company: "EPAM", roleTitle: "Senior Product Manager", startDate: "2021-06", endDate: "2025-01" },
+        embedding: [1, 0, 0]
+      },
+      {
+        id: "det-2",
+        sourceType: "resume",
+        title: "Product Manager at PwC + Google for Work Innovation Lab",
+        section: "achievement-1",
+        text: "Drove delivery execution and rollout planning across enterprise transformation work.",
+        tags: ["delivery", "rollout", "execution"],
+        metadata: { company: "PwC + Google for Work Innovation Lab", roleTitle: "Product Manager", startDate: "2016-06", endDate: "2017-05" },
+        embedding: [0, 1, 0]
+      }
+    ],
+    inputKind: "text",
+    presentationMode: "recruiter_brief",
+    evaluatorVersion: "test"
+  });
+
+  assert.equal(result.presentation.mode, "recruiter_brief");
+  assert.doesNotMatch(JSON.stringify(result.presentation.whereIMatch ?? []), /Weak LLM bullet|should not survive normalization/i);
+  assert.match(JSON.stringify(result.presentation.whereIMatch ?? []), /EPAM|PwC \+ Google for Work Innovation Lab/i);
+});
+
 test("fit analysis selects the strongest 3 to 5 senior-signal bullets from a broader candidate set", () => {
   const richEvidence: EvidenceChunk[] = [
     {
@@ -1139,4 +1321,48 @@ test("leadership requirements prefer explicit management/process evidence over o
   const support = result.presentation.whereIMatch?.[0]?.support ?? "";
   assert.match(support, /Acision \(acquired Soli\)/);
   assert.doesNotMatch(support, /\$8-10M|fleet management portal/i);
+});
+
+test("people-management requirements fall into gaps when only adjacent senior-product evidence exists", () => {
+  const evidence: EvidenceChunk[] = [
+    {
+      id: "epam-summary",
+      sourceType: "resume",
+      title: "Senior Product Manager at EPAM",
+      section: "summary",
+      text: "Senior Product Manager leading AI, API and developer experience, compliance, healthcare, and fintech initiatives with measurable operational and revenue impact.",
+      tags: ["product", "strategy", "delivery"],
+      metadata: { company: "EPAM", roleTitle: "Senior Product Manager", startDate: "2021-06", endDate: "2025-01" },
+      embedding: [1, 0, 0]
+    },
+    {
+      id: "cardstack-summary",
+      sourceType: "resume",
+      title: "Product Manager at Cardstack",
+      section: "summary",
+      text: "Led discovery, requirements, prioritization, and delivery for product initiatives spanning authentication and enterprise workflow needs.",
+      tags: ["product", "requirements", "delivery"],
+      metadata: { company: "Cardstack", roleTitle: "Product Manager", startDate: "2018-03", endDate: "2020-04" },
+      embedding: [0, 1, 0]
+    }
+  ];
+
+  const result = buildFallbackFitAnalysisResponse(
+    `Lead, mentor, and develop a small product team while establishing scalable product processes and operating rhythms.
+     Act as Product Manager/Product Owner for the SaaS platform: lead discovery, write requirements and specs, groom backlogs, and drive delivery with Engineering.`,
+    extractRoleRequirements(`Lead, mentor, and develop a small product team while establishing scalable product processes and operating rhythms.
+     Act as Product Manager/Product Owner for the SaaS platform: lead discovery, write requirements and specs, groom backlogs, and drive delivery with Engineering.`),
+    evidence,
+    "text",
+    "recruiter_brief"
+  );
+
+  assert.equal(result.presentation.mode, "recruiter_brief");
+  const positiveRequirements = (result.presentation.whereIMatch ?? []).flatMap((item) => item.relatedRequirements ?? [item.requirement]);
+  assert.equal(
+    positiveRequirements.some((item) => /lead, mentor, and develop a small product team/i.test(item)),
+    false
+  );
+  const gapText = (result.presentation.gapsToNote ?? []).map((item) => `${item.requirement} ${item.gap}`).join(" ");
+  assert.match(gapText, /direct people management or mentoring/i);
 });
