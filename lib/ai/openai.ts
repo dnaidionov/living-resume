@@ -92,7 +92,7 @@ export async function generateFitAnalysisWithOpenAI(
       stageVersions: {
         requirementExtraction: "v1-llm-primary",
         retrieval: "v1-semantic-static",
-        generation: "v2-llm-dual-format"
+        generation: "v3-llm-internal-deterministic-brief"
       }
     });
   } catch {

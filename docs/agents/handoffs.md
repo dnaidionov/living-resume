@@ -147,8 +147,23 @@
 - restrict recruiter-facing fit evidence to actual experience-bearing sources; do not let portfolio/meta project artifacts surface as proof of prior role fit
 - sanitize numeric HTML entities and other encoded artifacts before JD segments are promoted to recruiter-facing bullet titles
 - require one-to-one positive evidence assignment: if a bullet cannot be supported by its own defensible proof point, drop it instead of showing `Same as above.`
+- if multiple positive-fit requirements share the same explanation, group them into one recruiter-facing evidence block and render the requirements as bullets under that shared support text
+- when handling URL fit-analysis input, preserve the original URL as provenance but pass fetched JD content through requirement extraction, retrieval, and generation so recruiter-facing output never analyzes the URL string itself
 - tighten evidence ranking for enterprise/integration/rollout/tradeoff requirements so generic PM evidence does not outrank more relevant technical-operating proof
+- exclude culture/work-environment statements from recruiter-facing requirement bullets unless they contain a concrete responsibility or qualification signal
+- for player-coach, team-building, and operating-rhythm requirements, rank leadership/process evidence ahead of isolated implementation examples
+- for leadership/team/process requirements, prefer explicit management/process evidence and management-titled roles over generic outcome-heavy product evidence when both can support the bullet
+- treat direct people-management requirements as a higher bar than general senior-product leadership: if the evidence is only adjacent, move that requirement into `Gaps to note` rather than `Where I match`
+- fit-analysis retrieval should merge a broad role-text query with prioritized per-requirement queries so the scorer can see enough management/process/context evidence before ranking support
+- after broader recall, rank candidate requirement-evidence pairs and render only the strongest 3 to 5 recruiter-facing bullets, with a bias toward senior-signal support rather than first-match order
+- use the LLM for internal fit synthesis and recommendation text only; recruiter-facing evidence bullets must come from deterministic requirement/evidence selection so model drift cannot override grounded support
 - rewrite anonymized portfolio-summary evidence into concrete engagement examples such as conversational AI assistant or fleet management portal instead of exposing internal anonymization phrasing
+- keep Vingis available as supporting evidence, but deprioritize it against more concrete role/project evidence when the match quality is otherwise comparable
+- for generic PM expectations, prefer the latest relevant named product role in recruiter-facing evidence sentences; if only catch-all evidence like Vingis remains, keep the sentence generic instead of naming it
+- when grouped generic PM bullets are supported by recent-role evidence from both EPAM and Modus Create, prefer a dual-role sentence rather than naming only the latest role
+- when the JD asks for broad senior-product tenure plus generic leadership depth, use a cross-role leadership summary rather than a narrow one-off explainer as recruiter-facing support
+- if catch-all consulting evidence such as Vingis is still the selected support, render it as neutral `In my previous roles...` phrasing rather than naming Vingis directly
+- for strategic-execution requirements, prefer strategy/discovery/roadmap proof over outcome-only delivery examples when both can support the same JD bullet
 
 ## Ops / Release Agent -> Deployment Execution (Cloudflare Adapter Readiness 2026-03-07)
 

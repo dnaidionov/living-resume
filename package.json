@@ -4,15 +4,16 @@
   "private": true,
   "scripts": {
     "dev": "next dev",
-    "build": "next build",
-    "cf:build": "opennextjs-cloudflare build",
+    "build": "npm run embeddings:verify && next build",
+    "cf:build": "npm run embeddings:verify && opennextjs-cloudflare build",
     "cf:preview": "wrangler dev",
     "cf:deploy": "opennextjs-cloudflare deploy",
     "start": "next start",
     "lint": "next lint",
-    "test": "node --import tsx --test tests/**/*.test.ts",
+    "test": "npm run embeddings:verify && node --import tsx --test tests/**/*.test.ts",
     "content:build": "node --import tsx scripts/build-content-index.ts",
-    "embeddings:build": "node --import tsx scripts/build-embeddings.ts"
+    "embeddings:build": "node --import tsx scripts/build-embeddings.ts",
+    "embeddings:verify": "node --import tsx scripts/verify-embeddings.ts"
   },
   "dependencies": {
     "jszip": "^3.10.1",
