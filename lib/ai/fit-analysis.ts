@@ -9,7 +9,7 @@ function roleInputToText(input: RoleInput): string {
     return input.text;
   }
   if (input.kind === "url") {
-    return input.url;
+    return input.content ?? input.url;
   }
   return `${input.fileId} ${input.mimeType}`;
 }

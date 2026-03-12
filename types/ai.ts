@@ -23,7 +23,7 @@ export type ChatAnswer = {
 export type RoleInput =
   | { kind: "text"; text: string }
   | { kind: "file"; fileId: string; mimeType: string }
-  | { kind: "url"; url: string };
+  | { kind: "url"; url: string; content?: string };
 
 export type FitPresentationMode = "scorecard" | "recruiter_brief";
 
@@ -52,6 +52,7 @@ export type FitDimension = {
 export type MatchBullet = {
   requirement: string;
   support: string;
+  relatedRequirements?: string[];
   citations?: Citation[];
 };
 

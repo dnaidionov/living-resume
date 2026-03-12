@@ -15,6 +15,9 @@ function modeFilter(mode: "resume_qa" | "fit_analysis" | "build_process", chunk:
   if (mode === "build_process") {
     return chunk.sourceType === "build_doc" || chunk.sourceType === "case_study";
   }
+  if (mode === "fit_analysis") {
+    return chunk.sourceType === "resume" || chunk.sourceType === "ai_context";
+  }
   return chunk.sourceType !== "build_doc";
 }
 
@@ -22,6 +25,7 @@ export const staticRetrievalStore: RetrievalStore = {
   async searchEvidence(query, mode) {
     const chunks = await loadEmbeddedChunks();
     const queryEmbedding = await embedQuery(query, usesSemanticEmbeddings(chunks));
+    const limit = mode === "fit_analysis" ? 12 : 5;
 
     return chunks
       .filter((chunk) => modeFilter(mode, chunk))
@@ -30,7 +34,7 @@ export const staticRetrievalStore: RetrievalStore = {
         score: cosineSimilarity(queryEmbedding, chunk.embedding)
       }))
       .sort((left, right) => right.score - left.score)
-      .slice(0, 5)
+      .slice(0, limit)
       .map(({ chunk }) => chunk);
   }
 };

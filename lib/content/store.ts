@@ -47,6 +47,8 @@ export async function buildDocuments(): Promise<ContentDocument[]> {
     loadBuildDocs(),
     loadCaseStudies()
   ]);
+  const roleDateById = new Map(roles.map((role) => [role.id, { startDate: role.startDate, endDate: role.endDate }]));
+  const roleMetaById = new Map(roles.map((role) => [role.id, { company: role.company, roleTitle: role.title }]));
 
   return [
     ...roles.flatMap((role) => [
@@ -56,7 +58,14 @@ export async function buildDocuments(): Promise<ContentDocument[]> {
         title: `${role.title} at ${role.company}`,
         section: "summary",
         text: role.summary,
-        tags: role.tags
+        tags: role.tags,
+        metadata: {
+          startDate: role.startDate,
+          endDate: role.endDate,
+          relatedRoleId: role.id,
+          company: role.company,
+          roleTitle: role.title
+        }
       },
       ...role.achievements.map((achievement, index) => ({
         id: `role-${role.id}-achievement-${index + 1}`,
@@ -64,7 +73,14 @@ export async function buildDocuments(): Promise<ContentDocument[]> {
         title: `${role.title} at ${role.company}`,
         section: `achievement-${index + 1}`,
         text: achievement,
-        tags: role.tags
+        tags: role.tags,
+        metadata: {
+          startDate: role.startDate,
+          endDate: role.endDate,
+          relatedRoleId: role.id,
+          company: role.company,
+          roleTitle: role.title
+        }
       }))
     ]),
     ...projects.flatMap((project) => [
@@ -74,7 +90,8 @@ export async function buildDocuments(): Promise<ContentDocument[]> {
         title: project.name,
         section: "summary",
         text: project.summary,
-        tags: project.tags
+        tags: project.tags,
+        metadata: buildProjectMetadata(project.relatedRoleIds, roleDateById, roleMetaById)
       },
       {
         id: `project-${project.id}-problem`,
@@ -82,7 +99,8 @@ export async function buildDocuments(): Promise<ContentDocument[]> {
         title: project.name,
         section: "problem",
         text: project.problem,
-        tags: project.tags
+        tags: project.tags,
+        metadata: buildProjectMetadata(project.relatedRoleIds, roleDateById, roleMetaById)
       },
       ...project.actions.map((action, index) => ({
         id: `project-${project.id}-action-${index + 1}`,
@@ -90,7 +108,8 @@ export async function buildDocuments(): Promise<ContentDocument[]> {
         title: project.name,
         section: `action-${index + 1}`,
         text: action,
-        tags: project.tags
+        tags: project.tags,
+        metadata: buildProjectMetadata(project.relatedRoleIds, roleDateById, roleMetaById)
       }))
     ]),
     ...explainers.flatMap((explainer) => [
@@ -100,7 +119,14 @@ export async function buildDocuments(): Promise<ContentDocument[]> {
         title: explainer.headline,
         section: "summary",
         text: explainer.summary,
-        tags: explainer.skillsDemonstrated
+        tags: explainer.skillsDemonstrated,
+        metadata: {
+          startDate: roleDateById.get(explainer.roleId)?.startDate,
+          endDate: roleDateById.get(explainer.roleId)?.endDate,
+          relatedRoleId: explainer.roleId,
+          company: roleMetaById.get(explainer.roleId)?.company,
+          roleTitle: roleMetaById.get(explainer.roleId)?.roleTitle
+        }
       },
       {
         id: `ai-context-${explainer.id}-situation`,
@@ -108,7 +134,14 @@ export async function buildDocuments(): Promise<ContentDocument[]> {
         title: explainer.headline,
         section: "situation",
         text: explainer.situation,
-        tags: explainer.skillsDemonstrated
+        tags: explainer.skillsDemonstrated,
+        metadata: {
+          startDate: roleDateById.get(explainer.roleId)?.startDate,
+          endDate: roleDateById.get(explainer.roleId)?.endDate,
+          relatedRoleId: explainer.roleId,
+          company: roleMetaById.get(explainer.roleId)?.company,
+          roleTitle: roleMetaById.get(explainer.roleId)?.roleTitle
+        }
       },
       {
         id: `ai-context-${explainer.id}-goal`,
@@ -116,7 +149,14 @@ export async function buildDocuments(): Promise<ContentDocument[]> {
         title: explainer.headline,
         section: "goal",
         text: explainer.goal,
-        tags: explainer.skillsDemonstrated
+        tags: explainer.skillsDemonstrated,
+        metadata: {
+          startDate: roleDateById.get(explainer.roleId)?.startDate,
+          endDate: roleDateById.get(explainer.roleId)?.endDate,
+          relatedRoleId: explainer.roleId,
+          company: roleMetaById.get(explainer.roleId)?.company,
+          roleTitle: roleMetaById.get(explainer.roleId)?.roleTitle
+        }
       },
       ...explainer.outcomes.map((outcome, index) => ({
         id: `ai-context-${explainer.id}-outcome-${index + 1}`,
@@ -124,7 +164,14 @@ export async function buildDocuments(): Promise<ContentDocument[]> {
         title: explainer.headline,
         section: `outcome-${index + 1}`,
         text: outcome,
-        tags: explainer.skillsDemonstrated
+        tags: explainer.skillsDemonstrated,
+        metadata: {
+          startDate: roleDateById.get(explainer.roleId)?.startDate,
+          endDate: roleDateById.get(explainer.roleId)?.endDate,
+          relatedRoleId: explainer.roleId,
+          company: roleMetaById.get(explainer.roleId)?.company,
+          roleTitle: roleMetaById.get(explainer.roleId)?.roleTitle
+        }
       })),
       ...(explainer.projectContexts ?? []).flatMap((projectContext) => [
         {
@@ -133,7 +180,14 @@ export async function buildDocuments(): Promise<ContentDocument[]> {
           title: `${explainer.headline} · ${projectContext.title}`,
           section: "project-situation",
           text: projectContext.situation,
-          tags: explainer.skillsDemonstrated
+          tags: explainer.skillsDemonstrated,
+          metadata: {
+            startDate: roleDateById.get(explainer.roleId)?.startDate,
+            endDate: roleDateById.get(explainer.roleId)?.endDate,
+            relatedRoleId: explainer.roleId,
+            company: roleMetaById.get(explainer.roleId)?.company,
+            roleTitle: roleMetaById.get(explainer.roleId)?.roleTitle
+          }
         },
         {
           id: `ai-context-${explainer.id}-${projectContext.id}-approach`,
@@ -141,7 +195,14 @@ export async function buildDocuments(): Promise<ContentDocument[]> {
           title: `${explainer.headline} · ${projectContext.title}`,
           section: "project-approach",
           text: projectContext.approach,
-          tags: explainer.skillsDemonstrated
+          tags: explainer.skillsDemonstrated,
+          metadata: {
+            startDate: roleDateById.get(explainer.roleId)?.startDate,
+            endDate: roleDateById.get(explainer.roleId)?.endDate,
+            relatedRoleId: explainer.roleId,
+            company: roleMetaById.get(explainer.roleId)?.company,
+            roleTitle: roleMetaById.get(explainer.roleId)?.roleTitle
+          }
         },
         {
           id: `ai-context-${explainer.id}-${projectContext.id}-work`,
@@ -149,7 +210,14 @@ export async function buildDocuments(): Promise<ContentDocument[]> {
           title: `${explainer.headline} · ${projectContext.title}`,
           section: "project-work",
           text: projectContext.work,
-          tags: explainer.skillsDemonstrated
+          tags: explainer.skillsDemonstrated,
+          metadata: {
+            startDate: roleDateById.get(explainer.roleId)?.startDate,
+            endDate: roleDateById.get(explainer.roleId)?.endDate,
+            relatedRoleId: explainer.roleId,
+            company: roleMetaById.get(explainer.roleId)?.company,
+            roleTitle: roleMetaById.get(explainer.roleId)?.roleTitle
+          }
         },
         ...(projectContext.lessonsLearned
           ? [
@@ -159,7 +227,14 @@ export async function buildDocuments(): Promise<ContentDocument[]> {
                 title: `${explainer.headline} · ${projectContext.title}`,
                 section: "project-lessons-learned",
                 text: projectContext.lessonsLearned,
-                tags: explainer.skillsDemonstrated
+                tags: explainer.skillsDemonstrated,
+                metadata: {
+                  startDate: roleDateById.get(explainer.roleId)?.startDate,
+                  endDate: roleDateById.get(explainer.roleId)?.endDate,
+                  relatedRoleId: explainer.roleId,
+                  company: roleMetaById.get(explainer.roleId)?.company,
+                  roleTitle: roleMetaById.get(explainer.roleId)?.roleTitle
+                }
               }
             ]
           : [])
@@ -205,3 +280,41 @@ export const fileContentStore: ContentStore = {
     return buildDocuments();
   }
 };
+
+function buildProjectMetadata(
+  relatedRoleIds: string[],
+  roleDateById: Map<string, { startDate: string; endDate?: string }>,
+  roleMetaById: Map<string, { company: string; roleTitle: string }>
+) {
+  const datedRoles = relatedRoleIds
+    .map((roleId) => ({
+      roleId,
+      dates: roleDateById.get(roleId),
+      meta: roleMetaById.get(roleId)
+    }))
+    .filter((item) => item.dates);
+
+  if (datedRoles.length === 0) {
+    return undefined;
+  }
+
+  datedRoles.sort((left, right) => compareDateStrings(right.dates?.endDate ?? right.dates?.startDate, left.dates?.endDate ?? left.dates?.startDate));
+  const latest = datedRoles[0];
+
+  return {
+    startDate: latest?.dates?.startDate,
+    endDate: latest?.dates?.endDate,
+    relatedRoleId: latest?.roleId,
+    company: latest?.meta?.company,
+    roleTitle: latest?.meta?.roleTitle
+  };
+}
+
+function compareDateStrings(left: string | undefined, right: string | undefined): number {
+  const normalizedLeft = left ?? "";
+  const normalizedRight = right ?? "";
+  if (normalizedLeft === normalizedRight) {
+    return 0;
+  }
+  return normalizedLeft > normalizedRight ? 1 : -1;
+}

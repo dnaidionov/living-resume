@@ -23,9 +23,12 @@ The current repo uses a portable stateless AI runtime:
 - `lib/ai/openai.ts` calls OpenAI through plain `fetch`, not a provider SDK.
 - `lib/ai/chat-service.ts` retrieves evidence and sends the latest chat turn plus a short history window to the model.
 - `lib/ai/fit-analysis.ts` retrieves evidence and requests a structured fit evaluation from the model.
+- URL fit analysis must run on fetched JD content while preserving `inputKind: "url"` in the result metadata; the raw URL should be treated as provenance only, not as analysis text.
 - `lib/platform/file-intake.ts` parses TXT, PDF, and DOCX uploads.
 - `lib/platform/url-intake.ts` normalizes remote job pages into plain text.
 - URL intake should isolate main-content sections and strip navigation, legal, and application boilerplate before requirement extraction runs.
+- URL intake should prefer structured job payloads embedded in JSON or JSON-LD when available, and it must reject serialized theme/config blobs that are not recruiter-readable role content.
+- When structured or HTML body extraction is sparse, URL intake may fall back to meta/title text rather than failing immediately, but it should emit a JS-rendered-page error when the page shell still does not contain enough recruiter-readable role content.
 - Local regression fixtures should cover positive non-AI roles, positive AI-native roles, and obvious stretch roles so fit-calibration drift is visible without live model calls.
 - `lib/ai/requirement-extraction.ts` extracts recruiter-relevant role requirements before fit scoring, using the LLM as the primary path and heuristics only as fallback.
 
@@ -47,7 +50,28 @@ This keeps the app deployable on both Cloudflare and Vercel without requiring a 
 - Requirement extraction is now its own stage and should return structured role requirements before final fit analysis is generated.
 - Heuristic requirement extraction remains only as a fallback path when the LLM extractor is unavailable.
 - Retrieval should run per requirement using semantic embeddings when available, while still staying repo-backed and stateless.
+- Until per-requirement retrieval is implemented, fit analysis should retrieve a broader evidence set than chat so requirement-to-evidence matching has enough recall for leadership, process, and context-specific bullets.
+- Recruiter-facing `Where I match` output should be selected after ranking the broader candidate pool; render only the strongest 3 to 5 bullets with the clearest senior-signal support instead of the first few passing matches.
 - Fit-analysis metadata should expose stage versions so QA can tell which extractor, retrieval path, and generator produced a result.
+- Fit analysis should gate clearly non-product roles to a negative outcome even when some tool or domain overlap exists.
+- Positive recruiter-fit bullets should use one defensible evidence source per bullet. If a distinct proof point is not available, that bullet should be dropped rather than reusing earlier evidence.
+- When multiple positive-fit requirements are supported by the same explanation, recruiter-facing output should group those requirements under one shared evidence block instead of repeating near-identical cards.
+- Modern LLM requirements must be validated against recency; older AI/ML or chatbot work is adjacent, not direct proof.
+- Technology matches must respect context, distinguishing product-adjacent familiarity from hands-on engineering ownership.
+- Recruiter-facing evidence text must use explicit employer provenance from structured experience metadata, not infer the company from AI-context headlines or project-context titles.
+- Negative recruiter briefs should render 3 to 5 `Where I don't fit` bullets, each explaining the concrete mismatch or missing qualification rather than using generic rejection language.
+- Negative recruiter briefs should collapse repeated mismatch explanations to `Same as above.` and reject requirement-to-gap mismatches before rendering.
+- `What does transfer` should describe transferable capabilities, not prior role titles or company names, while the supporting sentence should use explicit employer provenance only when that provenance exists.
+- Requirement ranking should prefer concrete responsibilities, requirements, and expectations over company-branding or mission-intro prose.
+- Requirement ranking should also exclude culture/work-environment statements unless they contain a concrete role responsibility or qualification signal.
+- Requirement extraction must sanitize encoded artifacts such as numeric HTML entities before the segment can become a recruiter-facing bullet title.
+- Evidence ranking should require meaningful keyword/domain coverage for specific requirements such as enterprise systems, integration, rollout, and technical tradeoffs; generic PM evidence is not enough on its own.
+- Leadership, player-coach, team-building, and product-process requirements should prefer management/process/operating evidence over isolated technical workflow examples.
+- When recruiter-visible evidence comes from an anonymized portfolio summary, the formatter should rewrite it into a portfolio-of-engagements statement with concrete project examples rather than exposing internal anonymization language.
+- Broad catch-all consulting evidence should remain available, but when all else is equal it should lose to more concrete project or role evidence. In this repo, Vingis is treated that way in ranking.
+- For generic product-management expectations, recruiter-facing evidence should prefer named recent product roles like EPAM and Modus Create. Vingis should not be used as the named example unless no stronger named role exists, and even then the sentence should stay generic rather than calling Vingis out.
+- When multiple evidence candidates are comparably relevant, newer experience should be preferred over older experience, using structured role/project dates as a secondary ranking signal rather than overriding stronger relevance.
+- Recruiter-facing fit evidence should come from actual experience-bearing sources only. In this repo, that means `resume` and `ai_context`; portfolio/meta project artifacts should not appear as proof of prior role fit.
 
 ## Session model
 

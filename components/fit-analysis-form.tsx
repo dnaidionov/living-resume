@@ -56,6 +56,31 @@ function BulletList<T extends { requirement?: string; support?: string; gap?: st
   );
 }
 
+function MatchSection({ items }: { items: MatchBullet[] }) {
+  return (
+    <div style={{ display: "grid", gap: 12 }}>
+      {items.map((item, index) => (
+        <div key={`${item.requirement}-${index}`} className="pill" style={{ borderRadius: 18, padding: 14 }}>
+          {item.relatedRequirements && item.relatedRequirements.length > 1 ? (
+            <ul style={{ margin: 0, paddingLeft: 20, display: "grid", gap: 6 }}>
+              {item.relatedRequirements.map((requirement) => (
+                <li key={requirement}>
+                  <strong>{requirement}</strong>
+                </li>
+              ))}
+            </ul>
+          ) : (
+            <strong>{item.requirement}</strong>
+          )}
+          <div className="muted" style={{ marginTop: 8 }}>
+            {item.support}
+          </div>
+        </div>
+      ))}
+    </div>
+  );
+}
+
 export function FitAnalysisForm() {
   const [jobText, setJobText] = useState("");
   const [jobUrl, setJobUrl] = useState("");
@@ -240,7 +265,7 @@ function renderPresentation(presentation: RecruiterBriefPresentation | Scorecard
       {presentation.whereIMatch && presentation.whereIMatch.length > 0 ? (
         <section style={{ display: "grid", gap: 10 }}>
           <strong>Where I match</strong>
-          <BulletList items={presentation.whereIMatch} render={(item: MatchBullet) => ({ heading: item.requirement, body: item.support })} />
+          <MatchSection items={presentation.whereIMatch} />
         </section>
       ) : null}
 

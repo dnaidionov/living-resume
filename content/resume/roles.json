@@ -4,12 +4,12 @@
     "company": "EPAM",
     "title": "Senior Product Manager",
     "startDate": "2021-06",
-    "summary": "Senior Product Manager driving enterprise transformation across AI, developer experience, compliance, healthcare, and fintech portfolios, with measurable operational and revenue impact.",
+    "summary": "Senior Product Manager leading AI, API and developer experience, compliance, healthcare, and fintech initiatives with measurable operational and revenue impact.",
     "achievements": [
-      "Set evaluation and prioritization criteria for AI assistant workflows for a global leader in automotive technology, then led MVP delivery across multi-source enterprise knowledge systems to improve response quality.",
-      "Directed API and developer-experience modernization for a leading US telecom provider from internal standards to external readiness, improving API discoverability and accelerating promotion to external audiences.",
-      "Led cross-product healthcare fleet management portal strategy and execution for a major medical device manufacturer, with projected first year savings of $8-10M from self-service workflow adoption.",
-      "Led fintech workflow and KYC redesign across B2B2C flows, contributing to 40% call center load reduction, 35% operational cost reduction, and 70% fraud reduction while meeting NACHA and CFPB compliance deadlines."
+      "Led development of a conversational product knowledge assistant MVP for a global leader in automotive technology, defining the AI evaluation framework and supporting implementation to improve response quality.",
+      "Led developer experience enhancements for a leading US telecom provider, improving API discoverability and accelerating API promotion from internal to external audiences.",
+      "Led fintech workflow and KYC redesign across B2B2C flows, contributing to 40% call-center load reduction, 35% operational cost reduction, and 70% fraud reduction while meeting NACHA and CFPB compliance deadlines.",
+      "Led healthcare fleet management portal product work for a major medical device manufacturer, with projected first-year savings of $8-10M from self-service workflow adoption."
     ],
     "skills": [
       "AI Product Management",
@@ -27,11 +27,10 @@
     "title": "Product Strategist",
     "startDate": "2020-12",
     "endDate": "2021-06",
-    "summary": "Product Strategist leading client-facing transformation initiatives and productized strategy programs, from KPI architecture through roadmap decisions.",
+    "summary": "Product Strategist focused on KPI-led product definition and workshop-driven idea-to-MVP execution.",
     "achievements": [
-      "Led white-label cloud services redesign for a major telecom services provider, translating falling satisfaction signals into data-backed roadmap decisions.",
-      "Led executive workshops and ethnographic/UX research synthesis to align business-product goals, define KPIs, and drive roadmap prioritization decisions.",
-      "Productized the Product Kickstart workshop series to standardize idea-to-MVP decision and execution flow across client engagements."
+      "Led strategy workshops to align business goals, KPIs, and product direction, validated offering scope, and delivery roadmaps across client engagements.",
+      "Redesigned the Product Kickstart workshop series to move client teams from idea to MVP with clearer decision and execution structure."
     ],
     "skills": ["Product Strategy", "Workshop Facilitation", "Roadmapping", "KPI Design"],
     "tags": ["strategy", "workshops", "mvp", "consulting"],

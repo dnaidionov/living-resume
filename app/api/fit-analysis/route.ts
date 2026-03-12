@@ -11,8 +11,9 @@ export async function POST(request: Request) {
     const roleInput =
       payload.roleInput.kind === "url"
         ? {
-            kind: "text" as const,
-            text: await fetchJobDescriptionFromUrl(payload.roleInput.url)
+            kind: "url" as const,
+            url: payload.roleInput.url,
+            content: await fetchJobDescriptionFromUrl(payload.roleInput.url)
           }
         : payload.roleInput;
 
