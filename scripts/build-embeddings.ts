@@ -3,6 +3,7 @@ import path from "node:path";
 import { buildDocuments } from "@/lib/content/store";
 import { loadLocalEnv } from "@/lib/env/load-local-env";
 import { requestEmbeddings } from "@/lib/ai/openai";
+import { buildEmbeddingsArtifactManifest } from "@/lib/retrieval/artifact-manifest";
 
 async function main() {
   loadLocalEnv();
@@ -19,8 +20,12 @@ async function main() {
   }));
 
   const outputPath = path.join(process.cwd(), "content/retrieval/embeddings.generated.json");
+  const manifestPath = path.join(process.cwd(), "content/retrieval/embeddings.manifest.json");
+  const manifest = await buildEmbeddingsArtifactManifest();
   await writeFile(outputPath, JSON.stringify(embeddings, null, 2), "utf8");
+  await writeFile(manifestPath, JSON.stringify(manifest, null, 2), "utf8");
   console.log(`Wrote ${embeddings.length} embeddings to ${outputPath}`);
+  console.log(`Wrote embeddings manifest to ${manifestPath}`);
 }
 
 main().catch((error) => {
