@@ -5,6 +5,27 @@ import type { AIContextExplainer, ResumeRole } from "@/types/content";
 import { trackEvent } from "@/lib/analytics/events";
 import { SparkleIcon } from "@/components/sparkle-icon";
 
+function ContextSectionCaption({ children }: { children: React.ReactNode }) {
+  return (
+    <h5
+      style={{
+        marginTop: 0,
+        marginBottom: 4,
+        color: "#7f8ca0",
+        fontSize: "0.72rem",
+        letterSpacing: "0.14em",
+        textTransform: "uppercase"
+      }}
+    >
+      {children}
+    </h5>
+  );
+}
+
+const aiContextBodyTextStyle = {
+  color: "rgba(243, 247, 255, 0.82)"
+} as const;
+
 export function RoleCard({
   role,
   explainer
@@ -108,7 +129,7 @@ export function RoleCard({
                 <span className="eyebrow">AI Context</span>
                 <h3 style={{ marginBottom: 6 }}>{explainer.headline}</h3>
               </div>
-              {explainer.summary ? <p className="muted">{explainer.summary}</p> : null}
+              {explainer.summary ? <p className="muted" style={aiContextBodyTextStyle}>{explainer.summary}</p> : null}
               {hasProjectContexts ? (
                 <div>
                   {hasMultipleProjectContexts ? (
@@ -159,25 +180,25 @@ export function RoleCard({
                       >
                         <h4 style={{ marginTop: 0, marginBottom: 8 }}>{item.title}</h4>
 
-                        <h5 style={{ marginTop: 0, marginBottom: 4 }}>Situation</h5>
-                        <p className="muted" style={{ marginTop: 0, marginBottom: 10 }}>
+                        <ContextSectionCaption>Situation</ContextSectionCaption>
+                        <p className="muted" style={{ ...aiContextBodyTextStyle, marginTop: 0, marginBottom: 10 }}>
                           {item.situation}
                         </p>
 
-                        <h5 style={{ marginTop: 0, marginBottom: 4 }}>Approach</h5>
-                        <p className="muted" style={{ marginTop: 0, marginBottom: 10 }}>
+                        <ContextSectionCaption>Approach</ContextSectionCaption>
+                        <p className="muted" style={{ ...aiContextBodyTextStyle, marginTop: 0, marginBottom: 10 }}>
                           {item.approach}
                         </p>
 
-                        <h5 style={{ marginTop: 0, marginBottom: 4 }}>Work</h5>
-                        <p className="muted" style={{ marginTop: 0, marginBottom: item.lessonsLearned ? 10 : 0 }}>
+                        <ContextSectionCaption>Work</ContextSectionCaption>
+                        <p className="muted" style={{ ...aiContextBodyTextStyle, marginTop: 0, marginBottom: item.lessonsLearned ? 10 : 0 }}>
                           {item.work}
                         </p>
 
                         {item.lessonsLearned ? (
                           <>
-                            <h5 style={{ marginTop: 0, marginBottom: 4 }}>Lessons Learned</h5>
-                            <p className="muted" style={{ marginTop: 0, marginBottom: 0 }}>
+                            <ContextSectionCaption>Lessons Learned</ContextSectionCaption>
+                            <p className="muted" style={{ ...aiContextBodyTextStyle, marginTop: 0, marginBottom: 0 }}>
                               {item.lessonsLearned}
                             </p>
                           </>
@@ -206,8 +227,8 @@ export function RoleCard({
                         borderTop: index === 0 ? "none" : "1px solid var(--line)"
                       }}
                     >
-                      <h5 style={{ marginTop: 0, marginBottom: 4 }}>{label}</h5>
-                      <p className="muted" style={{ marginTop: 0, marginBottom: 0 }}>
+                      <ContextSectionCaption>{label}</ContextSectionCaption>
+                      <p className="muted" style={{ ...aiContextBodyTextStyle, marginTop: 0, marginBottom: 0 }}>
                         {value}
                       </p>
                     </div>

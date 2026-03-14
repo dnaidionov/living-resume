@@ -1,11 +1,12 @@
 "use client";
 
-import { useMemo, useState } from "react";
+import { useMemo, useState, type ReactNode } from "react";
 import { trackEvent } from "@/lib/analytics/events";
 import type {
   FitAnalysisResult,
   FitDimension,
   FitPresentationMode,
+  FitVerdict,
   GapBullet,
   MatchBullet,
   RecruiterBriefPresentation,
@@ -19,6 +20,159 @@ const dimensionLabels: Record<FitDimension["name"], string> = {
   leadership_collaboration: "Leadership & Collaboration",
   context_readiness: "Context Readiness"
 };
+
+const fitSemanticColors = {
+  match: {
+    accent: "#45D7FF",
+    background: "rgba(69, 215, 255, 0.17)",
+    border: "rgba(69, 215, 255, 0.28)"
+  },
+  neutral: {
+    accent: "#F3F7FF",
+    background: "rgba(243, 247, 255, 0.08)",
+    border: "rgba(243, 247, 255, 0.18)"
+  },
+  noFit: {
+    accent: "#D9B15F",
+    background: "rgba(217, 177, 95, 0.19)",
+    border: "rgba(217, 177, 95, 0.3)"
+  }
+} as const;
+
+function getVerdictTone(verdict: FitVerdict) {
+  if (verdict === "strong_fit_lets_talk") {
+    return fitSemanticColors.match;
+  }
+
+  if (verdict === "probably_not_your_person") {
+    return fitSemanticColors.noFit;
+  }
+
+  return fitSemanticColors.neutral;
+}
+
+function CheckIcon({ color = "currentColor", size = 18 }: { color?: string; size?: number }) {
+  return (
+    <svg aria-hidden="true" width={size} height={size} viewBox="0 0 18 18" fill="none">
+      <path d="M3.75 9.3 7.05 12.6 14.25 4.8" stroke={color} strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round" />
+    </svg>
+  );
+}
+
+function CrossIcon({ color = "currentColor", size = 16 }: { color?: string; size?: number }) {
+  return (
+    <svg aria-hidden="true" width={size} height={size} viewBox="0 0 16 16" fill="none">
+      <path d="M3.5 3.5 12.5 12.5M12.5 3.5 3.5 12.5" stroke={color} strokeWidth="1.9" strokeLinecap="round" />
+    </svg>
+  );
+}
+
+function CircleIcon({ color = "currentColor", size = 14 }: { color?: string; size?: number }) {
+  return (
+    <svg aria-hidden="true" width={size} height={size} viewBox="0 0 14 14" fill="none">
+      <circle cx="7" cy="7" r="4.5" stroke={color} strokeWidth="1.8" />
+    </svg>
+  );
+}
+
+function WarningTriangleIcon({ color = "currentColor", size = 16 }: { color?: string; size?: number }) {
+  return (
+    <svg aria-hidden="true" width={size} height={size} viewBox="0 0 16 16" fill="none">
+      <path d="M8 2.2 13.2 12.8H2.8L8 2.2Z" stroke={color} strokeWidth="1.8" strokeLinejoin="round" />
+      <path d="M8 5.7v3.5M8 11.4h.01" stroke={color} strokeWidth="1.8" strokeLinecap="round" />
+    </svg>
+  );
+}
+
+function SectionCaption({ children }: { children: ReactNode }) {
+  return (
+    <strong
+      style={{
+        color: "#7f8ca0",
+        fontSize: "0.72rem",
+        letterSpacing: "0.14em",
+        textTransform: "uppercase"
+      }}
+    >
+      {children}
+    </strong>
+  );
+}
+
+function BulletCard({
+  heading,
+  bulletHeadings,
+  body,
+  color,
+  icon,
+  bulletIcon
+}: {
+  heading?: string;
+  bulletHeadings?: string[];
+  body: string;
+  color: string;
+  icon: ReactNode;
+  bulletIcon?: ReactNode;
+}) {
+  return (
+    <div
+      className="pill"
+      style={{
+        display: "grid",
+        gap: 8,
+        borderRadius: 18,
+        padding: 16,
+        borderWidth: 0.8,
+        borderStyle: "solid",
+        borderColor: color === fitSemanticColors.neutral.accent ? fitSemanticColors.neutral.border : color,
+        background: "rgba(255, 255, 255, 0.02)"
+      }}
+    >
+      <div style={{ display: "grid", gap: 8 }}>
+        {bulletHeadings && bulletHeadings.length > 0 ? (
+          <div style={{ display: "grid", gap: 10 }}>
+            {bulletHeadings.map((bulletHeading) => (
+              <div key={bulletHeading} style={{ display: "flex", alignItems: "flex-start", gap: 10 }}>
+                <span
+                  aria-hidden="true"
+                  style={{
+                    display: "inline-flex",
+                    alignItems: "center",
+                    justifyContent: "center",
+                    width: 18,
+                    minWidth: 18,
+                    marginTop: 2
+                  }}
+                >
+                  {bulletIcon ?? icon}
+                </span>
+                <strong style={{ color }}>{bulletHeading}</strong>
+              </div>
+            ))}
+          </div>
+        ) : (
+          <div style={{ display: "flex", alignItems: "flex-start", gap: 10 }}>
+            <span
+              aria-hidden="true"
+              style={{
+                display: "inline-flex",
+                alignItems: "center",
+                justifyContent: "center",
+                width: 18,
+                minWidth: 18,
+                marginTop: 2
+              }}
+            >
+              {icon}
+            </span>
+            <strong style={{ color }}>{heading}</strong>
+          </div>
+        )}
+        <div className="muted">{body}</div>
+      </div>
+    </div>
+  );
+}
 
 function resolvePresentationMode(): FitPresentationMode {
   if (typeof window !== "undefined") {
@@ -34,48 +188,38 @@ function resolvePresentationMode(): FitPresentationMode {
 
 function BulletList<T extends { requirement?: string; support?: string; gap?: string; skillOrExperience?: string; relevance?: string }>({
   items,
-  render
+  render,
+  color,
+  icon
 }: {
   items: T[];
   render: (item: T) => { heading: string; body: string };
+  color: string;
+  icon: ReactNode;
 }) {
   return (
     <div style={{ display: "grid", gap: 12 }}>
       {items.map((item, index) => {
         const content = render(item);
-        return (
-          <div key={`${content.heading}-${index}`} className="pill" style={{ borderRadius: 18, padding: 14 }}>
-            <strong>{content.heading}</strong>
-            <div className="muted" style={{ marginTop: 4 }}>
-              {content.body}
-            </div>
-          </div>
-        );
+        return <BulletCard key={`${content.heading}-${index}`} heading={content.heading} body={content.body} color={color} icon={icon} />;
       })}
     </div>
   );
 }
 
-function MatchSection({ items }: { items: MatchBullet[] }) {
+function MatchSection({ items, color }: { items: MatchBullet[]; color: string }) {
   return (
     <div style={{ display: "grid", gap: 12 }}>
       {items.map((item, index) => (
-        <div key={`${item.requirement}-${index}`} className="pill" style={{ borderRadius: 18, padding: 14 }}>
-          {item.relatedRequirements && item.relatedRequirements.length > 1 ? (
-            <ul style={{ margin: 0, paddingLeft: 20, display: "grid", gap: 6 }}>
-              {item.relatedRequirements.map((requirement) => (
-                <li key={requirement}>
-                  <strong>{requirement}</strong>
-                </li>
-              ))}
-            </ul>
-          ) : (
-            <strong>{item.requirement}</strong>
-          )}
-          <div className="muted" style={{ marginTop: 8 }}>
-            {item.support}
-          </div>
-        </div>
+        <BulletCard
+          key={`${item.requirement}-${index}`}
+          heading={item.requirement}
+          bulletHeadings={item.relatedRequirements && item.relatedRequirements.length > 1 ? item.relatedRequirements : undefined}
+          body={item.support}
+          color={color}
+          icon={<CheckIcon color={color} />}
+          bulletIcon={<CheckIcon color={color} />}
+        />
       ))}
     </div>
   );
@@ -146,9 +290,8 @@ export function FitAnalysisForm() {
   }
 
   return (
-    <div className="grid two-col" style={{ marginTop: 24 }}>
-      <div className="card" style={{ padding: 28, background: "var(--surface-alt)" }}>
-        <span className="eyebrow">Role Fit</span>
+    <div className="card" style={{ marginTop: 24, padding: 28, background: "var(--surface-alt)" }}>
+      <div style={{ display: "grid", gap: 0 }}>
         <h3 style={{ marginBottom: 8, fontSize: "1.5rem" }}>Run a candid fit analysis</h3>
         <p className="muted body-copy">
           Paste a job description and the system will judge whether the evidence shows strong qualification for the role,
@@ -224,12 +367,18 @@ export function FitAnalysisForm() {
             {loading ? "Analyzing..." : "Analyze fit"}
           </button>
         </form>
+        {result ? (
+          <div
+            style={{
+              marginTop: 28,
+              paddingTop: 28,
+              borderTop: "1px solid var(--line)"
+            }}
+          >
+            {renderPresentation(result.presentation)}
+          </div>
+        ) : null}
       </div>
-
-      <aside className="card" style={{ padding: 28, background: "var(--surface-alt)" }}>
-        <span className="eyebrow">Output</span>
-        {result ? renderPresentation(result.presentation) : <p className="muted">The fit assessment will appear here.</p>}
-      </aside>
     </div>
   );
 }
@@ -256,43 +405,102 @@ function renderPresentation(presentation: RecruiterBriefPresentation | Scorecard
     );
   }
 
+  const verdictTone = getVerdictTone(presentation.overallMatch.verdict);
+  const verdictIcon =
+    presentation.overallMatch.verdict === "probably_not_your_person" ? (
+      <WarningTriangleIcon color={verdictTone.accent} />
+    ) : (
+      <CheckIcon color={verdictTone.accent} />
+    );
+
   return (
     <div style={{ display: "grid", gap: 18 }}>
-      <div>
-        <h3 style={{ marginBottom: 4, fontSize: "1.45rem" }}>Overall match: {presentation.overallMatch.label}</h3>
+      <div
+        style={{
+          display: "grid",
+          gap: 6,
+          padding: 18,
+          borderRadius: 18,
+          background: verdictTone.background,
+          border: `1px solid ${verdictTone.border}`
+        }}
+      >
+        <div style={{ display: "flex", alignItems: "center", gap: 12 }}>
+          <span
+            aria-hidden="true"
+            style={{
+              display: "inline-flex",
+              alignItems: "center",
+              justifyContent: "center",
+              width: 30,
+              height: 30,
+              borderRadius: 999,
+              border: `1px solid ${verdictTone.border}`,
+              background: "rgba(255, 255, 255, 0.04)"
+            }}
+          >
+            {verdictIcon}
+          </span>
+          <h3 style={{ margin: 0, fontSize: "1.45rem", color: verdictTone.accent }}>{presentation.overallMatch.label}</h3>
+        </div>
       </div>
 
       {presentation.whereIMatch && presentation.whereIMatch.length > 0 ? (
         <section style={{ display: "grid", gap: 10 }}>
-          <strong>Where I match</strong>
-          <MatchSection items={presentation.whereIMatch} />
+          <SectionCaption>Where I match</SectionCaption>
+          <MatchSection items={presentation.whereIMatch} color={fitSemanticColors.match.accent} />
         </section>
       ) : null}
 
       {presentation.gapsToNote && presentation.gapsToNote.length > 0 ? (
         <section style={{ display: "grid", gap: 10 }}>
-          <strong>Gaps to note</strong>
-          <BulletList items={presentation.gapsToNote} render={(item: GapBullet) => ({ heading: item.requirement, body: item.gap })} />
+          <SectionCaption>Gaps to note</SectionCaption>
+          <BulletList
+            items={presentation.gapsToNote}
+            render={(item: GapBullet) => ({ heading: item.requirement, body: item.gap })}
+            color={fitSemanticColors.neutral.accent}
+            icon={<CircleIcon color={fitSemanticColors.neutral.accent} />}
+          />
         </section>
       ) : null}
 
       {presentation.whereIDontFit && presentation.whereIDontFit.length > 0 ? (
         <section style={{ display: "grid", gap: 10 }}>
-          <strong>Where I don&apos;t fit</strong>
-          <BulletList items={presentation.whereIDontFit} render={(item: GapBullet) => ({ heading: item.requirement, body: item.gap })} />
+          <SectionCaption>Where I don&apos;t fit</SectionCaption>
+          <BulletList
+            items={presentation.whereIDontFit}
+            render={(item: GapBullet) => ({ heading: item.requirement, body: item.gap })}
+            color={fitSemanticColors.noFit.accent}
+            icon={<CrossIcon color={fitSemanticColors.noFit.accent} />}
+          />
         </section>
       ) : null}
 
       {presentation.whatDoesTransfer && presentation.whatDoesTransfer.length > 0 ? (
         <section style={{ display: "grid", gap: 10 }}>
-          <strong>What does transfer</strong>
-          <BulletList items={presentation.whatDoesTransfer} render={(item: TransferBullet) => ({ heading: item.skillOrExperience, body: item.relevance })} />
+          <SectionCaption>What does transfer</SectionCaption>
+          <BulletList
+            items={presentation.whatDoesTransfer}
+            render={(item: TransferBullet) => ({ heading: item.skillOrExperience, body: item.relevance })}
+            color={fitSemanticColors.neutral.accent}
+            icon={<CircleIcon color={fitSemanticColors.neutral.accent} />}
+          />
         </section>
       ) : null}
 
       <section style={{ display: "grid", gap: 8 }}>
-        <strong>My recommendation</strong>
-        <p className="muted body-copy" style={{ margin: 0 }}>
+        <SectionCaption>My recommendation</SectionCaption>
+        <p
+          className="body-copy"
+          style={{
+            margin: 0,
+            padding: 18,
+            borderRadius: 18,
+            background: verdictTone.background,
+            border: `1px solid ${verdictTone.border}`,
+            color: verdictTone.accent
+          }}
+        >
           {presentation.recommendation}
         </p>
       </section>

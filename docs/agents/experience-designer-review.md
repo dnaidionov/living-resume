@@ -64,3 +64,5 @@ Polish the living-resume UI so it reads as a coherent recruiter-facing product r
 - adjust hero icon-only resume download control to match surrounding action-button height/alignment (44px) while remaining icon-only
 - fine-tune hero icon-only resume control baseline alignment by matching flex-row center alignment and adjusting icon visual centering/size to text-button rhythm
 - remove text-file resume fallback and standardize downloads on the latest PDF resume artifact only
+- apply recruiter-brief fit-result semantics with electric-cyan `Where I match`, neutral ink-white `Gaps to note`, and soft-gold `Where I don't fit`, plus matching verdict/recommendation panels and bullet icons
+- collapse fit-analysis input and output into one card, remove the `Role Fit` / `Output` eyebrow pills, and reveal results inline under the form separated by a divider
