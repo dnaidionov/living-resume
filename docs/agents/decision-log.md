@@ -210,3 +210,8 @@ Use this log for concise, chronological records of meaningful decisions that do 
 - Decision: Added data-analysis and SQL/database framing to Modus and Acision explainers at execution/approach/skills levels.
 - Rationale: Reflect user-confirmed cross-role data fluency and prevent database/SQL capability from appearing isolated to early engineering experience.
 - Scope impact: `content/ai-context/explainers.json` (`ctx-modus-create.execution`, `ctx-modus-create.skillsDemonstrated`, `ctx-acision.approach`, `ctx-acision.execution`, `ctx-acision.skillsDemonstrated`).
+
+- Agent role: Content Strategist
+- Decision: Replaced the hero `Current focus` line with broader strategic-leadership positioning centered on AI, enterprise transformation, and business outcomes, removing developer-experience emphasis.
+- Rationale: The latest role and AI-context evidence supports portfolio-level transformation and strategic leadership more strongly than DevEx specialization, which better matches senior/staff PM to director positioning.
+- Scope impact: `components/home-page-shell.tsx`.
