@@ -40,8 +40,8 @@ export function HomePageShell({
               opacity: 0.74
             }}
           >
-            Current focus: AI product management, developer experience, and cross-functional execution at
-            scale.
+            Current focus: Strategic product leadership across AI, enterprise transformation, and
+            measurable business outcomes.
           </p>
           <div className="grid" style={{ marginTop: 24 }}>
             {roles.map((role) => (
