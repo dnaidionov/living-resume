@@ -86,6 +86,10 @@
 - fix hero download button scale/alignment mismatch by matching action-row button dimensions and stretch behavior
 - remove `public/classic-resume.txt` fallback and keep PDF (`public/DmitryNaidionov-cv.pdf`) as the only download target
 - correct hero download icon/text-row alignment via flex baseline tuning and icon-level centering adjustment
+- style recruiter-brief fit analysis with semantic tones: electric-cyan strong-fit/match, neutral ink-white probable-fit/gaps, soft-gold non-fit, including colored verdict/recommendation panels and section-specific bullet icons
+- when a fit-analysis card groups multiple matched requirements into one support block, render a checkmark beside each requirement line instead of a single outer card-level checkmark
+- collapse fit-analysis form and results into a single card; show only the input block initially and insert results below it after analysis with a thin divider
+- align AI Context subsection headers to the same muted uppercase caption treatment used by fit-analysis section headers
 
 ## AI Systems Architect -> Application Engineer (Stateless LLM Runtime 2026-03-07)
 
