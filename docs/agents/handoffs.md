@@ -78,6 +78,13 @@
 - switch send glyph to tilted outlined plane icon for clearer directional affordance
 - refine overlay header separation and close affordance: thin header-bottom border plus larger borderless top-right close icon
 - remove chat answer preambles and question echoes; return direct answer text only
+- keep resume-chat answers grounded server-side but do not render visible citations/proof rows in the Ask AI overlay
+- send resume-chat messages from the Ask AI overlay on `Cmd+Enter` (macOS) and `Ctrl+Enter` (Windows/Linux) without breaking multiline entry on plain `Enter`
+- normalize Ask AI overlay message whitespace before storing/rendering so empty lines do not create oversized chat bubbles
+- replace the temporary Ask AI `Thinking...` bubble with a compact animated typing-dots indicator
+- intercept resume-fit requests in the Ask AI overlay and hand them off to the dedicated Role Fit section; on confirmation, close chat, prefill the matching URL/text input, scroll to the section, and auto-run the fit analysis
+- render the fit-check handoff as explicit assistant actions (`Sure, do it`, `No, stay here`) instead of relying on typed confirmation; declining keeps chat open and replies `Ok, staying here.`
+- keep keyboard focus in the Ask AI composer on open and after in-chat replies or handoff dismissal so the chat remains type-ready without extra clicks
 - add top-menu resume download icon button with tooltip `Download classic resume`, linked to `public/classic-resume.txt` download target
 - add resume download control to hero and menu; implement zero-delay attached callout label in place of native tooltip
 - update menu/hero resume download targets to latest PDF (`/DmitryNaidionov-cv.pdf`) copied from user-provided source path
@@ -168,6 +175,12 @@
 - when the JD asks for broad senior-product tenure plus generic leadership depth, use a cross-role leadership summary rather than a narrow one-off explainer as recruiter-facing support
 - if catch-all consulting evidence such as Vingis is still the selected support, render it as neutral `In my previous roles...` phrasing rather than naming Vingis directly
 - for strategic-execution requirements, prefer strategy/discovery/roadmap proof over outcome-only delivery examples when both can support the same JD bullet
+- treat `how this system/site/product is built` chat questions as build/process questions about the Career Twin product itself, not as generic website trivia
+- end build/process chat answers with a short invitation to see the source and documentation on GitHub: `https://github.com/dnaidionov/living-resume`
+- strip raw `Evidence N` markers from visible chat answers before they reach the overlay
+- normalize stale visible `Living Resume` phrasing to `Career Twin` in build-process answers so legacy source labels do not leak into the UI
+- render assistant URLs in the Ask AI overlay as clickable links so GitHub/source-doc pointers are directly usable
+- keep trailing punctuation outside assistant URL anchors so GitHub/source-doc links remain valid when a sentence ends with punctuation
 
 ## Ops / Release Agent -> Deployment Execution (Cloudflare Adapter Readiness 2026-03-07)
 

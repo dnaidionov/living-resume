@@ -1,15 +1,18 @@
 "use client";
 
-import { useEffect, useMemo, useRef, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { trackEvent } from "@/lib/analytics/events";
+import { extractFitCheckTarget, isAffirmativeFitHandoffReply, isNegativeFitHandoffReply, type FitCheckTarget } from "@/lib/chat-handoff";
+import { normalizeChatText } from "@/lib/chat-format";
 import type { ChatAnswer } from "@/types/ai";
 import { PaperPlaneIcon } from "@/components/paper-plane-icon";
+import type { FitAnalysisPrefill } from "@/components/fit-analysis-form";
 
 type ChatMessage = {
   id: string;
   role: "user" | "assistant";
   text: string;
-  citations?: ChatAnswer["citations"];
+  kind?: "fit_handoff";
 };
 
 const starterPrompts = [
@@ -21,11 +24,60 @@ const starterPrompts = [
 
 const storageKey = "living-resume:chat-overlay:v1";
 const sessionStorageKey = "living-resume:chat-session-id";
+const urlPattern = /(https?:\/\/[^\s)]+)/g;
 
-export function AskAiOverlay({ onClose }: { onClose: () => void }) {
+function splitTrailingPunctuation(value: string) {
+  const trimmed = value.match(/[.,!?:;]+$/);
+  if (!trimmed) {
+    return { url: value, trailing: "" };
+  }
+
+  return {
+    url: value.slice(0, -trimmed[0].length),
+    trailing: trimmed[0]
+  };
+}
+
+function renderMessageContent(text: string) {
+  const parts = text.split(urlPattern);
+
+  return parts.map((part, index) => {
+    if (!part) {
+      return null;
+    }
+
+    if (/^https?:\/\//.test(part)) {
+      const { url, trailing } = splitTrailingPunctuation(part);
+      return (
+        <span key={`${part}-${index}`}>
+          <a
+            href={url}
+            target="_blank"
+            rel="noreferrer"
+            style={{ color: "var(--accent)", textDecoration: "underline" }}
+          >
+            {url}
+          </a>
+          {trailing}
+        </span>
+      );
+    }
+
+    return <span key={`${part}-${index}`}>{part}</span>;
+  });
+}
+
+export function AskAiOverlay({
+  onClose,
+  onStartFitCheck
+}: {
+  onClose: () => void;
+  onStartFitCheck: (prefill: Omit<FitAnalysisPrefill, "id">) => void;
+}) {
   const [message, setMessage] = useState("");
   const [messages, setMessages] = useState<ChatMessage[]>([]);
   const [loading, setLoading] = useState(false);
+  const [pendingFitRequest, setPendingFitRequest] = useState<FitCheckTarget | null>(null);
   const scrollRef = useRef<HTMLDivElement | null>(null);
   const textareaRef = useRef<HTMLTextAreaElement | null>(null);
   const sessionId = useMemo(() => {
@@ -55,7 +107,12 @@ export function AskAiOverlay({ onClose }: { onClose: () => void }) {
 
     try {
       const parsed = JSON.parse(stored) as ChatMessage[];
-      setMessages(parsed.slice(-20));
+      setMessages(
+        parsed.slice(-20).map((item) => ({
+          ...item,
+          text: normalizeChatText(item.text)
+        }))
+      );
     } catch {
       window.localStorage.removeItem(storageKey);
     }
@@ -77,6 +134,28 @@ export function AskAiOverlay({ onClose }: { onClose: () => void }) {
     scrollRef.current.scrollTop = scrollRef.current.scrollHeight;
   }, [messages, loading]);
 
+  const focusComposer = useCallback(() => {
+    if (!textareaRef.current) {
+      return;
+    }
+
+    requestAnimationFrame(() => {
+      textareaRef.current?.focus();
+    });
+  }, []);
+
+  useEffect(() => {
+    focusComposer();
+  }, [focusComposer]);
+
+  useEffect(() => {
+    if (loading) {
+      return;
+    }
+
+    focusComposer();
+  }, [focusComposer, messages, loading]);
+
   useEffect(() => {
     if (!textareaRef.current) {
       return;
@@ -92,16 +171,87 @@ export function AskAiOverlay({ onClose }: { onClose: () => void }) {
     input.style.overflowY = input.scrollHeight > maxHeight ? "auto" : "hidden";
   }, [message]);
 
+  function clearFitHandoffPrompt() {
+    setMessages((current) => current.map((item) => (item.kind === "fit_handoff" ? { ...item, kind: undefined } : item)));
+  }
+
+  function handleFitHandoffAccept() {
+    if (!pendingFitRequest) {
+      return;
+    }
+
+    clearFitHandoffPrompt();
+    onStartFitCheck(
+      pendingFitRequest.kind === "url"
+        ? { kind: "url", value: pendingFitRequest.value }
+        : { kind: "text", value: pendingFitRequest.value }
+    );
+    setPendingFitRequest(null);
+    setMessage("");
+    onClose();
+  }
+
+  function handleFitHandoffDecline() {
+    clearFitHandoffPrompt();
+    setMessages((current) => [
+      ...current.map((item) => (item.kind === "fit_handoff" ? { ...item, kind: undefined } : item)),
+      {
+        id: crypto.randomUUID(),
+        role: "assistant",
+        text: "Ok, staying here."
+      }
+    ]);
+    setPendingFitRequest(null);
+    setMessage("");
+  }
+
   async function sendMessage(input: string) {
     const trimmed = input.trim();
     if (!trimmed || loading) {
       return;
     }
 
+    if (pendingFitRequest) {
+      const normalized = normalizeChatText(trimmed);
+
+      if (isAffirmativeFitHandoffReply(normalized)) {
+        handleFitHandoffAccept();
+        return;
+      }
+
+      if (isNegativeFitHandoffReply(normalized)) {
+        handleFitHandoffDecline();
+        return;
+      }
+    }
+
+    const fitCheckTarget = extractFitCheckTarget(trimmed);
+    if (fitCheckTarget) {
+      const userMessage: ChatMessage = {
+        id: crypto.randomUUID(),
+        role: "user",
+        text: normalizeChatText(trimmed)
+      };
+
+      setMessages((current) => [
+        ...current,
+        userMessage,
+        {
+          id: crypto.randomUUID(),
+          role: "assistant",
+          text: "There’s a separate fit-check flow for that. Do you want me to take you there?",
+          kind: "fit_handoff"
+        }
+      ]);
+      setPendingFitRequest(fitCheckTarget);
+      setMessage("");
+      return;
+    }
+
     const userMessage: ChatMessage = {
       id: crypto.randomUUID(),
       role: "user",
-      text: trimmed
+      text: normalizeChatText(trimmed)
     };
 
     const nextMessages = [...messages, userMessage];
@@ -135,8 +285,7 @@ export function AskAiOverlay({ onClose }: { onClose: () => void }) {
         {
           id: crypto.randomUUID(),
           role: "assistant",
-          text: payload.answer,
-          citations: payload.citations
+          text: normalizeChatText(payload.answer)
         }
       ]);
     } catch (caughtError) {
@@ -145,7 +294,7 @@ export function AskAiOverlay({ onClose }: { onClose: () => void }) {
         {
           id: crypto.randomUUID(),
           role: "assistant",
-          text: caughtError instanceof Error ? caughtError.message : "Something went wrong."
+          text: normalizeChatText(caughtError instanceof Error ? caughtError.message : "Something went wrong.")
         }
       ]);
     } finally {
@@ -180,10 +329,10 @@ export function AskAiOverlay({ onClose }: { onClose: () => void }) {
           <div>
             <span className="eyebrow">Ask AI</span>
             <h2 className="section-title" style={{ marginBottom: 6 }}>
-              Chat with the living resume
+              Chat with my Career Twin
             </h2>
             <p className="muted section-intro" style={{ marginTop: 0, marginBottom: 0 }}>
-              Ask about experience, role fit, product judgment, or how this site was built.
+              Ask about experience, role fit, product judgment, or how this system was built.
             </p>
           </div>
           <button
@@ -216,7 +365,8 @@ export function AskAiOverlay({ onClose }: { onClose: () => void }) {
             overflowY: "auto",
             padding: "8px 2px 12px",
             display: "grid",
-            gap: 10
+            gap: 10,
+            alignContent: "start"
           }}
         >
           {messages.length === 0 ? (
@@ -272,14 +422,29 @@ export function AskAiOverlay({ onClose }: { onClose: () => void }) {
                 whiteSpace: "pre-wrap"
               }}
             >
-              <div>{item.text}</div>
-              {item.citations && item.citations.length > 0 ? (
-                <div style={{ display: "grid", gap: 4, marginTop: 10 }}>
-                  {item.citations.map((citation) => (
-                    <div key={`${item.id}-${citation.sourceId}`} className="muted" style={{ fontSize: "0.8rem" }}>
-                      {citation.title} · {citation.section}
-                    </div>
-                  ))}
+              <div>{item.role === "assistant" ? renderMessageContent(item.text) : item.text}</div>
+              {item.kind === "fit_handoff" ? (
+                <div style={{ display: "flex", gap: 8, flexWrap: "wrap", marginTop: 12 }}>
+                  <button
+                    type="button"
+                    className="button secondary"
+                    style={{ minWidth: 0, padding: "6px 12px", minHeight: 34, fontSize: "0.84rem" }}
+                    onClick={() => {
+                      handleFitHandoffAccept();
+                    }}
+                  >
+                    Sure, let’s go
+                  </button>
+                  <button
+                    type="button"
+                    className="button secondary"
+                    style={{ minWidth: 0, padding: "6px 12px", minHeight: 34, fontSize: "0.84rem" }}
+                    onClick={() => {
+                      handleFitHandoffDecline();
+                    }}
+                  >
+                    No, stay here
+                  </button>
                 </div>
               ) : null}
             </div>
@@ -288,14 +453,15 @@ export function AskAiOverlay({ onClose }: { onClose: () => void }) {
           {loading ? (
             <div
               style={{
-                justifySelf: "start",
-                padding: "8px 12px",
-                borderRadius: 12,
-                border: "1px solid var(--line)",
-                background: "var(--surface-alt)"
+                justifySelf: "start"
               }}
+              aria-label="Assistant is typing"
             >
-              Thinking...
+              <div className="typing-indicator" aria-hidden="true">
+                <span />
+                <span />
+                <span />
+              </div>
             </div>
           ) : null}
         </div>
@@ -306,6 +472,12 @@ export function AskAiOverlay({ onClose }: { onClose: () => void }) {
               ref={textareaRef}
               value={message}
               onChange={(event) => setMessage(event.target.value)}
+              onKeyDown={(event) => {
+                if ((event.metaKey || event.ctrlKey) && event.key === "Enter") {
+                  event.preventDefault();
+                  void sendMessage(message);
+                }
+              }}
               rows={1}
               placeholder="Message..."
               style={{

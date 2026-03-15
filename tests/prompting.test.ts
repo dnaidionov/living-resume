@@ -2,8 +2,11 @@ import test from "node:test";
 import assert from "node:assert/strict";
 import {
   assembleFitAnalysisResult,
+  buildFallbackChatAnswer,
   buildFallbackFitAnalysisResponse,
+  buildChatSystemPrompt,
   buildFitAnalysisUserPrompt,
+  finalizeChatAnswer,
   extractRoleRequirements
 } from "@/lib/ai/prompting";
 import type { ExtractedRoleRequirement } from "@/types/ai";
@@ -122,6 +125,66 @@ test("fit-analysis prompt keeps anti-false-negative logic in the hidden prompt",
   assert.match(prompt, /Strong Fit - Let's talk, Probably a Good Fit, Honest Assessment - Probably Not Your Person/);
   assert.match(prompt, /If the role is clearly outside product management/);
   assert.match(prompt, /Do not count pre-2023 AI\/ML or chatbot work as direct evidence/);
+});
+
+test("resume chat fallback politely declines off-scope personal questions", () => {
+  const answer = buildFallbackChatAnswer("What is Dmitry's favorite movie?", [], "resume_qa");
+  assert.match(answer, /I do not have that information/i);
+  assert.match(answer, /professional history and listed projects/i);
+  assert.doesNotMatch(answer, /curated|repo-managed|provided materials|FAQ evidence|system is limited/i);
+  assert.equal(answer.includes("\n"), false);
+});
+
+test("build-process prompt treats site/system build questions as Career Twin product questions", () => {
+  const prompt = buildChatSystemPrompt("build_process");
+
+  assert.match(prompt, /Career Twin/i);
+  assert.match(prompt, /product/i);
+  assert.match(prompt, /If the user asks how this system, site, or product was built/i);
+  assert.match(prompt, /GitHub/i);
+  assert.match(prompt, /https:\/\/github\.com\/dnaidionov\/living-resume/);
+});
+
+test("build-process fallback answer points to GitHub source and documentation", () => {
+  const answer = buildFallbackChatAnswer("How is this built?", evidence, "build_process");
+
+  assert.match(answer, /Career Twin|build/i);
+  assert.match(answer, /GitHub/i);
+  assert.match(answer, /https:\/\/github\.com\/dnaidionov\/living-resume/);
+});
+
+test("build-process answer finalization strips evidence markers and appends GitHub link", () => {
+  const answer = finalizeChatAnswer(
+    `Short summary
+Built as a documented product. (Evidence 1)
+- Chat-first interface (Evidence 2, Evidence 4)`,
+    "build_process"
+  );
+
+  assert.doesNotMatch(answer, /\(Evidence \d+(,\s*Evidence \d+)*\)/i);
+  assert.doesNotMatch(answer, /evidence \d/i);
+  assert.match(answer, /GitHub/i);
+  assert.match(answer, /https:\/\/github\.com\/dnaidionov\/living-resume/);
+});
+
+test("build-process answer finalization normalizes living resume references to Career Twin", () => {
+  const answer = finalizeChatAnswer(
+    `Short answer: it's an AI-native, chat-first "living resume" built as a documented product.`,
+    "build_process"
+  );
+
+  assert.doesNotMatch(answer, /living resume/i);
+  assert.match(answer, /Career Twin/);
+});
+
+test("resume answer finalization strips evidence markers without adding build link", () => {
+  const answer = finalizeChatAnswer(
+    `Strong fit for product strategy. (Evidence 1)`,
+    "resume_qa"
+  );
+
+  assert.doesNotMatch(answer, /evidence \d/i);
+  assert.doesNotMatch(answer, /github/i);
 });
 
 test("fallback recruiter brief does not mention preferred domains or absent AI language", () => {

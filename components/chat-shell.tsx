@@ -42,7 +42,7 @@ export function ChatShell() {
           <div style={{ display: "flex", justifyContent: "space-between", gap: 12, alignItems: "center" }}>
             <div>
               <span className="eyebrow">Chat</span>
-              <h2 style={{ marginBottom: 4 }}>Ask the living resume</h2>
+              <h2 style={{ marginBottom: 4 }}>Ask the Career Twin</h2>
             </div>
             <select
               aria-label="Chat mode"

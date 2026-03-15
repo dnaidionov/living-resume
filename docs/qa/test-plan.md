@@ -5,8 +5,21 @@
 - Homepage renders
 - Resume roles render
 - Every role opens AI context
-- Chat route returns grounded answer plus citations
+- Chat route returns a grounded answer; the overlay should display only the answer text, not visible citations
 - Chat route accepts short conversation history without server-side persistence
+- Resume-chat overlay does not render source/proof rows beneath assistant answers
+- Resume-chat overlay sends on `Cmd+Enter` (macOS) and `Ctrl+Enter` (Windows/Linux) while plain `Enter` remains available for multiline input
+- Resume-chat overlay normalizes message whitespace so empty lines do not inflate bubble height
+- Resume-chat overlay shows a compact typing-dots indicator while waiting for an answer instead of a loading bubble
+- Resume-chat overlay routes fit-check requests into the dedicated Role Fit section instead of answering about system capability; if the user confirms, it should prefill the correct tab (`Use URL` or `Paste text`) and auto-submit the analysis
+- Resume-chat fit-check handoff should render explicit `Sure, do it` and `No, stay here` actions; declining should leave chat open and reply `Ok, staying here.`
+- Resume-chat composer should take focus on open and regain focus after replies or local handoff dismissal so the user can keep typing without extra clicks
+- Build/process chat questions such as `how is this system built`, `how is this site built`, or `how is this built` should be interpreted as questions about the Career Twin product rather than as generic site trivia
+- Build/process chat answers should end with a short pointer to the source and documentation on GitHub: `https://github.com/dnaidionov/living-resume`
+- Visible chat answers should not leak raw `Evidence 1` / `Evidence 2` style markers into the overlay
+- Build/process chat answers should normalize stale `Living Resume` phrasing to `Career Twin` in visible output
+- Assistant-rendered URLs in the chat overlay should be clickable
+- Assistant-rendered URLs in the chat overlay should exclude trailing punctuation from the anchor target
 - Fit-analysis route returns structured output from text, URL, and file inputs
 - URL-based fit-analysis tests must verify that fetched JD content, not the literal URL string, is used for requirement extraction and evidence retrieval while `metadata.inputKind` remains `url`
 - Fit-analysis route supports both `recruiter_brief` and `scorecard` presentation modes

@@ -51,6 +51,7 @@ type RequirementEvidencePair = MatchBullet & {
 };
 
 type RoleFamily = "product_management" | "adjacent_product" | "non_product";
+const githubDocsPointer = "See the source and documentation on GitHub: https://github.com/dnaidionov/living-resume";
 
 export function formatEvidencePacket(evidence: EvidenceChunk[]): string {
   if (evidence.length === 0) {
@@ -76,11 +77,14 @@ export function buildChatSystemPrompt(mode: ChatMode): string {
       : "Answer only from resume, project, FAQ, and AI-context evidence. If the evidence is weak, say that directly.";
 
   return [
-    "You are the AI systems architect for Dmitry Naidionov's living resume.",
+    "You are the AI systems architect for Dmitry Naidionov's Career Twin.",
     modeInstruction,
     "Be concise, direct, and grounded.",
     "Do not fabricate facts, employers, metrics, or technologies.",
     "If evidence is partial, distinguish proven evidence from adjacent evidence.",
+    mode === "build_process"
+      ? "If the user asks how this system, site, or product was built, treat that as a question about the Career Twin product and its documented architecture, delivery workflow, and implementation. Do not include inline evidence markers such as Evidence 1, Evidence 2, or similar references in the visible answer. If the question is outside the documented build/process material, reply with one short, polite redirect to the build and delivery process for the Career Twin. End build-process answers with one short suggestion to see the source and documentation on GitHub: https://github.com/dnaidionov/living-resume. Do not explain system limits or source rules."
+      : "If the question is outside Dmitry's documented professional history or listed projects, reply with one short, polite redirect to his professional background and listed projects. Do not explain system limits or source rules.",
     "Do not mention citations inline unless they materially clarify uncertainty.",
     "Return plain text only."
   ].join(" ");
@@ -162,10 +166,18 @@ export function buildFitAnalysisUserPrompt(
 }
 
 export function buildFallbackChatAnswer(message: string, evidence: EvidenceChunk[], mode: ChatMode): string {
+  if (mode !== "build_process" && looksOffScopeResumeQuestion(message)) {
+    return "I do not have that information. I can only discuss Dmitry's professional history and listed projects.";
+  }
+
+  if (mode === "build_process" && looksOffScopeBuildQuestion(message)) {
+    return `I do not have that information. I can only discuss the build and delivery process for the Career Twin. ${githubDocsPointer}`;
+  }
+
   if (evidence.length === 0) {
     return mode === "build_process"
-      ? "I do not see enough build evidence to answer that yet."
-      : "I do not see enough resume or project evidence to answer that yet.";
+      ? `I do not have enough documented build/process information to answer that. I can only discuss the documented build and delivery process for the Career Twin. ${githubDocsPointer}`
+      : "I do not have enough documented information to answer that. I can only discuss Dmitry's professional history and listed projects.";
   }
 
   const opening =
@@ -175,7 +187,39 @@ export function buildFallbackChatAnswer(message: string, evidence: EvidenceChunk
 
   const bullets = evidence.slice(0, 3).map((item) => `- ${item.title}: ${item.text}`);
 
-  return [opening, ...bullets, "", `Question reviewed: ${message}`].join("\n");
+  const answer = [opening, ...bullets, "", `Question reviewed: ${message}`].join("\n");
+  return finalizeChatAnswer(answer, mode);
+}
+
+export function finalizeChatAnswer(answer: string, mode: ChatMode): string {
+  const cleaned = answer
+    .replace(/\s*\(Evidence\s+\d+(?:\s*,\s*Evidence\s+\d+)*\)/gi, "")
+    .replace(/\bEvidence\s+\d+(?:\s*,\s*Evidence\s+\d+)*\b:?\s*/gi, "")
+    .replace(/[ \t]+\n/g, "\n")
+    .replace(/\n{3,}/g, "\n\n")
+    .trim();
+
+  if (mode !== "build_process") {
+    return cleaned;
+  }
+
+  const normalized = cleaned
+    .replace(/["“”]?living resume["“”]?/gi, "Career Twin")
+    .replace(/\bliving resume\b/gi, "Career Twin");
+
+  return normalized.includes("https://github.com/dnaidionov/living-resume")
+    ? normalized
+    : `${normalized}\n\n${githubDocsPointer}`;
+}
+
+function looksOffScopeResumeQuestion(message: string): boolean {
+  const normalized = message.toLowerCase();
+  return /\b(age|birthday|born|wife|husband|girlfriend|boyfriend|kids|children|religion|politics|salary|favorite (movie|music|song|food|color|sport)|hobby|hobbies|pets?|dog|cat|home address|address|phone number)\b/.test(normalized);
+}
+
+function looksOffScopeBuildQuestion(message: string): boolean {
+  const normalized = message.toLowerCase();
+  return /\b(age|birthday|born|wife|husband|girlfriend|boyfriend|kids|children|religion|politics|salary|favorite (movie|music|song|food|color|sport)|hobby|hobbies|pets?|dog|cat|home address|address|phone number)\b/.test(normalized);
 }
 
 export function buildFallbackFitAnalysisResponse(

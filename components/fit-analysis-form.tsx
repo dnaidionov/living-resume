@@ -1,6 +1,6 @@
 "use client";
 
-import { useMemo, useState, type ReactNode } from "react";
+import { useCallback, useEffect, useMemo, useState, type ReactNode } from "react";
 import { trackEvent } from "@/lib/analytics/events";
 import type {
   FitAnalysisResult,
@@ -225,7 +225,11 @@ function MatchSection({ items, color }: { items: MatchBullet[]; color: string })
   );
 }
 
-export function FitAnalysisForm() {
+export type FitAnalysisPrefill =
+  | { id: string; kind: "text"; value: string }
+  | { id: string; kind: "url"; value: string };
+
+export function FitAnalysisForm({ prefill }: { prefill?: FitAnalysisPrefill | null }) {
   const [jobText, setJobText] = useState("");
   const [jobUrl, setJobUrl] = useState("");
   const [file, setFile] = useState<File | null>(null);
@@ -235,8 +239,17 @@ export function FitAnalysisForm() {
   const [error, setError] = useState<string | null>(null);
   const presentationMode = useMemo(resolvePresentationMode, []);
 
-  async function onSubmit(event: React.FormEvent) {
-    event.preventDefault();
+  const runAnalysis = useCallback(async ({
+    inputMode,
+    jobText,
+    jobUrl,
+    file
+  }: {
+    inputMode: "text" | "url" | "file";
+    jobText: string;
+    jobUrl: string;
+    file: File | null;
+  }) => {
     setLoading(true);
     setError(null);
     trackEvent("fit_analysis_started");
@@ -287,15 +300,43 @@ export function FitAnalysisForm() {
     } finally {
       setLoading(false);
     }
+  }, [presentationMode]);
+
+  async function onSubmit(event: React.FormEvent) {
+    event.preventDefault();
+    await runAnalysis({ inputMode, jobText, jobUrl, file });
   }
+
+  useEffect(() => {
+    if (!prefill) {
+      return;
+    }
+
+    setResult(null);
+    setError(null);
+    setFile(null);
+
+    if (prefill.kind === "url") {
+      setInputMode("url");
+      setJobUrl(prefill.value);
+      setJobText("");
+      void runAnalysis({ inputMode: "url", jobText: "", jobUrl: prefill.value, file: null });
+      return;
+    }
+
+    setInputMode("text");
+    setJobText(prefill.value);
+    setJobUrl("");
+    void runAnalysis({ inputMode: "text", jobText: prefill.value, jobUrl: "", file: null });
+  }, [prefill, runAnalysis]);
 
   return (
     <div className="card" style={{ marginTop: 24, padding: 28, background: "var(--surface-alt)" }}>
       <div style={{ display: "grid", gap: 0 }}>
         <h3 style={{ marginBottom: 8, fontSize: "1.5rem" }}>Run a candid fit analysis</h3>
         <p className="muted body-copy">
-          Paste a job description and the system will judge whether the evidence shows strong qualification for the role,
-          then summarize the best supporting points and any validation items for interview.
+          Use the Career Twin to paste a job description, upload a file, or use a job URL, then compare role
+          requirements against documented experience, outcomes, and adjacent evidence.
         </p>
         <div className="pill-row" style={{ marginTop: 18 }}>
           {[
