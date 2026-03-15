@@ -4,7 +4,7 @@ import { OpenAIChatModel } from "@/lib/ai/openai";
 
 const model = new OpenAIChatModel();
 
-function resolveMode(request: ChatRequest): "resume_qa" | "build_process" {
+export function resolveChatMode(request: ChatRequest): "resume_qa" | "build_process" {
   if (request.mode === "build_process") {
     return "build_process";
   }
@@ -14,13 +14,13 @@ function resolveMode(request: ChatRequest): "resume_qa" | "build_process" {
   }
 
   const normalized = request.message.toLowerCase();
-  return normalized.includes("build") || normalized.includes("site") || normalized.includes("architecture")
+  return /\bbuilt\b|\bbuild\b|\bsite\b|\barchitecture\b|\bhow this is\b/.test(normalized)
     ? "build_process"
     : "resume_qa";
 }
 
 export async function answerChat(request: ChatRequest) {
-  const mode = resolveMode(request);
+  const mode = resolveChatMode(request);
   const evidence = await staticRetrievalStore.searchEvidence(
     request.message,
     mode === "build_process" ? "build_process" : "resume_qa"

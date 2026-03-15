@@ -3,9 +3,9 @@ import type { ReactNode } from "react";
 import "./globals.css";
 
 export const metadata: Metadata = {
-  title: "Dmitry Naidionov | Living Resume",
+  title: "Dmitry Naidionov | Career Twin",
   description:
-    "AI-native living resume with grounded chat, role-fit analysis, and structured AI context explainers."
+    "Career Twin for Dmitry Naidionov: a structured, evidence-based view of experience, strengths, and likely role fit."
 };
 
 export default function RootLayout({

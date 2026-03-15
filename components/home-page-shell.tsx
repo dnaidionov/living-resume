@@ -1,12 +1,12 @@
 "use client";
 
-import { useState } from "react";
+import { useRef, useState } from "react";
 import Image from "next/image";
 import type { AIContextExplainer, BuildDoc, ResumeRole } from "@/types/content";
 import { SiteHeader } from "@/components/site-header";
 import { Hero } from "@/components/hero";
 import { RoleCard } from "@/components/role-card";
-import { FitAnalysisForm } from "@/components/fit-analysis-form";
+import { FitAnalysisForm, type FitAnalysisPrefill } from "@/components/fit-analysis-form";
 import { ContactPanel } from "@/components/contact-panel";
 import { AskAiOverlay } from "@/components/ask-ai-overlay";
 import { GithubIcon } from "@/components/github-icon";
@@ -21,6 +21,16 @@ export function HomePageShell({
   buildDocs: BuildDoc[];
 }) {
   const [isChatOpen, setIsChatOpen] = useState(false);
+  const [fitPrefill, setFitPrefill] = useState<FitAnalysisPrefill | null>(null);
+  const fitSectionRef = useRef<HTMLElement | null>(null);
+
+  function startFitCheck(prefill: Omit<FitAnalysisPrefill, "id">) {
+    setFitPrefill({ ...prefill, id: crypto.randomUUID() });
+    setIsChatOpen(false);
+    requestAnimationFrame(() => {
+      fitSectionRef.current?.scrollIntoView({ behavior: "smooth", block: "start" });
+    });
+  }
 
   return (
     <main className={`page-shell ${isChatOpen ? "is-blurred" : ""}`}>
@@ -55,14 +65,14 @@ export function HomePageShell({
 
         </section>
 
-        <section id="fit-check" className="section shell">
+        <section id="fit-check" className="section shell" ref={fitSectionRef}>
           <span className="eyebrow">Role Fit</span>
           <h2 className="section-title">Role Fit Assessment</h2>
           <p className="muted section-intro">
-            Paste a job description, upload a file, or use a job URL to compare role requirements with
-            documented experience and outcomes.
+            Use the Career Twin to compare role requirements against documented experience, outcomes, and
+            adjacent evidence.
           </p>
-          <FitAnalysisForm />
+          <FitAnalysisForm prefill={fitPrefill} />
         </section>
 
         <section id="how-built" className="section shell">
@@ -78,7 +88,7 @@ export function HomePageShell({
             }}
           >
             <p className="muted section-intro" style={{ margin: 0, flex: "1 1 540px" }}>
-              This product is intentionally transparent about architecture, delivery workflow, and the role
+              The Career Twin is intentionally transparent about architecture, delivery workflow, and the role
               each agent played in shaping the result.
             </p>
             <a
@@ -138,7 +148,7 @@ export function HomePageShell({
         <ContactPanel />
       </div>
 
-      {isChatOpen ? <AskAiOverlay onClose={() => setIsChatOpen(false)} /> : null}
+      {isChatOpen ? <AskAiOverlay onClose={() => setIsChatOpen(false)} onStartFitCheck={startFitCheck} /> : null}
     </main>
   );
 }

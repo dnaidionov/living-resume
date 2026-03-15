@@ -215,3 +215,35 @@ Use this log for concise, chronological records of meaningful decisions that do 
 - Decision: Replaced the hero `Current focus` line with broader strategic-leadership positioning centered on AI, enterprise transformation, and business outcomes, removing developer-experience emphasis.
 - Rationale: The latest role and AI-context evidence supports portfolio-level transformation and strategic leadership more strongly than DevEx specialization, which better matches senior/staff PM to director positioning.
 - Scope impact: `components/home-page-shell.tsx`.
+
+### 2026-03-14
+
+- Agent role: Experience Designer
+- Decision: Renamed system-facing product copy from `Living Resume` to `Career Twin` while explicitly leaving the hero positioned around Dmitry rather than the product.
+- Rationale: The hero is personal positioning, not product taxonomy; the system surfaces needed a name that better matches the current fit-analysis and interactive-profile behavior.
+- Scope impact: `components/ask-ai-overlay.tsx`, `components/chat-shell.tsx`, `components/home-page-shell.tsx`, `components/fit-analysis-form.tsx`, `app/layout.tsx`, `docs/product/prd.md`.
+
+- Agent role: Experience Designer
+- Decision: Tightened Ask AI overlay behavior so chat stays answer-only, type-ready, and product-directed: no visible proof rows, typing-dots loading state, focus retained in the composer, and fit-check requests handed off into the dedicated analysis flow through explicit assistant actions.
+- Rationale: The overlay is now a lightweight interaction surface, not the place to perform the full fit workflow. The user should not need extra clicks or system-explainer responses to continue.
+- Scope impact: `components/ask-ai-overlay.tsx`, `components/home-page-shell.tsx`, `components/fit-analysis-form.tsx`, `lib/chat-format.ts`, `lib/chat-handoff.ts`, `docs/product/prd.md`, `docs/qa/test-plan.md`, `docs/agents/handoffs.md`.
+
+- Agent role: AI Systems Architect
+- Decision: Treated `how this system/site/product is built` questions as build-process questions about the Career Twin product itself and required build answers to end with a short GitHub/source-doc suggestion.
+- Rationale: Users asking how the system is built are asking about the product architecture and implementation, not generic website trivia. The GitHub pointer makes the answer operationally useful.
+- Scope impact: `lib/ai/prompting.ts`, `tests/prompting.test.ts`, `docs/product/prd.md`, `docs/qa/test-plan.md`, `docs/agents/handoffs.md`.
+
+- Agent role: AI Systems Architect
+- Decision: Added output finalization for chat answers so visible build responses strip raw `Evidence N` markers, normalize stale `Living Resume` naming to `Career Twin`, and always preserve the GitHub/source-doc pointer once the request is routed to build-process mode.
+- Rationale: Prompt-only control was not strong enough; the model kept leaking internal evidence-style formatting and legacy product naming into the visible UI.
+- Scope impact: `lib/ai/prompting.ts`, `lib/ai/openai.ts`, `lib/ai/chat-service.ts`, `tests/prompting.test.ts`, `tests/chat-service.test.ts`, `docs/product/prd.md`, `docs/architecture/ai-system.md`, `docs/qa/test-plan.md`, `docs/agents/handoffs.md`.
+
+- Agent role: Experience Designer
+- Decision: Render assistant URLs in the Ask AI overlay as clickable links rather than inert plain text.
+- Rationale: Build/process answers now intentionally direct users to GitHub and source documentation; that guidance is weaker if the URL cannot be used directly from the chat response.
+- Scope impact: `components/ask-ai-overlay.tsx`, `tests/ask-ai-overlay.test.ts`, `docs/product/prd.md`, `docs/architecture/ai-system.md`, `docs/qa/test-plan.md`, `docs/agents/handoffs.md`.
+
+- Agent role: Experience Designer
+- Decision: Keep sentence-ending punctuation outside assistant URL anchors in the Ask AI overlay.
+- Rationale: If trailing punctuation is absorbed into the clickable target, GitHub/source-doc links break at the exact point where users are most likely to click them.
+- Scope impact: `components/ask-ai-overlay.tsx`, `tests/ask-ai-overlay.test.ts`, `docs/product/prd.md`, `docs/architecture/ai-system.md`, `docs/qa/test-plan.md`, `docs/agents/handoffs.md`, `docs/agents/decision-log.md`.

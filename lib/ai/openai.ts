@@ -9,7 +9,8 @@ import {
   buildFallbackFitAnalysisResponse,
   buildFitAnalysisSystemPrompt,
   buildFitAnalysisUserPrompt,
-  buildCitations
+  buildCitations,
+  finalizeChatAnswer
 } from "@/lib/ai/prompting";
 
 const OPENAI_URL = "https://api.openai.com/v1/chat/completions";
@@ -57,7 +58,9 @@ export class OpenAIChatModel implements ChatModel {
     });
 
     return {
-      answer: answer.trim() || buildFallbackChatAnswer(input.prompt, input.evidence, input.mode),
+      answer:
+        finalizeChatAnswer(answer.trim(), input.mode) ||
+        buildFallbackChatAnswer(input.prompt, input.evidence, input.mode),
       citations: buildCitations(input.evidence),
       confidence: input.evidence.length >= 4 ? "high" : input.evidence.length >= 2 ? "medium" : "low"
     };

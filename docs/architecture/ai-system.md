@@ -10,7 +10,7 @@
 
 - Use curated repo content only for self-claims.
 - Keep JD, file-upload, and page-fetch inputs ephemeral.
-- Show citations for substantive answers and fit analyses.
+- Show citations for fit analyses and keep chat answers grounded internally, but the resume-chat overlay should display only the answer text rather than visible source/proof lines.
 - Distinguish proven evidence from adjacent or unsupported evidence.
 - Fall back gracefully when the LLM is unavailable.
 
@@ -22,7 +22,7 @@ The current repo uses a portable stateless AI runtime:
 - `lib/retrieval` prefers bundled semantic embeddings and falls back to live semantic indexing or deterministic ranking only when needed.
 - `lib/ai/openai.ts` calls OpenAI through plain `fetch`, not a provider SDK.
 - `lib/ai/chat-service.ts` retrieves evidence and sends the latest chat turn plus a short history window to the model.
-- `lib/ai/fit-analysis.ts` retrieves evidence and requests a structured fit evaluation from the model.
+- `lib/ai/fit-analysis.ts` extracts requirements, resolves evidence from a broad role query plus prioritized per-requirement queries, and then requests fit synthesis from the model.
 - URL fit analysis must run on fetched JD content while preserving `inputKind: "url"` in the result metadata; the raw URL should be treated as provenance only, not as analysis text.
 - `lib/platform/file-intake.ts` parses TXT, PDF, and DOCX uploads.
 - `lib/platform/url-intake.ts` normalizes remote job pages into plain text.
@@ -84,10 +84,20 @@ This keeps the app deployable on both Cloudflare and Vercel without requiring a 
 - Server routes stay stateless.
 - Client chat history is persisted in `localStorage` and a short trailing window is sent with each chat request.
 - Resume chat and fit analysis do not persist user data server-side.
+- The Ask AI overlay should keep the composer focused while it remains open so interaction stays type-ready without extra clicks.
 
 ## Response formatting
 
 - Chat responses are returned as direct answers only.
 - The assistant should not prepend rationale intros like "Based on..." in the visible answer body.
 - The assistant should not echo the user's question in the answer output.
+- The resume-chat overlay should not render citations or evidence lists under assistant messages.
+- Visible chat answers should strip raw inline evidence markers such as `Evidence 1` / `Evidence 2` even if the model emits them.
+- The resume-chat overlay should use a compact typing-dots indicator instead of a loading bubble.
+- Assistant-rendered URLs in the chat overlay should render as clickable links rather than inert plain text.
+- Trailing punctuation adjacent to assistant-rendered URLs should remain outside the anchor so links do not break.
+- Resume-fit requests raised inside chat should hand off into the dedicated fit-analysis workflow rather than being answered as chat responses.
+- The fit-check handoff should offer explicit `Sure, let's go` and `No, stay here` actions, with the decline path handled locally rather than via an LLM round trip.
+- Build/process questions such as `how this is built` should be interpreted as questions about the Career Twin product itself, and build answers should end with a short GitHub/source-doc pointer.
+- Build/process answer finalization should normalize stale visible `Living Resume` references to `Career Twin` so retrieved legacy source labels do not leak into the UI.
 - Recruiter-facing fit output must not mention Dmitry's preferred domains, missing AI wording, or internal scoring logic.

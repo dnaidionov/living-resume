@@ -2,7 +2,7 @@
 
 ## Objective
 
-Build a recruiter-first living resume that acts as a grounded digital twin. The product should answer questions about Dmitry's resume, explain how specific claims were achieved, evaluate fit against a job description, and document the build itself as an AI-native case study.
+Build a recruiter-first Career Twin that acts as a grounded, interactive professional twin. The product should let recruiters and hiring teams review Dmitry's documented experience, ask grounded questions, run candid role-fit analysis, and inspect how the Career Twin itself was built.
 
 ## Core user problems
 
@@ -14,27 +14,55 @@ Build a recruiter-first living resume that acts as a grounded digital twin. The 
 
 1. Chat-first homepage
 2. Resume with `View AI Context` on every role
-3. Role-fit analysis from text, upload, or URL
-4. Public build/process section
+3. Dedicated role-fit workflow from text, upload, or URL
+4. Public build/process section with source visibility
 5. Contact handoff
+
+## Shipped capabilities
+
+- The hero remains personal and centered on Dmitry rather than the product taxonomy.
+- System-facing surfaces use `Career Twin` naming rather than `Living Resume`.
+- Resume chat shows answer text only; it does not render visible source/proof rows.
+- Resume chat supports multiline input and sends on `Cmd+Enter` (macOS) or `Ctrl+Enter` (Windows/Linux).
+- Resume chat keeps the composer focused on open and after replies so the user does not need extra clicks while the overlay is open.
+- Resume chat uses a compact typing-dots indicator instead of a loading bubble.
+- Resume chat must politely decline off-scope personal questions and steer back to documented professional history and listed projects.
+- Resume-fit requests raised inside chat must be handed off to the dedicated Role Fit section instead of being answered in chat.
+- The fit-check handoff must present explicit actions:
+  - `Sure, let's go`
+  - `No, stay here`
+- Accepting the handoff must close chat, scroll to the fit-analysis section, prefill the correct input mode (`Paste text` or `Use URL`), and auto-submit the analysis.
+- Declining the handoff must stay local to the client and reply `Ok, staying here.` without sending the message through the LLM.
+- Questions such as `how is this system built`, `how is this site built`, or `how is this built` must be interpreted as questions about the Career Twin product and its implementation.
+- Build/process answers should end with a short invitation to see the source and documentation on GitHub.
+- Visible chat answers should not expose raw evidence markers such as `Evidence 1` or `Evidence 2`.
+- Build/process answers should normalize visible product naming to `Career Twin` even if older internal source material still uses `Living Resume`.
+- Assistant-rendered URLs in the chat overlay should be clickable so GitHub/source-doc suggestions are directly usable.
+- Trailing punctuation next to assistant-rendered URLs should stay outside the clickable link target.
+- Fit analysis accepts pasted job descriptions, uploaded files, and job URLs.
+- Recruiter-facing fit output is a deterministic brief rather than freeform model copy.
+- Fit analysis should render only the strongest 3 to 5 recruiter-facing bullets with grounded support.
+- Clearly non-product roles should be screened out even when tools or domain terms overlap.
+- The user-facing fit surface is qualification-first and candid, not ideal-role-first or flattering by default.
 
 ## MVP scope
 
-- Grounded chat with citations
+- Grounded chat without visible citations in the overlay
 - Structured AI context explainers
-- Heuristic fit analysis flow with scorecard
+- Dedicated fit-analysis workflow from pasted text, uploaded files, or job URLs
+- Deterministic recruiter-brief output with grounded evidence selection
+- Chat handoff into fit analysis instead of in-chat pseudo-analysis
 - Repo-managed content system
 - Cloudflare-compatible deployment setup
-- Public documentation of process and architecture
+- Public documentation of process and architecture, plus GitHub source visibility
 
 ## Planned enhancements
 
-- Strengthen later-career experience framing, especially EPAM, Modus, and Cardstack, to better signal senior product strategy and leadership.
-- Revise the Modus role to include Verizon cloud solution redesign work.
-- Add semantic fit-result coloring for recruiter-facing assessments.
-- Review and refine the chat interaction and runtime behavior.
-- Review experience and AI-context coverage so broader qualifications such as integrations, data analysis, databases, GTM, training, and cost estimation are represented and retrievable when supported by evidence.
+- Continue refining experience and AI-context coverage so broader qualifications such as integrations, data analysis, databases, GTM, training, and cost estimation are represented and retrievable when supported by evidence.
 - Document and prioritize deployed-performance improvements, especially LLM response-time optimizations.
+- Continue refining deterministic evidence selection for recruiter-facing fit bullets while keeping the LLM limited to synthesis/recommendation tasks.
+- Continue tightening fit-analysis ranking so leadership, player-coach, and strategic-execution requirements consistently pick the strongest available support.
+- Decide whether remaining internal references to `Living Resume` should be renamed in prompts, docs, and internal artifacts for full terminology consistency.
 
 Detailed cross-agent ownership for these items lives in [cross-agent-plan-2026-03-10.md](../agents/cross-agent-plan-2026-03-10.md).
 
