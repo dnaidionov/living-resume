@@ -22,6 +22,7 @@
 - Assistant-rendered URLs in the chat overlay should exclude trailing punctuation from the anchor target
 - Fit-analysis route returns structured output from text, URL, and file inputs
 - URL-based fit-analysis tests must verify that fetched JD content, not the literal URL string, is used for requirement extraction and evidence retrieval while `metadata.inputKind` remains `url`
+- Live URL-ingestion regression coverage is fixture-driven from `tests/fixtures/url-fit-analysis-cases.json`; the enabled required build-gate set currently includes Waymo, Sourgum, Motive, and Netflix product-role URLs
 - Fit-analysis route supports both `recruiter_brief` and `scorecard` presentation modes
 - PDF and DOCX uploads parse into readable role text
 - Build page renders documented process artifacts
@@ -43,6 +44,8 @@
 - URL intake removes generic header/footer/application/legal boilerplate while preserving role headings and bullet lists
 - URL intake regression tests must cover embedded ATS JSON/JSON-LD job payloads and reject serialized theme/config blobs from appearing as readable role content
 - URL intake regression tests must also cover sparse-shell fallbacks (title/meta description) and explicit JS-rendered-page errors when no meaningful role content can be recovered
+- Live URL evals must assert that enabled required build-gate cases recover the expected job title and company from the fetched JD, produce parsed requirements without raw URL leakage, and complete recruiter-brief fit analysis
+- Fixture `expectedOutcome` is advisory rather than gating: outcome mismatches emit QA warnings but do not fail the test, while ingestion/parsing/analysis failures still fail the suite
 - Fit-analysis eval fixtures cover at least: non-AI product role, AI-native role, and obvious stretch role
 - Fit-analysis regression tests must cover: non-product-role gating, repeated-evidence collapsing, modern-LLM recency checks, and technology-context mismatch handling
 - Recruiter-facing evidence text must be validated against explicit company provenance so AI-context headlines never appear where an employer name should be shown
@@ -68,6 +71,7 @@
 ## Operational
 
 - Cloudflare and Vercel deployment paths remain documented
+- `npm run build` and `npm run cf:build` must fail if the enabled required live URL evals fail
 - Cloudflare adapter build produces `.open-next/worker.js` before release
 - Logs avoid raw JD and uploaded-document content
 - Analytics events remain lightweight

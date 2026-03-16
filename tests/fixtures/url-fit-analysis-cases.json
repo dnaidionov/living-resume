@@ -1,0 +1,78 @@
+[
+  {
+    "id": "waymo-product-manager-driving-behaviors",
+    "description": "Required build-gate product-role regression for a Waymo job page. Expected to ingest a real JD and land in the positive-fit band.",
+    "url": "https://careers.withwaymo.com/jobs/product-manager-driving-behaviors-mountain-view-california-united-states-san-francisco-new-york-city-new-york",
+    "expectedTitle": "Product Manager, Driving Behaviors",
+    "expectedCompany": "Waymo",
+    "expectedOutcome": "positive_fit",
+    "enabled": true,
+    "requiredForBuild": true
+  },
+  {
+    "id": "sourgum-director-of-product",
+    "description": "Required build-gate product-role regression for an Ashby posting. Expected to ingest a real JD and land in the positive-fit band.",
+    "url": "https://jobs.ashbyhq.com/sourgum/a8720ec5-99e8-4aa8-b8da-07aa0afa5be6?utm_source=VjydAOXMeB",
+    "expectedTitle": "Director of Product",
+    "expectedCompany": "Sourgum",
+    "expectedOutcome": "positive_fit",
+    "enabled": true,
+    "requiredForBuild": true
+  },
+  {
+    "id": "motive-staff-product-manager-telematics",
+    "description": "Required build-gate product-role regression for a Greenhouse posting. Expected to ingest a real JD and land in the positive-fit band.",
+    "url": "https://job-boards.greenhouse.io/gomotive/jobs/8303849002",
+    "expectedTitle": "Staff Product Manager, Telematics",
+    "expectedCompany": "Motive",
+    "expectedOutcome": "positive_fit",
+    "enabled": true,
+    "requiredForBuild": true
+  },
+  {
+    "id": "netflix-product-manager-enterprise-systems",
+    "description": "Required build-gate product-role regression for a Netflix-hosted posting. Expected to ingest a real JD and land in the positive-fit band.",
+    "url": "https://explore.jobs.netflix.net/careers/job/790313631140?microsite=netflix.com",
+    "expectedTitle": "Product Manager, Enterprise Systems",
+    "expectedCompany": "Netflix",
+    "expectedOutcome": "positive_fit",
+    "enabled": true,
+    "requiredForBuild": true
+  },
+  {
+    "id": "system-senior-software-engineer",
+    "description": "Optional exploratory non-product engineering case for role-family gating and ATS coverage.",
+    "url": "https://job-boards.greenhouse.io/system/jobs/5573086004",
+    "expectedTitle": "Senior Software Engineer",
+    "expectedCompany": "System",
+    "enabled": false,
+    "requiredForBuild": false
+  },
+  {
+    "id": "speechify-qa-engineer",
+    "description": "Optional exploratory non-product QA case for role-family gating and ATS coverage.",
+    "url": "https://job-boards.greenhouse.io/speechify/jobs/5602287004",
+    "expectedTitle": "QA Engineer",
+    "expectedCompany": "Speechify",
+    "enabled": false,
+    "requiredForBuild": false
+  },
+  {
+    "id": "state-affairs-account-executive",
+    "description": "Optional exploratory non-product sales case for role-family gating and ATS coverage.",
+    "url": "https://job-boards.greenhouse.io/stateaffairs/jobs/5500572004",
+    "expectedTitle": "Account Executive",
+    "expectedCompany": "State Affairs",
+    "enabled": false,
+    "requiredForBuild": false
+  },
+  {
+    "id": "qualio-customer-support-specialist",
+    "description": "Optional exploratory non-product support case for role-family gating and ATS coverage.",
+    "url": "https://job-boards.greenhouse.io/qualio/jobs/6667420003",
+    "expectedTitle": "Customer Support Specialist",
+    "expectedCompany": "Qualio",
+    "enabled": false,
+    "requiredForBuild": false
+  }
+]

@@ -247,3 +247,10 @@ Use this log for concise, chronological records of meaningful decisions that do 
 - Decision: Keep sentence-ending punctuation outside assistant URL anchors in the Ask AI overlay.
 - Rationale: If trailing punctuation is absorbed into the clickable target, GitHub/source-doc links break at the exact point where users are most likely to click them.
 - Scope impact: `components/ask-ai-overlay.tsx`, `tests/ask-ai-overlay.test.ts`, `docs/product/prd.md`, `docs/architecture/ai-system.md`, `docs/qa/test-plan.md`, `docs/agents/handoffs.md`, `docs/agents/decision-log.md`.
+
+### 2026-03-16
+
+- Agent role: QA / Evaluations Agent
+- Decision: Added a fixture-driven live URL-ingestion and fit-analysis regression gate using repo-managed external job URLs, and made the enabled required cases part of the build path.
+- Rationale: Synthetic HTML fixtures were not enough to catch provider-specific regressions. The required ATS pages now need direct coverage so URL-ingestion failures are caught before release, even though this intentionally adds third-party availability risk to the build.
+- Scope impact: `tests/fixtures/url-fit-analysis-cases.json`, `tests/url-fit-analysis.eval.test.ts`, `lib/platform/url-intake.ts`, `package.json`, `docs/product/prd.md`, `docs/qa/test-plan.md`, `docs/operations/runbook.md`, `docs/agents/handoffs.md`, `docs/agents/decision-log.md`.

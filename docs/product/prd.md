@@ -40,6 +40,9 @@ Build a recruiter-first Career Twin that acts as a grounded, interactive profess
 - Assistant-rendered URLs in the chat overlay should be clickable so GitHub/source-doc suggestions are directly usable.
 - Trailing punctuation next to assistant-rendered URLs should stay outside the clickable link target.
 - Fit analysis accepts pasted job descriptions, uploaded files, and job URLs.
+- URL-based fit analysis is protected by a live external regression fixture stored in `tests/fixtures/url-fit-analysis-cases.json`; the required build-gate set currently covers Waymo, Sourgum, Motive, and Netflix product-role URLs.
+- The fixture format is intentionally editable without code changes and stores URL, expected title, expected company, optional expected outcome, and enable/build-gate flags.
+- Expected fit outcome mismatches are treated as QA warnings, but failure to ingest, parse, or analyze the required live URLs is a build blocker.
 - Recruiter-facing fit output is a deterministic brief rather than freeform model copy.
 - Fit analysis should render only the strongest 3 to 5 recruiter-facing bullets with grounded support.
 - Clearly non-product roles should be screened out even when tools or domain terms overlap.
@@ -55,6 +58,7 @@ Build a recruiter-first Career Twin that acts as a grounded, interactive profess
 - Repo-managed content system
 - Cloudflare-compatible deployment setup
 - Public documentation of process and architecture, plus GitHub source visibility
+- Seed the live URL-eval fixture with additional non-product exploratory cases so QA can expand gating later without changing the harness; current seeded disabled cases cover software engineering, QA, sales, and customer support roles
 
 ## Planned enhancements
 

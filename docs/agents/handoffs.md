@@ -160,6 +160,7 @@
 - require one-to-one positive evidence assignment: if a bullet cannot be supported by its own defensible proof point, drop it instead of showing `Same as above.`
 - if multiple positive-fit requirements share the same explanation, group them into one recruiter-facing evidence block and render the requirements as bullets under that shared support text
 - when handling URL fit-analysis input, preserve the original URL as provenance but pass fetched JD content through requirement extraction, retrieval, and generation so recruiter-facing output never analyzes the URL string itself
+- live URL-ingestion QA now uses the repo-managed fixture file `tests/fixtures/url-fit-analysis-cases.json`; enabled required cases are build-gated, while `expectedOutcome` mismatches log warnings instead of failing
 - tighten evidence ranking for enterprise/integration/rollout/tradeoff requirements so generic PM evidence does not outrank more relevant technical-operating proof
 - exclude culture/work-environment statements from recruiter-facing requirement bullets unless they contain a concrete responsibility or qualification signal
 - for player-coach, team-building, and operating-rhythm requirements, rank leadership/process evidence ahead of isolated implementation examples
