@@ -28,6 +28,7 @@ Keep the site cheap, stateless, and portable while supporting grounded resume ch
 - Cloudflare Workers Logs for runtime logs
 - Cloudflare Web Analytics for site analytics
 - logs should never include raw job-description or uploaded document content
+- successful fit-analysis requests log structured metadata such as source URL, extracted role/company, and fit verdict so downstream notification hooks can be added without storing raw JD content
 
 ## Build pipeline
 

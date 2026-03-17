@@ -98,3 +98,18 @@
 - no raw JD or uploaded file content is written to logs
 - analytics remain lightweight
 - `.open-next/worker.js` and `.open-next/assets` are produced for Cloudflare releases
+
+## Fit-analysis logging
+
+Successful fit-analysis runs now emit structured runtime log context with:
+
+- `timestamp`
+- `url` (only for URL-based checks; otherwise empty)
+- `roleName`
+- `company`
+- `fitVerdict`
+- `inputKind`
+- `presentationMode`
+
+These logs are intended for operational visibility and recruiter-activity notification hooks.
+They must not include raw job-description text or uploaded-document content.
