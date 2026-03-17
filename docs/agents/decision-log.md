@@ -248,6 +248,18 @@ Use this log for concise, chronological records of meaningful decisions that do 
 - Rationale: If trailing punctuation is absorbed into the clickable target, GitHub/source-doc links break at the exact point where users are most likely to click them.
 - Scope impact: `components/ask-ai-overlay.tsx`, `tests/ask-ai-overlay.test.ts`, `docs/product/prd.md`, `docs/architecture/ai-system.md`, `docs/qa/test-plan.md`, `docs/agents/handoffs.md`, `docs/agents/decision-log.md`.
 
+- Agent role: Application Engineer
+- Decision: Carry an extracted fit-analysis target summary in result metadata and render it above the analysis output as `Role - Company` when the JD exposes that label clearly enough.
+- Rationale: Users need to confirm which posting is being analyzed without re-reading the input field; this is presentation metadata, not part of the verdict itself, so it should be extracted once and carried through the result payload.
+- Scope impact: `types/ai.ts`, `lib/ai/fit-analysis.ts`, `lib/ai/openai.ts`, `lib/ai/prompting.ts`, `components/fit-analysis-form.tsx`, `tests/fit-analysis-target.test.ts`, `tests/copy.test.ts`, `docs/product/prd.md`, `docs/architecture/ai-system.md`, `docs/qa/test-plan.md`, `docs/agents/handoffs.md`, `docs/agents/decision-log.md`.
+
+- Agent role: AI Systems Architect
+- Decision: Move URL title/company extraction to the ingestion layer, prefer structured metadata there, and treat JD-text heuristics only as backup. Expand the live URL fixture contract so parsed-JD expectations and displayed target-summary expectations can differ when an ATS exposes inconsistent metadata vs body copy.
+- Rationale: The fit-result header is not a synthesis problem; it should come from the best available structured source. Some live ATS pages expose one title in structured metadata and another in the rendered body, so the regression harness must model both rather than forcing a false equivalence.
+- Decision: The checked role/company label now resolves in this source order: provider-specific structured payloads, page metadata/title, URL-derived company identity, and only then JD-text heuristics.
+- Decision: When a live ATS page exposes a stale or conflicting metadata title, the displayed fit-check title should prefer the recruiter-readable JD title while keeping company identity from the stronger structured/meta/URL source.
+- Scope impact: `types/ai.ts`, `lib/platform/url-intake.ts`, `app/api/fit-analysis/route.ts`, `lib/ai/fit-analysis.ts`, `tests/platform-intake.test.ts`, `tests/url-fit-analysis.eval.test.ts`, `tests/fixtures/url-fit-analysis-cases.json`, `docs/product/prd.md`, `docs/architecture/ai-system.md`, `docs/qa/test-plan.md`, `docs/agents/handoffs.md`, `docs/agents/decision-log.md`.
+
 ### 2026-03-16
 
 - Agent role: QA / Evaluations Agent

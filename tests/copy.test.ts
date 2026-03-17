@@ -30,6 +30,12 @@ test("fit-analysis panel copy mentions paste, upload, and URL intake with Career
   );
 });
 
+test("fit-analysis results render the checked role and company above the analysis body", () => {
+  assert.match(fitFormSource, /result\.metadata\?\.targetSummary\?\.displayLabel/);
+  assert.match(fitFormSource, /Role being checked/);
+  assert.match(fitFormSource, /fontSize:\s*"1\.45rem"/);
+});
+
 test("chat surfaces use Career Twin naming instead of living resume", () => {
   assert.match(overlaySource, /Chat with my Career Twin/);
   assert.match(overlaySource, /Ask about experience, role fit, product judgment, or how this system was built\./);

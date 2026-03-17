@@ -2,7 +2,7 @@ import test from "node:test";
 import assert from "node:assert/strict";
 import { readFileSync } from "node:fs";
 import path from "node:path";
-import { fetchJobDescriptionFromUrl } from "@/lib/platform/url-intake";
+import { fetchJobPostingFromUrl } from "@/lib/platform/url-intake";
 import { extractRoleRequirementsHeuristically } from "@/lib/ai/prompting";
 import { heuristicFitAnalysisService } from "@/lib/ai/fit-analysis";
 import type { FitVerdict } from "@/types/ai";
@@ -13,6 +13,8 @@ type UrlFitAnalysisCase = {
   url: string;
   expectedTitle: string;
   expectedCompany: string;
+  expectedTargetTitle?: string;
+  expectedTargetCompany?: string;
   expectedOutcome?: "positive_fit" | "negative_fit" | FitVerdict;
   enabled?: boolean;
   requiredForBuild?: boolean;
@@ -79,7 +81,8 @@ for (const testCase of enabledCases) {
       delete process.env.OPENAI_API_KEY;
 
       try {
-        const jobDescription = await fetchJobDescriptionFromUrl(testCase.url);
+        const posting = await fetchJobPostingFromUrl(testCase.url);
+        const jobDescription = posting.content;
 
         assert.ok(jobDescription.length >= 300, `${testCase.id} returned too little JD text.`);
         assert.notEqual(jobDescription.trim(), testCase.url);
@@ -103,7 +106,8 @@ for (const testCase of enabledCases) {
           {
             kind: "url",
             url: testCase.url,
-            content: jobDescription
+            content: jobDescription,
+            targetSummary: posting.targetSummary
           },
           `qa-url-fit-${testCase.id}`,
           "recruiter_brief"
@@ -111,6 +115,20 @@ for (const testCase of enabledCases) {
 
         assert.equal(result.metadata?.inputKind, "url");
         assert.equal(result.presentation.mode, "recruiter_brief");
+        assert.ok(
+          includesNormalized(
+            result.metadata?.targetSummary?.roleTitle ?? "",
+            testCase.expectedTargetTitle ?? testCase.expectedTitle
+          ),
+          `${testCase.id} targetSummary did not keep expected title "${testCase.expectedTargetTitle ?? testCase.expectedTitle}".`
+        );
+        assert.ok(
+          includesNormalized(
+            result.metadata?.targetSummary?.companyName ?? "",
+            testCase.expectedTargetCompany ?? testCase.expectedCompany
+          ),
+          `${testCase.id} targetSummary did not keep expected company "${testCase.expectedTargetCompany ?? testCase.expectedCompany}".`
+        );
 
         const verdict = result.presentation.overallMatch.verdict;
         if (!matchesExpectedOutcome(testCase.expectedOutcome, verdict)) {

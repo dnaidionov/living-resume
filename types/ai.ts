@@ -23,7 +23,13 @@ export type ChatAnswer = {
 export type RoleInput =
   | { kind: "text"; text: string }
   | { kind: "file"; fileId: string; mimeType: string }
-  | { kind: "url"; url: string; content?: string };
+  | { kind: "url"; url: string; content?: string; targetSummary?: FitTargetSummary };
+
+export type FitTargetSummary = {
+  roleTitle?: string;
+  companyName?: string;
+  displayLabel: string;
+};
 
 export type FitPresentationMode = "scorecard" | "recruiter_brief";
 
@@ -115,6 +121,7 @@ export type FitAnalysisResult = {
     evaluatorVersion: string;
     inputKind: "text" | "url" | "file";
     presentationMode: FitPresentationMode;
+    targetSummary?: FitTargetSummary;
     stageVersions?: {
       requirementExtraction: string;
       retrieval: string;

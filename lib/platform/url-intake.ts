@@ -1,4 +1,11 @@
+import type { FitTargetSummary } from "@/types/ai";
+
 export async function fetchJobDescriptionFromUrl(url: string): Promise<string> {
+  const result = await fetchJobPostingFromUrl(url);
+  return result.content;
+}
+
+export async function fetchJobPostingFromUrl(url: string): Promise<{ content: string; targetSummary?: FitTargetSummary }> {
   const response = await fetch(url, {
     headers: {
       "user-agent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/136.0.0.0 Safari/537.36",
@@ -15,6 +22,7 @@ export async function fetchJobDescriptionFromUrl(url: string): Promise<string> {
 
   const html = await response.text();
   const normalized = extractReadableText(html);
+  const targetSummary = extractJobTargetSummary(html, url);
 
   if (normalized.length < 60 && scoreDocument(normalized) < 3) {
     if (/enable javascript to run this app|javascript required|please enable javascript/i.test(html)) {
@@ -23,7 +31,10 @@ export async function fetchJobDescriptionFromUrl(url: string): Promise<string> {
     throw new Error("Fetched page did not contain enough readable job description content.");
   }
 
-  return normalized;
+  return {
+    content: normalized,
+    targetSummary
+  };
 }
 
 export function extractReadableText(html: string): string {
@@ -83,6 +94,28 @@ function extractMetaFallbackText(html: string): string {
   return normalizeSegments(values.join("\n\n")).join("\n\n");
 }
 
+function extractMetaTitleCandidates(html: string): string[] {
+  return [
+    extractMetaContent(html, "og:title"),
+    extractMetaContent(html, "twitter:title"),
+    extractTitle(html)
+  ]
+    .filter(Boolean)
+    .map((item) => normalizeStructuredString(item as string))
+    .filter(Boolean);
+}
+
+function extractMetaCompanyCandidates(html: string): string[] {
+  return [
+    extractMetaContent(html, "og:site_name"),
+    extractMetaContent(html, "application-name"),
+    extractMetaContent(html, "twitter:site")
+  ]
+    .filter(Boolean)
+    .map((item) => normalizeStructuredString(item as string).replace(/^@/, ""))
+    .filter(Boolean);
+}
+
 function extractMetaContent(html: string, name: string): string | undefined {
   const pattern = new RegExp(`<meta[^>]+(?:name|property)=["']${escapeRegExp(name)}["'][^>]+content=["']([^"']+)["'][^>]*>`, "i");
   return html.match(pattern)?.[1];
@@ -140,6 +173,33 @@ function extractProviderSpecificText(html: string): string {
     .sort((left, right) => scoreDocument(right) - scoreDocument(left))[0] ?? "";
 }
 
+function extractProviderSpecificTargetSummary(html: string, fallbackCompany?: string): FitTargetSummary | undefined {
+  const ldJsonPosting = extractJsonLdJobPosting(html);
+  if (ldJsonPosting?.title) {
+    return {
+      roleTitle: normalizeTargetPart(ldJsonPosting.title),
+      companyName: normalizeTargetPart(ldJsonPosting.company) ?? normalizeTargetPart(fallbackCompany),
+      displayLabel: buildDisplayLabel(ldJsonPosting.title, ldJsonPosting.company ?? fallbackCompany)
+    };
+  }
+
+  const ashbyTitle = extractJsonEncodedField(html, "title");
+  const ashbyCompany =
+    extractJsonEncodedField(html, "companyName") ??
+    extractJsonEncodedField(html, "organizationName") ??
+    extractJsonEncodedField(html, "company");
+
+  if (ashbyTitle) {
+    return {
+      roleTitle: normalizeTargetPart(ashbyTitle),
+      companyName: normalizeTargetPart(ashbyCompany) ?? normalizeTargetPart(fallbackCompany),
+      displayLabel: buildDisplayLabel(ashbyTitle, ashbyCompany ?? fallbackCompany)
+    };
+  }
+
+  return undefined;
+}
+
 function extractJsonLdJobPosting(html: string): { title?: string; description?: string; company?: string } | undefined {
   const scripts = Array.from(html.matchAll(/<script\b[^>]*type=["']application\/ld\+json["'][^>]*>([\s\S]*?)<\/script>/gi))
     .map((match) => match[1]?.trim())
@@ -173,6 +233,202 @@ function extractJsonLdJobPosting(html: string): { title?: string; description?: 
       if ((description && description.trim()) || (title && title.trim()) || (company && company.trim())) {
         return { title, description, company };
       }
+    }
+  }
+
+  return undefined;
+}
+
+function normalizeTargetPart(value?: string): string | undefined {
+  const normalized = value?.replace(/\s+/g, " ").trim();
+  return normalized ? normalized : undefined;
+}
+
+function buildDisplayLabel(title?: string, company?: string): string {
+  const roleTitle = normalizeTargetPart(title);
+  const companyName = normalizeTargetPart(company);
+  return companyName && roleTitle ? `${roleTitle} - ${companyName}` : roleTitle ?? companyName ?? "";
+}
+
+function deriveCompanyFromUrl(url: string): string | undefined {
+  try {
+    const parsed = new URL(url);
+    const hostParts = parsed.hostname.toLowerCase().split(".").filter(Boolean);
+    const meaningfulHost = hostParts.find((part) => !["www", "jobs", "careers", "explore", "job-boards"].includes(part));
+    const pathParts = parsed.pathname.split("/").filter(Boolean);
+
+    if (parsed.hostname === "jobs.ashbyhq.com" && pathParts[0]) {
+      return humanizeCompanySlug(pathParts[0]);
+    }
+
+    if (parsed.hostname === "job-boards.greenhouse.io" && pathParts[0]) {
+      return humanizeCompanySlug(pathParts[0]);
+    }
+
+    if (meaningfulHost) {
+      return humanizeCompanySlug(meaningfulHost);
+    }
+  } catch {
+    return undefined;
+  }
+
+  return undefined;
+}
+
+function humanizeCompanySlug(value: string): string | undefined {
+  const cleaned = value.toLowerCase().replace(/[^a-z0-9]+/g, " ").trim();
+  if (!cleaned) {
+    return undefined;
+  }
+
+  const normalized =
+    cleaned === "withwaymo"
+      ? "waymo"
+      : cleaned === "gomotive"
+        ? "motive"
+        : cleaned;
+
+  return normalized
+    .split(" ")
+    .filter(Boolean)
+    .map((part) => part.charAt(0).toUpperCase() + part.slice(1))
+    .join(" ");
+}
+
+function looksLikeRoleTitle(value: string): boolean {
+  return value.length <= 120 &&
+    !/\b(as the|you will|you'll|responsible for|own strategy|execution across)\b/i.test(value) &&
+    /\b(product|manager|director|lead|head|owner|principal|staff|senior|group|vp|vice president)\b/i.test(value);
+}
+
+function looksLikeCompany(value: string): boolean {
+  return !!value &&
+    !looksLikeRoleTitle(value) &&
+    !/\b(remote|hybrid|on site|full-time|part-time|mountain view|san francisco|new york|california|united states)\b/i.test(value);
+}
+
+function parseTitleAndCompanyCandidate(value: string, urlCompany?: string): { roleTitle?: string; companyName?: string } | undefined {
+  const normalized = normalizeStructuredString(value);
+  const parts = normalized.split("|").map((part) => part.trim()).filter(Boolean);
+  if (parts.length >= 2) {
+    const roleTitle = parts.find(looksLikeRoleTitle);
+    const companyName = [...parts].reverse().find(looksLikeCompany) ?? urlCompany;
+    if (roleTitle) {
+      return { roleTitle, companyName };
+    }
+  }
+
+  const dashParts = normalized.split(/\s+-\s+/).map((part) => part.trim()).filter(Boolean);
+  if (dashParts.length >= 2 && looksLikeRoleTitle(dashParts[0] ?? "")) {
+    const companyName = [...dashParts].reverse().find(looksLikeCompany) ?? urlCompany;
+    return {
+      roleTitle: dashParts[0],
+      companyName
+    };
+  }
+
+  if (looksLikeRoleTitle(normalized)) {
+    return {
+      roleTitle: normalized,
+      companyName: urlCompany
+    };
+  }
+
+  return undefined;
+}
+
+function extractVisibleBodyRoleTitle(bodyText: string): string | undefined {
+  const globalAsRoleMatch = bodyText.match(/\bAs the ([A-Z][A-Za-z0-9/&,\- ]{3,100}?)(?:,|\s+you\b)/);
+  const globalCandidate = normalizeTargetPart(globalAsRoleMatch?.[1]);
+  if (globalCandidate && looksLikeRoleTitle(globalCandidate)) {
+    return globalCandidate;
+  }
+
+  const lines = bodyText
+    .split("\n")
+    .map((line) => normalizeStructuredString(line))
+    .filter(Boolean)
+    .slice(0, 40);
+
+  for (const line of lines) {
+    const asRoleMatch = line.match(/\bAs the ([A-Z][A-Za-z0-9/&,\- ]{3,100}?)(?:,|\s+you\b)/);
+    const candidate = normalizeTargetPart(asRoleMatch?.[1]);
+    if (candidate && looksLikeRoleTitle(candidate)) {
+      return candidate;
+    }
+  }
+
+  for (const line of lines) {
+    if (looksLikeRoleTitle(line)) {
+      return line;
+    }
+  }
+
+  return undefined;
+}
+
+function extractReadableRoleTitleOverride(readableText: string): string | undefined {
+  const globalAsRoleMatch = readableText.match(/\bAs the ([A-Z][A-Za-z0-9/&,\- ]{3,100}?)(?:,|\s+you\b)/);
+  const globalCandidate = normalizeTargetPart(globalAsRoleMatch?.[1]);
+  if (globalCandidate && looksLikeRoleTitle(globalCandidate)) {
+    return globalCandidate;
+  }
+
+  return undefined;
+}
+
+export function extractJobTargetSummary(html: string, url: string): FitTargetSummary | undefined {
+  const urlCompany = deriveCompanyFromUrl(url);
+  const readableText = extractReadableText(html);
+  const bodyText = normalizeSegments(htmlToReadableText(extractPrimaryHtml(html))).join("\n");
+  const visibleBodyRoleTitle = extractVisibleBodyRoleTitle(bodyText) ?? extractReadableRoleTitleOverride(readableText);
+  const structured = extractProviderSpecificTargetSummary(html, urlCompany);
+  if (structured?.displayLabel) {
+    if (visibleBodyRoleTitle && structured.roleTitle && visibleBodyRoleTitle !== structured.roleTitle) {
+      return {
+        roleTitle: visibleBodyRoleTitle,
+        companyName: structured.companyName,
+        displayLabel: buildDisplayLabel(visibleBodyRoleTitle, structured.companyName)
+      };
+    }
+    return structured;
+  }
+
+  for (const candidate of extractMetaTitleCandidates(html)) {
+    const parsed = parseTitleAndCompanyCandidate(candidate, urlCompany);
+    if (parsed?.roleTitle) {
+      const roleTitle =
+        visibleBodyRoleTitle && visibleBodyRoleTitle !== parsed.roleTitle
+          ? visibleBodyRoleTitle
+          : parsed.roleTitle;
+      return {
+        roleTitle,
+        companyName: parsed.companyName,
+        displayLabel: buildDisplayLabel(roleTitle, parsed.companyName)
+      };
+    }
+  }
+
+  const firstHeading = readableText.split("\n").map((item) => item.trim()).find(Boolean);
+  if (firstHeading && looksLikeRoleTitle(firstHeading)) {
+    const metaCompany = extractMetaCompanyCandidates(html).find(looksLikeCompany) ?? urlCompany;
+    return {
+      roleTitle: firstHeading,
+      companyName: metaCompany,
+      displayLabel: buildDisplayLabel(firstHeading, metaCompany)
+    };
+  }
+
+  const metaCompany = extractMetaCompanyCandidates(html).find(looksLikeCompany) ?? urlCompany;
+  const title = extractTitle(html);
+  if (title) {
+    const parsed = parseTitleAndCompanyCandidate(title, metaCompany);
+    if (parsed?.roleTitle) {
+      return {
+        roleTitle: parsed.roleTitle,
+        companyName: parsed.companyName,
+        displayLabel: buildDisplayLabel(parsed.roleTitle, parsed.companyName)
+      };
     }
   }
 

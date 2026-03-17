@@ -71,6 +71,11 @@ test("assembleFitAnalysisResult preserves internal scorecard and recruiter brief
     evidence,
     inputKind: "text",
     presentationMode: "recruiter_brief",
+    targetSummary: {
+      roleTitle: "Senior Product Manager",
+      companyName: "Example",
+      displayLabel: "Senior Product Manager - Example"
+    },
     evaluatorVersion: "v3-test"
   });
 
@@ -81,6 +86,7 @@ test("assembleFitAnalysisResult preserves internal scorecard and recruiter brief
   assert.equal(result.metadata?.inputKind, "text");
   assert.equal(result.metadata?.evaluatorVersion, "v3-test");
   assert.equal(result.metadata?.presentationMode, "recruiter_brief");
+  assert.equal(result.metadata?.targetSummary?.displayLabel, "Senior Product Manager - Example");
 });
 
 test("extractRoleRequirements marks explicit must-haves and nice-to-haves", () => {

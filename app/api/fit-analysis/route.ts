@@ -1,21 +1,14 @@
 import { NextResponse } from "next/server";
 import { heuristicFitAnalysisService } from "@/lib/ai/fit-analysis";
+import { resolveRoleInputForAnalysis } from "@/lib/ai/fit-analysis-input";
 import { logEvent } from "@/lib/logging/logger";
-import { fetchJobDescriptionFromUrl } from "@/lib/platform/url-intake";
 import type { FitAnalysisRequest } from "@/types/ai";
 
 export async function POST(request: Request) {
   const payload = (await request.json()) as FitAnalysisRequest;
 
   try {
-    const roleInput =
-      payload.roleInput.kind === "url"
-        ? {
-            kind: "url" as const,
-            url: payload.roleInput.url,
-            content: await fetchJobDescriptionFromUrl(payload.roleInput.url)
-          }
-        : payload.roleInput;
+    const roleInput = await resolveRoleInputForAnalysis(payload.roleInput);
 
     const result = await heuristicFitAnalysisService.analyze(
       roleInput,
