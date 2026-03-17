@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
 import { heuristicFitAnalysisService } from "@/lib/ai/fit-analysis";
+import { buildFitAnalysisLogContext } from "@/lib/logging/fit-analysis-log";
 import { logEvent } from "@/lib/logging/logger";
 import { parseUploadedRoleFile } from "@/lib/platform/file-intake";
 import type { FitPresentationMode } from "@/types/ai";
@@ -17,10 +18,19 @@ export async function POST(request: Request) {
   try {
     const text = await parseUploadedRoleFile(file);
     const result = await heuristicFitAnalysisService.analyze({ kind: "text", text }, sessionId, presentationMode);
-    logEvent("info", "fit_analysis_file_completed", {
-      mimeType: file.type || "unknown",
-      presentationMode
-    });
+    logEvent(
+      "info",
+      "fit_analysis_file_completed",
+      buildFitAnalysisLogContext(
+        {
+          kind: "file",
+          fileId: file.name,
+          mimeType: file.type || "unknown"
+        },
+        result,
+        presentationMode
+      )
+    );
     return NextResponse.json(result);
   } catch (error) {
     return NextResponse.json(
