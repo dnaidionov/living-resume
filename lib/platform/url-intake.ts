@@ -28,17 +28,29 @@ export async function fetchJobDescriptionFromUrl(url: string): Promise<string> {
 
 export function extractReadableText(html: string): string {
   const structuredText = extractStructuredJobText(html);
-  if (structuredText.length >= 80 || scoreDocument(structuredText) >= 6) {
-    return structuredText;
-  }
-
-  const metaText = extractMetaFallbackText(html);
-  if (metaText.length >= 80 || scoreDocument(metaText) >= 4) {
-    return metaText;
-  }
-
   const primaryHtml = extractPrimaryHtml(html);
-  const text = htmlToReadableText(primaryHtml);
+  const primaryText = normalizeSegments(htmlToReadableText(primaryHtml)).join("\n\n");
+  const metaText = extractMetaFallbackText(html);
+
+  const candidates = [
+    { text: structuredText, source: "structured" },
+    { text: mergeTextParts(metaText, structuredText), source: "structured_with_meta" },
+    { text: primaryText, source: "primary" },
+    { text: mergeTextParts(metaText, primaryText), source: "primary_with_meta" },
+    { text: metaText, source: "meta" }
+  ]
+    .map((item) => ({
+      ...item,
+      text: normalizeSegments(item.text).join("\n\n")
+    }))
+    .filter((item) => item.text.length > 0)
+    .sort((left, right) => scoreCandidate(right) - scoreCandidate(left));
+
+  if (candidates.length === 0) {
+    return "";
+  }
+
+  const text = candidates[0]?.text ?? "";
   const sections = normalizeSegments(text);
 
   const ranked = sections
@@ -113,12 +125,13 @@ function extractProviderSpecificText(html: string): string {
 
   const ashbyDescription = extractJsonEncodedField(html, "descriptionHtml");
   if (ashbyDescription) {
-    candidates.push(normalizeSegments(normalizeStructuredString(ashbyDescription)).join("\n\n"));
+    const ashbyTitle = extractJsonEncodedField(html, "title");
+    candidates.push(mergeTextParts(ashbyTitle, normalizeStructuredString(ashbyDescription)));
   }
 
-  const ldJsonDescription = extractJsonLdDescription(html);
-  if (ldJsonDescription) {
-    candidates.push(normalizeSegments(normalizeStructuredString(ldJsonDescription)).join("\n\n"));
+  const ldJsonPosting = extractJsonLdJobPosting(html);
+  if (ldJsonPosting) {
+    candidates.push(mergeTextParts(ldJsonPosting.company, ldJsonPosting.title, ldJsonPosting.description));
   }
 
   return candidates
@@ -127,7 +140,7 @@ function extractProviderSpecificText(html: string): string {
     .sort((left, right) => scoreDocument(right) - scoreDocument(left))[0] ?? "";
 }
 
-function extractJsonLdDescription(html: string): string | undefined {
+function extractJsonLdJobPosting(html: string): { title?: string; description?: string; company?: string } | undefined {
   const scripts = Array.from(html.matchAll(/<script\b[^>]*type=["']application\/ld\+json["'][^>]*>([\s\S]*?)<\/script>/gi))
     .map((match) => match[1]?.trim())
     .filter(Boolean);
@@ -147,9 +160,18 @@ function extractJsonLdDescription(html: string): string | undefined {
       if (String(record["@type"] ?? "").toLowerCase() !== "jobposting") {
         continue;
       }
-      const description = record.description;
-      if (typeof description === "string" && description.trim()) {
-        return description;
+      const description = typeof record.description === "string" ? record.description : undefined;
+      const title = typeof record.title === "string" ? record.title : undefined;
+      const hiringOrganization = record.hiringOrganization;
+      const company =
+        hiringOrganization && typeof hiringOrganization === "object"
+          ? typeof (hiringOrganization as Record<string, unknown>).name === "string"
+            ? ((hiringOrganization as Record<string, unknown>).name as string)
+            : undefined
+          : undefined;
+
+      if ((description && description.trim()) || (title && title.trim()) || (company && company.trim())) {
+        return { title, description, company };
       }
     }
   }
@@ -239,6 +261,22 @@ function normalizeStructuredString(value: string): string {
     .trim();
 }
 
+function mergeTextParts(...parts: Array<string | undefined>): string {
+  const seen = new Set<string>();
+
+  return parts
+    .flatMap((part) => normalizeSegments(part ?? ""))
+    .filter((part) => {
+      const key = part.toLowerCase();
+      if (!key || seen.has(key)) {
+        return false;
+      }
+      seen.add(key);
+      return true;
+    })
+    .join("\n\n");
+}
+
 function decodeHtmlEntities(value: string): string {
   return value
     .replace(/&nbsp;/gi, " ")
@@ -254,6 +292,9 @@ function decodeHtmlEntities(value: string): string {
 
 function isStructuredJobSegment(segment: string, path: string): boolean {
   if (segment.length < 20 || looksLikeConfigBlob(segment)) {
+    return false;
+  }
+  if (/\/assets\/|(?:^|\s)[/@a-z0-9_.-]+\.(?:js|css|png|svg|woff2?)(?:\s|$)/i.test(segment)) {
     return false;
   }
   if (/(themeoptions|customtheme|customfonts|microsite|vscdn|font-family|border-radius|background-color|stylesheet|favicon|logo|image\/|cdn)/i.test(segment)) {
@@ -325,8 +366,12 @@ function isBoilerplateSegment(segment: string): boolean {
 
 function looksLikeConfigBlob(segment: string): boolean {
   const normalized = segment.toLowerCase();
+  const assetReferenceCount = (segment.match(/\b(?:https?:\/\/\S+|\/\S+)\.(?:js|css|png|svg|woff2?)\b/gi) ?? []).length;
+
   return (
     /themeoptions|customtheme|customfonts|font-family|vscdn|microsite|src\\?https?:\/\/|background-color|border-radius|box-shadow|stylesheet|favicon|image\/png|cdn/.test(normalized) ||
+    /\/assets\/|bootstrap\d?|videojs|googlemaps|markerclusterer|turbo_streams|controllers\/|font\.woff|favicon\.png/.test(normalized) ||
+    assetReferenceCount >= 2 ||
     /[{[]\s*"?[a-z0-9_-]+"?\s*:/.test(segment) ||
     /&#34;/.test(segment)
   );
@@ -334,8 +379,9 @@ function looksLikeConfigBlob(segment: string): boolean {
 
 function scoreSegment(segment: string): number {
   let score = 0;
+  const wordCount = segment.trim().split(/\s+/).length;
 
-  if (segment.length <= 90 && !isBoilerplateSegment(segment)) {
+  if (segment.length <= 90 && !isBoilerplateSegment(segment) && wordCount >= 3) {
     score += 1;
   }
   if (/(responsibilities|qualifications|requirements|you will|about the role|preferred qualifications|what you'?ll do|what you will do|about the job|about the team)/i.test(segment)) {
@@ -359,6 +405,21 @@ function scoreSegment(segment: string): number {
 
 function scoreDocument(text: string): number {
   return normalizeSegments(text).reduce((sum, segment) => sum + Math.max(0, scoreSegment(segment)), 0);
+}
+
+function scoreCandidate(candidate: { text: string; source: string }): number {
+  const sourceBias =
+    candidate.source === "structured_with_meta"
+      ? 10
+      : candidate.source === "structured"
+        ? 8
+        : candidate.source === "primary_with_meta"
+          ? 6
+          : candidate.source === "primary"
+            ? 4
+            : 2;
+
+  return scoreDocument(candidate.text) + sourceBias;
 }
 
 function escapeRegExp(value: string): string {

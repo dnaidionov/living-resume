@@ -9,3 +9,5 @@ embeddings.json
 .env.local
 *.log
 .DS_Store
+*.tsbuildinfo
+.codex

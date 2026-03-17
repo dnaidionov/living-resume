@@ -57,6 +57,7 @@
   - [ ] chat returns an answer with citations
   - [ ] pasted-text fit analysis returns a scorecard
   - [ ] URL fit analysis works for a readable public job page
+  - [ ] `npm run test:url-evals` passes the enabled required live URL cases
   - [ ] TXT uploads are accepted
   - [ ] PDF uploads are accepted
   - [ ] DOCX uploads are accepted
@@ -72,6 +73,7 @@
   - [ ] chat returns an answer with citations
   - [ ] pasted-text fit analysis returns a scorecard
   - [ ] URL fit analysis works for a readable public job page
+  - [ ] `npm run test:url-evals` passes the enabled required live URL cases
   - [ ] TXT uploads are accepted
   - [ ] PDF uploads are accepted
   - [ ] DOCX uploads are accepted
