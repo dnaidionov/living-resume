@@ -85,6 +85,7 @@
 - intercept resume-fit requests in the Ask AI overlay and hand them off to the dedicated Role Fit section; on confirmation, close chat, prefill the matching URL/text input, scroll to the section, and auto-run the fit analysis
 - render the fit-check handoff as explicit assistant actions (`Sure, do it`, `No, stay here`) instead of relying on typed confirmation; declining keeps chat open and replies `Ok, staying here.`
 - keep keyboard focus in the Ask AI composer on open and after in-chat replies or handoff dismissal so the chat remains type-ready without extra clicks
+- anchor the Ask AI message rail to the bottom of the panel so conversation starts near the composer and grows upward as messages are added
 - add top-menu resume download icon button with tooltip `Download classic resume`, linked to `public/classic-resume.txt` download target
 - add resume download control to hero and menu; implement zero-delay attached callout label in place of native tooltip
 - update menu/hero resume download targets to latest PDF (`/DmitryNaidionov-cv.pdf`) copied from user-provided source path

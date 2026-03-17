@@ -17,8 +17,16 @@ test("ask-ai overlay keeps plain Enter available for multiline input", () => {
   assert.doesNotMatch(overlaySource, /if\s*\(\s*event\.key === "Enter"/);
 });
 
-test("ask-ai overlay packs chat messages at the top of the scroll rail", () => {
-  assert.match(overlaySource, /alignContent:\s*"start"/);
+test("ask-ai overlay anchors chat content to the bottom of the scroll rail", () => {
+  assert.match(overlaySource, /minHeight:\s*0/);
+  assert.match(overlaySource, /overscrollBehavior:\s*"contain"/);
+  assert.match(overlaySource, /minHeight:\s*"100%"/);
+  assert.match(overlaySource, /justifyContent:\s*"flex-end"/);
+});
+
+test("ask-ai overlay aligns user messages right and assistant messages left", () => {
+  assert.match(overlaySource, /alignSelf:\s*item\.role === "user" \? "flex-end" : "flex-start"/);
+  assert.match(overlaySource, /alignSelf:\s*"flex-start"/);
 });
 
 test("ask-ai overlay uses a typing indicator instead of a Thinking bubble", () => {

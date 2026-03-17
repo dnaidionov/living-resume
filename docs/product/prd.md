@@ -26,6 +26,7 @@ Build a recruiter-first Career Twin that acts as a grounded, interactive profess
 - Resume chat supports multiline input and sends on `Cmd+Enter` (macOS) or `Ctrl+Enter` (Windows/Linux).
 - Resume chat keeps the composer focused on open and after replies so the user does not need extra clicks while the overlay is open.
 - Resume chat uses a compact typing-dots indicator instead of a loading bubble.
+- Resume chat should anchor conversation content to the bottom of the chat rail so the first message starts near the composer and the thread grows upward as messages are added.
 - Resume chat must politely decline off-scope personal questions and steer back to documented professional history and listed projects.
 - Resume-fit requests raised inside chat must be handed off to the dedicated Role Fit section instead of being answered in chat.
 - The fit-check handoff must present explicit actions:
