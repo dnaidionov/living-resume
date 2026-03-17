@@ -362,108 +362,117 @@ export function AskAiOverlay({
         <div
           ref={scrollRef}
           style={{
+            minHeight: 0,
             overflowY: "auto",
-            padding: "8px 2px 12px",
-            display: "grid",
-            gap: 10,
-            alignContent: "start"
+            overscrollBehavior: "contain",
+            padding: "8px 2px 12px"
           }}
         >
-          {messages.length === 0 ? (
-            <div
-              style={{
-                justifySelf: "start",
-                maxWidth: "min(760px, 86%)",
-                padding: "10px 14px",
-                borderRadius: 14,
-                border: "1px solid var(--line)",
-                background: "var(--surface-alt)"
-              }}
-            >
-              <p className="muted" style={{ margin: 0, marginBottom: 8 }}>
-                Try one of these:
-              </p>
-              <div style={{ display: "flex", flexWrap: "wrap", gap: 8 }}>
-                {starterPrompts.map((prompt) => (
-                  <button
-                    key={prompt}
-                    type="button"
-                    style={{
-                      border: "1px solid var(--line)",
-                      background: "rgba(255,255,255,0.03)",
-                      color: "var(--ink)",
-                      padding: "6px 10px",
-                      borderRadius: 999,
-                      fontSize: "0.84rem",
-                      lineHeight: 1.2,
-                      cursor: "pointer"
-                    }}
-                    onClick={() => {
-                      void sendMessage(prompt);
-                    }}
-                  >
-                    {prompt}
-                  </button>
-                ))}
-              </div>
-            </div>
-          ) : null}
-
-          {messages.map((item) => (
-            <div
-              key={item.id}
-              style={{
-                justifySelf: item.role === "user" ? "end" : "start",
-                maxWidth: "min(760px, 86%)",
-                padding: "10px 14px",
-                borderRadius: 14,
-                border: "1px solid var(--line)",
-                background: item.role === "user" ? "var(--accent-soft)" : "var(--surface-alt)",
-                whiteSpace: "pre-wrap"
-              }}
-            >
-              <div>{item.role === "assistant" ? renderMessageContent(item.text) : item.text}</div>
-              {item.kind === "fit_handoff" ? (
-                <div style={{ display: "flex", gap: 8, flexWrap: "wrap", marginTop: 12 }}>
-                  <button
-                    type="button"
-                    className="button secondary"
-                    style={{ minWidth: 0, padding: "6px 12px", minHeight: 34, fontSize: "0.84rem" }}
-                    onClick={() => {
-                      handleFitHandoffAccept();
-                    }}
-                  >
-                    Sure, let’s go
-                  </button>
-                  <button
-                    type="button"
-                    className="button secondary"
-                    style={{ minWidth: 0, padding: "6px 12px", minHeight: 34, fontSize: "0.84rem" }}
-                    onClick={() => {
-                      handleFitHandoffDecline();
-                    }}
-                  >
-                    No, stay here
-                  </button>
+          <div
+            style={{
+              minHeight: "100%",
+              display: "flex",
+              flexDirection: "column",
+              gap: 10,
+              justifyContent: "flex-end"
+            }}
+          >
+            {messages.length === 0 ? (
+              <div
+                style={{
+                  alignSelf: "flex-start",
+                  maxWidth: "min(760px, 86%)",
+                  padding: "10px 14px",
+                  borderRadius: 14,
+                  border: "1px solid var(--line)",
+                  background: "var(--surface-alt)"
+                }}
+              >
+                <p className="muted" style={{ margin: 0, marginBottom: 8 }}>
+                  Try one of these:
+                </p>
+                <div style={{ display: "flex", flexWrap: "wrap", gap: 8 }}>
+                  {starterPrompts.map((prompt) => (
+                    <button
+                      key={prompt}
+                      type="button"
+                      style={{
+                        border: "1px solid var(--line)",
+                        background: "rgba(255,255,255,0.03)",
+                        color: "var(--ink)",
+                        padding: "6px 10px",
+                        borderRadius: 999,
+                        fontSize: "0.84rem",
+                        lineHeight: 1.2,
+                        cursor: "pointer"
+                      }}
+                      onClick={() => {
+                        void sendMessage(prompt);
+                      }}
+                    >
+                      {prompt}
+                    </button>
+                  ))}
                 </div>
-              ) : null}
-            </div>
-          ))}
-
-          {loading ? (
-            <div
-              style={{
-                justifySelf: "start"
-              }}
-              aria-label="Assistant is typing"
-            >
-              <div className="typing-indicator" aria-hidden="true">
-                <span />
-                <span />
-                <span />
               </div>
-            </div>
-          ) : null}
+            ) : null}
+
+            {messages.map((item) => (
+              <div
+                key={item.id}
+                style={{
+                  alignSelf: item.role === "user" ? "flex-end" : "flex-start",
+                  maxWidth: "min(760px, 86%)",
+                  padding: "10px 14px",
+                  borderRadius: 14,
+                  border: "1px solid var(--line)",
+                  background: item.role === "user" ? "var(--accent-soft)" : "var(--surface-alt)",
+                  whiteSpace: "pre-wrap"
+                }}
+              >
+                <div>{item.role === "assistant" ? renderMessageContent(item.text) : item.text}</div>
+                {item.kind === "fit_handoff" ? (
+                  <div style={{ display: "flex", gap: 8, flexWrap: "wrap", marginTop: 12 }}>
+                    <button
+                      type="button"
+                      className="button secondary"
+                      style={{ minWidth: 0, padding: "6px 12px", minHeight: 34, fontSize: "0.84rem" }}
+                      onClick={() => {
+                        handleFitHandoffAccept();
+                      }}
+                    >
+                      Sure, let’s go
+                    </button>
+                    <button
+                      type="button"
+                      className="button secondary"
+                      style={{ minWidth: 0, padding: "6px 12px", minHeight: 34, fontSize: "0.84rem" }}
+                      onClick={() => {
+                        handleFitHandoffDecline();
+                      }}
+                    >
+                      No, stay here
+                    </button>
+                  </div>
+                ) : null}
+              </div>
+            ))}
+
+            {loading ? (
+              <div
+                style={{
+                  alignSelf: "flex-start"
+                }}
+                aria-label="Assistant is typing"
+              >
+                <div className="typing-indicator" aria-hidden="true">
+                  <span />
+                  <span />
+                  <span />
+                </div>
+              </div>
+            ) : null}
+          </div>
         </div>
 
         <form onSubmit={onSubmit} style={{ marginTop: 8 }}>

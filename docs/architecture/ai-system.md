@@ -85,6 +85,7 @@ This keeps the app deployable on both Cloudflare and Vercel without requiring a 
 - Client chat history is persisted in `localStorage` and a short trailing window is sent with each chat request.
 - Resume chat and fit analysis do not persist user data server-side.
 - The Ask AI overlay should keep the composer focused while it remains open so interaction stays type-ready without extra clicks.
+- The Ask AI overlay should anchor its scroll rail to the bottom so starter prompts and early messages appear near the composer, with new messages pushing the thread upward while auto-scrolling to the latest turn.
 
 ## Response formatting
 
