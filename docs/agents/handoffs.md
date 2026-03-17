@@ -182,6 +182,10 @@
 - normalize stale visible `Living Resume` phrasing to `Career Twin` in build-process answers so legacy source labels do not leak into the UI
 - render assistant URLs in the Ask AI overlay as clickable links so GitHub/source-doc pointers are directly usable
 - keep trailing punctuation outside assistant URL anchors so GitHub/source-doc links remain valid when a sentence ends with punctuation
+- add fit-analysis target summary metadata so the result panel can show the checked role/company above the verdict
+- prefer structured URL-ingestion metadata for that target summary; keep JD-text heuristics only as backup
+- resolve target-summary company/title in this precedence order: provider payloads, page metadata/title, URL-derived company identity, then JD-text heuristics as the last resort
+- if metadata title conflicts with a clearer recruiter-readable JD title, display the JD title while still taking company from the stronger structured/meta/URL source
 
 ## Ops / Release Agent -> Deployment Execution (Cloudflare Adapter Readiness 2026-03-07)
 

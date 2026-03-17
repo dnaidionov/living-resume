@@ -2,7 +2,7 @@ import test from "node:test";
 import assert from "node:assert/strict";
 import JSZip from "jszip";
 import { parseUploadedRoleFile } from "@/lib/platform/file-intake";
-import { extractReadableText, fetchJobDescriptionFromUrl } from "@/lib/platform/url-intake";
+import { extractJobTargetSummary, extractReadableText, fetchJobDescriptionFromUrl } from "@/lib/platform/url-intake";
 
 test("extractReadableText strips markup and keeps readable content", () => {
   const html = `
@@ -141,6 +141,126 @@ test("extractReadableText falls back to title and meta description when body con
   const text = extractReadableText(html);
   assert.match(text, /Senior Product Manager/);
   assert.match(text, /Lead product strategy, roadmap planning, and cross-functional execution/i);
+});
+
+test("extractJobTargetSummary prefers structured company and title from JSON-LD", () => {
+  const html = `
+    <html>
+      <head>
+        <title>Ignore This | Example</title>
+        <meta property="og:site_name" content="Wrong Company">
+      </head>
+      <body>
+        <script type="application/ld+json">
+          {
+            "@context": "https://schema.org",
+            "@type": "JobPosting",
+            "title": "Staff Product Manager, Driver Experience",
+            "hiringOrganization": { "name": "Uber" },
+            "description": "<p>Own the roadmap.</p>"
+          }
+        </script>
+      </body>
+    </html>
+  `;
+
+  assert.deepEqual(
+    extractJobTargetSummary(html, "https://careers.uber.com/us/en/job/123"),
+    {
+      roleTitle: "Staff Product Manager, Driver Experience",
+      companyName: "Uber",
+      displayLabel: "Staff Product Manager, Driver Experience - Uber"
+    }
+  );
+});
+
+test("extractJobTargetSummary can recover company from page metadata and URL fallback", () => {
+  const html = `
+    <html>
+      <head>
+        <title>Product Manager, Driving Behaviors | Mountain View | Waymo</title>
+      </head>
+      <body>
+        <main>
+          <h1>Product Manager, Driving Behaviors</h1>
+        </main>
+      </body>
+    </html>
+  `;
+
+  assert.deepEqual(
+    extractJobTargetSummary(
+      html,
+      "https://careers.withwaymo.com/jobs/product-manager-driving-behaviors-mountain-view-california"
+    ),
+    {
+      roleTitle: "Product Manager, Driving Behaviors",
+      companyName: "Waymo",
+      displayLabel: "Product Manager, Driving Behaviors - Waymo"
+    }
+  );
+});
+
+test("extractJobTargetSummary supplements structured title-only metadata with URL-derived company fallback", () => {
+  const html = `
+    <html>
+      <body>
+        <script>
+          {
+            "posting": {
+              "title": "Staff Product Manager, Telematics",
+              "descriptionHtml": "<p>Own the roadmap.</p>"
+            }
+          }
+        </script>
+      </body>
+    </html>
+  `;
+
+  assert.deepEqual(
+    extractJobTargetSummary(html, "https://job-boards.greenhouse.io/gomotive/jobs/8303849002"),
+    {
+      roleTitle: "Staff Product Manager, Telematics",
+      companyName: "Motive",
+      displayLabel: "Staff Product Manager, Telematics - Motive"
+    }
+  );
+});
+
+test("extractJobTargetSummary prefers visible body role title when metadata title conflicts", () => {
+  const html = `
+    <html>
+      <head>
+        <title>Head of Product @ Sourgum</title>
+        <meta property="og:title" content="Head of Product" />
+      </head>
+      <body>
+        <main>
+          <p><strong>Sourgum</strong> is transforming waste operations.</p>
+          <h2>The Role:</h2>
+          <p>As the Director of Product, you will own strategy and execution across the product organization.</p>
+        </main>
+        <script type="application/ld+json">
+          {
+            "@context": "https://schema.org/",
+            "@type": "JobPosting",
+            "title": "Head of Product",
+            "hiringOrganization": { "name": "Sourgum" },
+            "description": "<p><strong>Sourgum</strong> is transforming waste operations.</p><h2>The Role:</h2><p>As the Director of Product, you will own strategy and execution across the product organization.</p>"
+          }
+        </script>
+      </body>
+    </html>
+  `;
+
+  assert.deepEqual(
+    extractJobTargetSummary(html, "https://jobs.ashbyhq.com/sourgum/a8720ec5-99e8-4aa8-b8da-07aa0afa5be6"),
+    {
+      roleTitle: "Director of Product",
+      companyName: "Sourgum",
+      displayLabel: "Director of Product - Sourgum"
+    }
+  );
 });
 
 test("fetchJobDescriptionFromUrl reports JS-rendered pages explicitly when content cannot be recovered", async () => {

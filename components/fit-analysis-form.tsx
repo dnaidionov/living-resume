@@ -416,6 +416,12 @@ export function FitAnalysisForm({ prefill }: { prefill?: FitAnalysisPrefill | nu
               borderTop: "1px solid var(--line)"
             }}
           >
+            {result.metadata?.targetSummary?.displayLabel ? (
+              <div style={{ display: "grid", gap: 4, marginBottom: 18 }}>
+                <SectionCaption>Role being checked</SectionCaption>
+                <div style={{ fontSize: "1.45rem", fontWeight: 700 }}>{result.metadata.targetSummary.displayLabel}</div>
+              </div>
+            ) : null}
             {renderPresentation(result.presentation)}
           </div>
         ) : null}

@@ -20,6 +20,7 @@ const dimensionOrder: FitDimension["name"][] = [
   "leadership_collaboration",
   "context_readiness"
 ];
+type TargetSummary = NonNullable<FitAnalysisResult["metadata"]>["targetSummary"];
 
 type InternalFitEvaluationInput = Partial<InternalFitEvaluation> | null | undefined;
 
@@ -227,7 +228,8 @@ export function buildFallbackFitAnalysisResponse(
   requirements: ExtractedRoleRequirement[],
   evidence: EvidenceChunk[],
   inputKind: "text" | "url" | "file",
-  presentationMode: FitPresentationMode
+  presentationMode: FitPresentationMode,
+  targetSummary?: TargetSummary
 ): FitAnalysisResult {
   const internal = buildFallbackInternalFit(requirements, evidence);
   return assembleFitAnalysisResult({
@@ -240,6 +242,7 @@ export function buildFallbackFitAnalysisResponse(
     evidence,
     inputKind,
     presentationMode,
+    targetSummary,
     evaluatorVersion: "v5-fallback-fit-analysis",
     stageVersions: {
       requirementExtraction: "v1-heuristic-fallback",
@@ -325,6 +328,7 @@ export function assembleFitAnalysisResult({
   evidence,
   inputKind,
   presentationMode,
+  targetSummary,
   evaluatorVersion,
   stageVersions
 }: {
@@ -333,6 +337,7 @@ export function assembleFitAnalysisResult({
   evidence: EvidenceChunk[];
   inputKind: "text" | "url" | "file";
   presentationMode: FitPresentationMode;
+  targetSummary?: TargetSummary;
   evaluatorVersion: string;
   stageVersions?: StageVersions;
 }): FitAnalysisResult {
@@ -357,6 +362,7 @@ export function assembleFitAnalysisResult({
       evaluatorVersion,
       inputKind,
       presentationMode,
+      targetSummary,
       stageVersions
     }
   };

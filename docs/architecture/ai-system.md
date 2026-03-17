@@ -96,6 +96,9 @@ This keeps the app deployable on both Cloudflare and Vercel without requiring a 
 - The resume-chat overlay should use a compact typing-dots indicator instead of a loading bubble.
 - Assistant-rendered URLs in the chat overlay should render as clickable links rather than inert plain text.
 - Trailing punctuation adjacent to assistant-rendered URLs should remain outside the anchor so links do not break.
+- Fit-analysis result metadata should carry a defensively extracted target summary so the UI can show the checked role/company above the analysis body.
+- URL ingestion should resolve the checked role/company label in this precedence order: provider-specific structured payloads (for example JSON-LD or ATS fields), page metadata/title, URL-derived company identity, then JD-text heuristics only as the final fallback.
+- When structured/meta title and recruiter-readable JD title disagree, the displayed role title should prefer the recruiter-readable JD title while still keeping company identity from the strongest structured/meta/URL source available.
 - Resume-fit requests raised inside chat should hand off into the dedicated fit-analysis workflow rather than being answered as chat responses.
 - The fit-check handoff should offer explicit `Sure, let's go` and `No, stay here` actions, with the decline path handled locally rather than via an LLM round trip.
 - Build/process questions such as `how this is built` should be interpreted as questions about the Career Twin product itself, and build answers should end with a short GitHub/source-doc pointer.

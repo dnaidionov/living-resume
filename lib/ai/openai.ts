@@ -18,6 +18,7 @@ const OPENAI_EMBEDDINGS_URL = "https://api.openai.com/v1/embeddings";
 const defaultChatModel = process.env.OPENAI_CHAT_MODEL ?? "gpt-5-mini";
 const defaultFitModel = process.env.OPENAI_FIT_MODEL ?? process.env.OPENAI_CHAT_MODEL ?? "gpt-5-mini";
 const defaultEmbeddingModel = process.env.OPENAI_EMBEDDING_MODEL ?? "text-embedding-3-small";
+type TargetSummary = NonNullable<FitAnalysisResult["metadata"]>["targetSummary"];
 
 type ChatCompletionResponse = {
   choices?: Array<{
@@ -72,10 +73,11 @@ export async function generateFitAnalysisWithOpenAI(
   requirements: ExtractedRoleRequirement[],
   evidence: EvidenceChunk[],
   inputKind: "text" | "url" | "file",
-  presentationMode: FitPresentationMode
+  presentationMode: FitPresentationMode,
+  targetSummary?: TargetSummary
 ): Promise<FitAnalysisResult> {
   if (!process.env.OPENAI_API_KEY) {
-    return buildFallbackFitAnalysisResponse(roleText, requirements, evidence, inputKind, presentationMode);
+    return buildFallbackFitAnalysisResponse(roleText, requirements, evidence, inputKind, presentationMode, targetSummary);
   }
 
   try {
@@ -91,6 +93,7 @@ export async function generateFitAnalysisWithOpenAI(
       evidence,
       inputKind,
       presentationMode,
+      targetSummary,
       evaluatorVersion: "v5-llm-fit-analysis",
       stageVersions: {
         requirementExtraction: "v1-llm-primary",
@@ -99,7 +102,7 @@ export async function generateFitAnalysisWithOpenAI(
       }
     });
   } catch {
-    return buildFallbackFitAnalysisResponse(roleText, requirements, evidence, inputKind, presentationMode);
+    return buildFallbackFitAnalysisResponse(roleText, requirements, evidence, inputKind, presentationMode, targetSummary);
   }
 }
 

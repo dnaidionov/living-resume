@@ -20,6 +20,10 @@
 - Build/process chat answers should normalize stale `Living Resume` phrasing to `Career Twin` in visible output
 - Assistant-rendered URLs in the chat overlay should be clickable
 - Assistant-rendered URLs in the chat overlay should exclude trailing punctuation from the anchor target
+- Fit-analysis results should show the extracted role/company label above the analysis body when the JD exposes it clearly enough
+- Target-summary regressions must verify the source precedence order: structured payloads first, then page metadata/title, then URL-derived company identity, with JD-text heuristics used only as backup
+- Target-summary regressions must also verify title-conflict handling: if recruiter-readable JD content clearly states a different role title than metadata, the displayed target summary should prefer the JD title while preserving company identity from the stronger source.
+- Live URL eval fixtures may validate parsed JD title/company separately from the structured target-summary label when ATS metadata and visible body copy disagree
 - Fit-analysis route returns structured output from text, URL, and file inputs
 - URL-based fit-analysis tests must verify that fetched JD content, not the literal URL string, is used for requirement extraction and evidence retrieval while `metadata.inputKind` remains `url`
 - Live URL-ingestion regression coverage is fixture-driven from `tests/fixtures/url-fit-analysis-cases.json`; the enabled required build-gate set currently includes Waymo, Sourgum, Motive, and Netflix product-role URLs
