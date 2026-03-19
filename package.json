@@ -7,11 +7,12 @@
     "build": "npm run embeddings:verify && npm run test:url-evals && next build",
     "cf:build": "npm run embeddings:verify && npm run test:url-evals && opennextjs-cloudflare build",
     "cf:preview": "wrangler dev",
-    "cf:deploy": "opennextjs-cloudflare deploy",
+    "cf:deploy": "node --import tsx scripts/cf-deploy.ts",
     "start": "next start",
     "lint": "next lint",
     "test": "npm run embeddings:verify && node --import tsx --test tests/**/*.test.ts",
     "test:url-evals": "node --import tsx --test tests/url-fit-analysis.eval.test.ts",
+    "bench:fit": "node --import tsx scripts/benchmark-fit-analysis.ts",
     "content:build": "node --import tsx scripts/build-content-index.ts",
     "embeddings:build": "node --import tsx scripts/build-embeddings.ts",
     "embeddings:verify": "node --import tsx scripts/verify-embeddings.ts"

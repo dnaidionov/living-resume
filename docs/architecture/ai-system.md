@@ -20,9 +20,12 @@ The current repo uses a portable stateless AI runtime:
 
 - `lib/content` provides repo-managed source content.
 - `lib/retrieval` prefers bundled semantic embeddings and falls back to live semantic indexing or deterministic ranking only when needed.
-- `lib/ai/openai.ts` calls OpenAI through plain `fetch`, not a provider SDK.
+- `lib/ai/openai.ts` is the provider-neutral runtime entrypoint; it routes chat, fit synthesis, requirement extraction, and embeddings through task-specific provider config rather than hard-wiring the app to OpenAI.
+- `lib/ai/provider-config.ts` resolves provider/model selection per task with backward-compatible fallbacks to the existing `OPENAI_*` env vars.
+- `lib/ai/providers/openai-compatible.ts` is the first provider adapter and currently serves OpenAI, OpenRouter, and custom OpenAI-compatible providers configured through namespaced env vars.
 - `lib/ai/chat-service.ts` retrieves evidence and sends the latest chat turn plus a short history window to the model.
 - `lib/ai/fit-analysis.ts` extracts requirements, resolves evidence from a broad role query plus prioritized per-requirement queries, and then requests fit synthesis from the model.
+- Fit-analysis retrieval should batch the broad-role query and prioritized per-requirement queries into one embeddings request rather than issuing one semantic embedding round trip per query.
 - URL fit analysis must run on fetched JD content while preserving `inputKind: "url"` in the result metadata; the raw URL should be treated as provenance only, not as analysis text.
 - `lib/platform/file-intake.ts` parses TXT, PDF, and DOCX uploads.
 - `lib/platform/url-intake.ts` normalizes remote job pages into plain text.
@@ -31,6 +34,11 @@ The current repo uses a portable stateless AI runtime:
 - When structured or HTML body extraction is sparse, URL intake may fall back to meta/title text rather than failing immediately, but it should emit a JS-rendered-page error when the page shell still does not contain enough recruiter-readable role content.
 - Local regression fixtures should cover positive non-AI roles, positive AI-native roles, and obvious stretch roles so fit-calibration drift is visible without live model calls.
 - `lib/ai/requirement-extraction.ts` extracts recruiter-relevant role requirements before fit scoring, using the LLM as the primary path and heuristics only as fallback.
+- URL intake should keep a short-lived in-memory cache keyed by exact URL so repeated checks of the same posting reuse normalized JD content and extracted target-summary metadata.
+- Requirement extraction should keep a short-lived in-memory cache keyed by normalized JD text so repeated analyses of the same exact JD reuse extracted requirements without another LLM round trip.
+- Local performance benchmarking for the fit-analysis path should run through `scripts/benchmark-fit-analysis.ts`, which loads `.env.local`, reports the active provider/model configuration, and measures URL fetch, requirement extraction, evidence resolution, and end-to-end URL/text analysis timings in one process so caches are observable.
+- Provider-neutral env routing now uses task-level `AI_*_PROVIDER` and `AI_*_MODEL` variables, plus provider-specific credentials such as `OPENAI_API_KEY`, `OPENROUTER_API_KEY`, or `AI_PROVIDER_<NAME>_{API_KEY,BASE_URL,COMPATIBILITY}` for custom OpenAI-compatible providers.
+- Requirement extraction inherits the fit provider/model when no explicit requirements-task override is set, so isolated fit-model experiments do not require duplicated provider config.
 
 This keeps the app deployable on both Cloudflare and Vercel without requiring a database or server-side session store.
 
@@ -86,6 +94,7 @@ This keeps the app deployable on both Cloudflare and Vercel without requiring a 
 - Resume chat and fit analysis do not persist user data server-side.
 - The Ask AI overlay should keep the composer focused while it remains open so interaction stays type-ready without extra clicks.
 - The Ask AI overlay should anchor its scroll rail to the bottom so starter prompts and early messages appear near the composer, with new messages pushing the thread upward while auto-scrolling to the latest turn.
+- The Ask AI overlay should render turns with explicit side separation: user turns right-aligned, assistant turns left-aligned, and starter/typing states on the assistant side.
 
 ## Response formatting
 
@@ -100,8 +109,17 @@ This keeps the app deployable on both Cloudflare and Vercel without requiring a 
 - Fit-analysis result metadata should carry a defensively extracted target summary so the UI can show the checked role/company above the analysis body.
 - URL ingestion should resolve the checked role/company label in this precedence order: provider-specific structured payloads (for example JSON-LD or ATS fields), page metadata/title, URL-derived company identity, then JD-text heuristics only as the final fallback.
 - When structured/meta title and recruiter-readable JD title disagree, the displayed role title should prefer the recruiter-readable JD title while still keeping company identity from the strongest structured/meta/URL source available.
+- Current live benchmarking shows the remaining dominant latency is the model path, not retrieval: URL fetch is sub-second, batched evidence resolution is under a second, exact-input requirement extraction cache removes a ~17-second cold extraction step on reruns, and warm end-to-end fit checks are still dominated by the final synthesis model call.
+- Preliminary live experiments with `gpt-5-nano` did not produce a reliable latency win for this fit-analysis path and, for at least one representative JD, made recruiter-facing requirement bullets more generic. Model downgrades should therefore remain benchmark-and-review experiments rather than default config changes.
+- The first OpenRouter free-model benchmark showed that fit-analysis is a viable task-routed hybrid:
+  - `requirements` worked well on both `qwen/qwen3-next-80b-a3b-instruct:free` and `openai/gpt-oss-120b:free`, with `gpt-oss-120b:free` winning the final requirements-only quality-vs-speed comparison
+  - `fit` worked well on both `qwen/qwen3-next-80b-a3b-instruct:free` and `openai/gpt-oss-120b:free`, with `qwen3-next` winning on raw speed and `gpt-oss-120b` winning on the reconciled default recommendation
+  - `stepfun/step-3.5-flash:free` was rejected for fit because it remained slow and showed unstable verdict behavior
+  - the tested free chat candidates failed in the current runtime, so chat remains on `gpt-5-mini`
+  - `nvidia/llama-nemotron-embed-vl-1b-v2:free` remains the next embedding candidate, but the final parallel pass did not complete a clean enough embeddings comparison to justify changing the default away from `text-embedding-3-small`
 - Resume-fit requests raised inside chat should hand off into the dedicated fit-analysis workflow rather than being answered as chat responses.
 - The fit-check handoff should offer explicit `Sure, let's go` and `No, stay here` actions, with the decline path handled locally rather than via an LLM round trip.
 - Build/process questions such as `how this is built` should be interpreted as questions about the Career Twin product itself, and build answers should end with a short GitHub/source-doc pointer.
 - Build/process answer finalization should normalize stale visible `Living Resume` references to `Career Twin` so retrieved legacy source labels do not leak into the UI.
 - Recruiter-facing fit output must not mention Dmitry's preferred domains, missing AI wording, or internal scoring logic.
+- Tests that intentionally force heuristic fallback should clear generic provider-routing env vars as well as provider-specific API keys; deleting only `OPENAI_API_KEY` is no longer sufficient once provider routing is generic.

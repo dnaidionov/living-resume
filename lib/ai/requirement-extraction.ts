@@ -2,11 +2,7 @@ import type { RequirementExtractionService } from "@/types/contracts";
 import type { ExtractedRoleRequirement, RoleRequirementCategory, RoleRequirementPriority } from "@/types/ai";
 import { extractRoleRequirementsHeuristically } from "@/lib/ai/prompting";
 import { requestJsonCompletion } from "@/lib/ai/openai";
-
-const defaultRequirementModel = process.env.OPENAI_REQUIREMENTS_MODEL
-  ?? process.env.OPENAI_FIT_MODEL
-  ?? process.env.OPENAI_CHAT_MODEL
-  ?? "gpt-5-mini";
+import { hasProviderConfig, readProviderSummary } from "@/lib/ai/provider-config";
 
 type RequirementExtractionResponse = {
   requirements?: Array<{
@@ -16,26 +12,69 @@ type RequirementExtractionResponse = {
   }>;
 };
 
-export const llmRequirementExtractionService: RequirementExtractionService = {
-  async extract(roleText) {
-    if (!process.env.OPENAI_API_KEY) {
-      return extractRoleRequirementsHeuristically(roleText);
-    }
+type RequirementExtractionRequester = (input: {
+  model: string;
+  systemPrompt: string;
+  userPrompt: string;
+}) => Promise<RequirementExtractionResponse>;
 
-    try {
-      const response = await requestJsonCompletion<RequirementExtractionResponse>({
-        model: defaultRequirementModel,
-        systemPrompt: buildRequirementExtractionSystemPrompt(),
-        userPrompt: buildRequirementExtractionUserPrompt(roleText)
+const requirementExtractionCacheTtlMs = 10 * 60 * 1000;
+
+function normalizeRoleTextForCache(roleText: string): string {
+  return roleText.trim().replace(/\s+/g, " ");
+}
+
+export function createRequirementExtractionService(
+  requester: RequirementExtractionRequester = requestJsonCompletion<RequirementExtractionResponse>,
+  isApiEnabled: () => boolean = () => hasProviderConfig("requirements"),
+  resolveModel: () => string = () =>
+    process.env.AI_REQUIREMENTS_MODEL
+    ?? process.env.AI_FIT_MODEL
+    ?? process.env.OPENAI_REQUIREMENTS_MODEL
+    ?? process.env.OPENAI_FIT_MODEL
+    ?? process.env.OPENAI_CHAT_MODEL
+    ?? "gpt-5-mini"
+): RequirementExtractionService {
+  const cache = new Map<string, { requirements: ExtractedRoleRequirement[]; expiresAt: number }>();
+
+  return {
+    async extract(roleText) {
+      const normalizedRoleText = normalizeRoleTextForCache(roleText);
+      const cached = cache.get(normalizedRoleText);
+      if (cached && cached.expiresAt > Date.now()) {
+        return cached.requirements;
+      }
+
+      let requirements: ExtractedRoleRequirement[];
+
+      if (!isApiEnabled()) {
+        requirements = extractRoleRequirementsHeuristically(roleText);
+      } else {
+        try {
+          const response = await requester({
+            model: resolveModel(),
+            systemPrompt: buildRequirementExtractionSystemPrompt(),
+            userPrompt: buildRequirementExtractionUserPrompt(roleText)
+          });
+
+          const normalized = normalizeExtractedRequirements(response.requirements);
+          requirements = normalized.length > 0 ? normalized : extractRoleRequirementsHeuristically(roleText);
+        } catch {
+          requirements = extractRoleRequirementsHeuristically(roleText);
+        }
+      }
+
+      cache.set(normalizedRoleText, {
+        requirements,
+        expiresAt: Date.now() + requirementExtractionCacheTtlMs
       });
 
-      const normalized = normalizeExtractedRequirements(response.requirements);
-      return normalized.length > 0 ? normalized : extractRoleRequirementsHeuristically(roleText);
-    } catch {
-      return extractRoleRequirementsHeuristically(roleText);
+      return requirements;
     }
-  }
-};
+  };
+}
+
+export const llmRequirementExtractionService = createRequirementExtractionService();
 
 function buildRequirementExtractionSystemPrompt(): string {
   return [

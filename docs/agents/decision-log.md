@@ -262,7 +262,51 @@ Use this log for concise, chronological records of meaningful decisions that do 
 
 ### 2026-03-16
 
+- Agent role: AI Systems Architect
+- Decision: Keep the current fit-analysis quality-oriented pipeline but remove avoidable upstream latency by batching semantic retrieval query embeddings, caching repeated URL-ingestion results by exact URL, and caching exact-input requirement extraction by normalized JD text.
+- Rationale: The slow path was dominated by repeated remote round trips, not by deterministic scoring itself. Removing requirement extraction or per-requirement retrieval would have been faster but would have weakened evidence quality; batching and caching preserve the current evaluator behavior while cutting redundant fetch and model calls.
+- Scope impact: `types/contracts.ts`, `lib/retrieval/store.ts`, `lib/ai/fit-analysis.ts`, `lib/ai/requirement-extraction.ts`, `lib/platform/url-intake.ts`, `tests/retrieval.test.ts`, `tests/requirement-extraction.test.ts`, `tests/platform-intake.test.ts`, `docs/architecture/ai-system.md`, `docs/qa/test-plan.md`, `docs/agents/handoffs.md`, `docs/agents/decision-log.md`.
+
+- Agent role: AI Systems Architect
+- Decision: Add a repo-managed fit-analysis benchmark harness and standardize model experiments on per-command overrides of `OPENAI_REQUIREMENTS_MODEL` and `OPENAI_FIT_MODEL` rather than editing `.env.local`.
+- Rationale: The live benchmark showed that URL fetch and batched retrieval are already small compared with model latency. A reproducible one-process benchmark is needed so model experiments can be compared honestly with caches visible and without contaminating the baseline config.
+- Decision: Current live timings on the Sourgum Ashby posting show URL fetch in the hundreds of milliseconds, first-run requirement extraction at roughly 17 seconds, live batched evidence resolution under 1 second, first-run URL fit analysis at roughly 50 seconds, warm URL reruns at roughly 26 seconds, first-run pasted-text analysis at roughly 46 seconds, and warm pasted-text reruns at roughly 32 seconds.
+- Rationale: Those numbers show the remaining dominant bottleneck is the final fit-synthesis model call, not retrieval or URL ingestion.
+- Decision: Do not change the default fit-analysis models to `gpt-5-nano` based on speed assumptions alone. Preliminary live experiments on the Sourgum JD showed no reliable latency win and produced a more generic recruiter-brief requirement set when `OPENAI_REQUIREMENTS_MODEL=gpt-5-nano` was used.
+- Rationale: The faster-model hypothesis was weaker than it looked. In this setup, the observed latency variance and output simplification outweighed the hoped-for speed gain, so switching defaults now would be cargo-cult optimization rather than evidence-based tuning.
+- Scope impact: `scripts/benchmark-fit-analysis.ts`, `package.json`, `tests/fit-benchmark-script.test.ts`, `docs/architecture/ai-system.md`, `docs/qa/test-plan.md`, `docs/operations/runbook.md`, `docs/agents/handoffs.md`, `docs/agents/decision-log.md`.
+
+- Agent role: Application Engineer
+- Decision: Replaced `alignSelf`-based Ask AI turn positioning with explicit full-width turn rows so user messages remain right-aligned and assistant messages remain left-aligned after bottom-anchoring the chat rail.
+- Rationale: The bottom-anchoring refactor changed the rail to a flex column, which made `justifySelf`/implicit alignment behavior too weak and caused user turns to collapse to the assistant side. Explicit row-level justification is the more stable layout contract.
+- Scope impact: `components/ask-ai-overlay.tsx`, `tests/ask-ai-overlay.test.ts`, `docs/product/prd.md`, `docs/architecture/ai-system.md`, `docs/qa/test-plan.md`, `docs/agents/handoffs.md`, `docs/agents/decision-log.md`.
+
 - Agent role: QA / Evaluations Agent
 - Decision: Added a fixture-driven live URL-ingestion and fit-analysis regression gate using repo-managed external job URLs, and made the enabled required cases part of the build path.
 - Rationale: Synthetic HTML fixtures were not enough to catch provider-specific regressions. The required ATS pages now need direct coverage so URL-ingestion failures are caught before release, even though this intentionally adds third-party availability risk to the build.
 - Scope impact: `tests/fixtures/url-fit-analysis-cases.json`, `tests/url-fit-analysis.eval.test.ts`, `lib/platform/url-intake.ts`, `package.json`, `docs/product/prd.md`, `docs/qa/test-plan.md`, `docs/operations/runbook.md`, `docs/agents/handoffs.md`, `docs/agents/decision-log.md`.
+
+- Agent role: AI Systems Architect
+- Decision: Replace the OpenAI-only runtime assumption with task-routed provider-neutral config, using built-in OpenAI/OpenRouter presets plus custom OpenAI-compatible providers via namespaced env vars.
+- Rationale: Model experiments should not require vendor-specific rewrites or global provider switches. Chat, fit, requirement extraction, and embeddings need to be independently routable while preserving the current repo behavior as the fallback path.
+- Scope impact: `lib/ai/provider-config.ts`, `lib/ai/providers/openai-compatible.ts`, `lib/ai/openai.ts`, `lib/ai/requirement-extraction.ts`, `lib/retrieval/store.ts`, `scripts/benchmark-fit-analysis.ts`, `scripts/build-embeddings.ts`, `.env.example`, `docs/architecture/ai-system.md`, `docs/operations/runbook.md`, `docs/qa/test-plan.md`, `docs/agents/handoffs.md`.
+
+- Agent role: AI Systems Architect
+- Decision: Use task-specific OpenRouter free-model recommendations rather than a single global free-model switch.
+- Rationale: The benchmark evidence did not support a universal migration. `qwen/qwen3-next-80b-a3b-instruct:free` performed well for requirement extraction and, in the broader zero-price follow-up, became the fastest acceptable fit model; `openai/gpt-oss-120b:free` remained a conservative fallback; `stepfun/step-3.5-flash:free` was too unstable for fit; the tested free chat candidates failed in the current runtime; and `nvidia/llama-nemotron-embed-vl-1b-v2:free` became a viable free embedding candidate once the scope widened beyond the curated collection page.
+- Scope impact: `docs/qa/fit-analysis-benchmark-2026-03-17.md`, `docs/architecture/ai-system.md`, `docs/operations/runbook.md`, `docs/qa/test-plan.md`, `docs/agents/handoffs.md`, `docs/agents/decision-log.md`.
+
+- Agent role: AI Systems Architect
+- Decision: Widen OpenRouter candidate discovery from the curated free-model collection page to the broader zero-price model index at `https://openrouter.ai/models?max_price=0`, while keeping the actual benchmark plan shortlist-based.
+- Rationale: The collection page was not complete enough to support a credible recommendation, particularly for embeddings. The broader zero-price index is the better source of scope, but benchmarking every zero-price model would create noise and weaken the experimental design.
+- Scope impact: `docs/qa/fit-analysis-benchmark-2026-03-17.md`, `docs/operations/runbook.md`, `docs/agents/handoffs.md`, `docs/agents/decision-log.md`.
+
+- Agent role: AI Systems Architect
+- Decision: Reconcile the OpenRouter benchmark recommendation after the stricter no-cache parallel pass to keep `openai/gpt-oss-120b:free` as the default free model for both `fit` and `requirements`, keep `gpt-5-mini` for `chat`, and keep `text-embedding-3-small` for `embeddings`.
+- Rationale: The final no-cache evidence showed `qwen/qwen3-next-80b-a3b-instruct:free` is still the fastest completed fit path, but it is consistently more generic than `gpt-oss-120b:free`. The embeddings candidate remained promising but was not benchmarked cleanly enough in the final pass to justify changing the default.
+- Scope impact: `docs/qa/fit-analysis-benchmark-2026-03-17.md`, `docs/architecture/ai-system.md`, `docs/operations/runbook.md`, `docs/agents/handoffs.md`, `docs/agents/decision-log.md`.
+
+- Agent role: Ops / Release Agent
+- Decision: Make Cloudflare deployment env-aware by routing `npm run cf:deploy` through a preflight that prints the exact AI env configuration, blocks on missing required values, and requires explicit `--confirm-env` acknowledgement before deploy.
+- Rationale: With provider-neutral routing, Cloudflare deployment is no longer just code plus one API key. Silent env drift is now a real release risk, so deployment must surface the effective task/provider/model configuration and force operator confirmation instead of assuming it.
+- Scope impact: `lib/deploy/cloudflare-env.ts`, `scripts/cf-deploy.ts`, `package.json`, `tests/cf-deploy-script.test.ts`, `docs/product/prd.md`, `docs/architecture/deployment-cloudflare-openai.md`, `docs/operations/runbook.md`, `docs/decisions/0005-stateless-llm-runtime.md`, `docs/agents/handoffs.md`, `docs/agents/decision-log.md`.

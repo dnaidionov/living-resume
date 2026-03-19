@@ -24,6 +24,10 @@ export type RetrievalStore = {
     query: string,
     mode: "resume_qa" | "fit_analysis" | "build_process"
   ): Promise<EvidenceChunk[]>;
+  searchEvidenceBatch(
+    queries: string[],
+    mode: "resume_qa" | "fit_analysis" | "build_process"
+  ): Promise<EvidenceChunk[][]>;
 };
 
 export type ChatModel = {

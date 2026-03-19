@@ -25,3 +25,14 @@ test("buildFitAnalysisQueries includes the broad role text plus prioritized requ
   assert.match(queries[2] ?? "", /Lead product strategy and roadmap/);
   assert.ok(queries.length >= 3);
 });
+
+test("staticRetrievalStore batch search preserves single-query retrieval behavior", async () => {
+  const query = "product strategy and roadmap execution";
+  const single = await staticRetrievalStore.searchEvidence(query, "fit_analysis");
+  const [batched] = await staticRetrievalStore.searchEvidenceBatch([query], "fit_analysis");
+
+  assert.deepEqual(
+    batched.map((item) => item.id),
+    single.map((item) => item.id)
+  );
+});
