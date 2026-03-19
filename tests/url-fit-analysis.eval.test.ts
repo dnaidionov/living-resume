@@ -77,8 +77,20 @@ for (const testCase of enabledCases) {
     `url-fit-analysis eval: ${testCase.id} ingests, parses, and analyzes the remote JD`,
     { timeout: 60_000 },
     async () => {
-      const originalApiKey = process.env.OPENAI_API_KEY;
+      const originalEnv = {
+        OPENAI_API_KEY: process.env.OPENAI_API_KEY,
+        OPENROUTER_API_KEY: process.env.OPENROUTER_API_KEY,
+        AI_CHAT_PROVIDER: process.env.AI_CHAT_PROVIDER,
+        AI_FIT_PROVIDER: process.env.AI_FIT_PROVIDER,
+        AI_REQUIREMENTS_PROVIDER: process.env.AI_REQUIREMENTS_PROVIDER,
+        AI_EMBEDDINGS_PROVIDER: process.env.AI_EMBEDDINGS_PROVIDER
+      };
       delete process.env.OPENAI_API_KEY;
+      delete process.env.OPENROUTER_API_KEY;
+      delete process.env.AI_CHAT_PROVIDER;
+      delete process.env.AI_FIT_PROVIDER;
+      delete process.env.AI_REQUIREMENTS_PROVIDER;
+      delete process.env.AI_EMBEDDINGS_PROVIDER;
 
       try {
         const posting = await fetchJobPostingFromUrl(testCase.url);
@@ -137,10 +149,12 @@ for (const testCase of enabledCases) {
           );
         }
       } finally {
-        if (originalApiKey) {
-          process.env.OPENAI_API_KEY = originalApiKey;
-        } else {
-          delete process.env.OPENAI_API_KEY;
+        for (const [key, value] of Object.entries(originalEnv)) {
+          if (value) {
+            process.env[key] = value;
+          } else {
+            delete process.env[key];
+          }
         }
       }
     }

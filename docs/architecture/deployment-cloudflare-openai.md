@@ -1,4 +1,4 @@
-# Deployment: Cloudflare + OpenAI
+# Deployment: Cloudflare + AI Providers
 
 ## Goal
 
@@ -13,9 +13,9 @@ Keep the site cheap, stateless, and portable while supporting grounded resume ch
 
 ## AI
 
-- `gpt-5-mini` for grounded chat and fit-analysis generation
+- `gpt-5-mini` is the current default baseline for grounded chat and fit-analysis generation
 - deterministic bundled retrieval artifacts for the current corpus
-- plain `fetch` calls to OpenAI so the runtime stays portable across Cloudflare and Vercel
+- provider-neutral task routing with plain `fetch`-based adapters so the runtime stays portable across Cloudflare and Vercel
 
 ## Ingestion
 
@@ -34,6 +34,11 @@ Keep the site cheap, stateless, and portable while supporting grounded resume ch
 
 - `npm run build` validates the standard Next.js production build
 - `npm run cf:build` generates the Cloudflare worker bundle and assets through OpenNext
+- `npm run cf:deploy` now acts as a deployment preflight plus deploy wrapper:
+  - loads local env
+  - prints the exact Cloudflare env configuration it expects to deploy
+  - fails if required secrets or env values are missing
+  - refuses to continue until rerun with `--confirm-env`
 - `wrangler.jsonc` targets `.open-next/worker.js` with `.open-next/assets` bound as static assets
 - `open-next.config.ts` keeps the Cloudflare adapter contract explicit in-repo
 

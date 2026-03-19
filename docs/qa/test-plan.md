@@ -15,6 +15,7 @@
 - Resume-chat fit-check handoff should render explicit `Sure, do it` and `No, stay here` actions; declining should leave chat open and reply `Ok, staying here.`
 - Resume-chat composer should take focus on open and regain focus after replies or local handoff dismissal so the user can keep typing without extra clicks
 - Resume-chat scroll rail should be bottom-anchored so starter prompts and initial messages render near the composer instead of the top of the panel
+- Resume-chat should keep conventional turn alignment after layout changes: user bubbles on the right, assistant bubbles on the left
 - Build/process chat questions such as `how is this system built`, `how is this site built`, or `how is this built` should be interpreted as questions about the Career Twin product rather than as generic site trivia
 - Build/process chat answers should end with a short pointer to the source and documentation on GitHub: `https://github.com/dnaidionov/living-resume`
 - Visible chat answers should not leak raw `Evidence 1` / `Evidence 2` style markers into the overlay
@@ -43,13 +44,20 @@
 - Recruiter-brief bullets must remain deterministic even when the LLM returns weaker recruiter-facing bullet content; tests should verify that LLM-provided bullets do not override deterministic evidence selection
 - Requirement extraction returns role requirements/functions/expectations rather than titles, locations, or ATS boilerplate
 - Retrieval prefers semantic embeddings when a generated artifact or live embedding path is available, and falls back deterministically only when semantic mode is unavailable
+- Retrieval regressions must verify that batch query search preserves the single-query result shape for fit-analysis retrieval
 - Fit-analysis retrieval should merge a broad role-text query with prioritized per-requirement queries so downstream requirement matching can choose distinct, role-appropriate evidence instead of overfitting to the top few broad-query chunks
+- Requirement-extraction regressions must verify that identical JD text reuses cached extracted requirements while distinct JD text does not
+- Benchmark-tooling regressions must verify that `npm run bench:fit` exists and that the benchmark script reports the active provider/model configuration plus the expected stage timings
+- Provider-config regressions must verify backward-compatible OpenAI defaults, OpenRouter routing, and custom OpenAI-compatible provider resolution from namespaced env vars
+- Provider-adapter regressions must verify that OpenAI-compatible providers use the configured base URL and provider-specific headers for both completions and embeddings
 - Fit-analysis regressions must verify that recruiter-facing `Where I match` output selects the strongest 3 to 5 supported bullets from the broader candidate pool and does not surface lower-value culture/environment statements
 - Fit-analysis metadata reports stage versions so fallback vs primary-path results can be distinguished in QA
 - URL intake removes generic header/footer/application/legal boilerplate while preserving role headings and bullet lists
+- URL-ingestion regressions must verify that repeated fetches of the same posting URL hit the in-memory cache rather than re-fetching the page
 - URL intake regression tests must cover embedded ATS JSON/JSON-LD job payloads and reject serialized theme/config blobs from appearing as readable role content
 - URL intake regression tests must also cover sparse-shell fallbacks (title/meta description) and explicit JS-rendered-page errors when no meaningful role content can be recovered
 - Live URL evals must assert that enabled required build-gate cases recover the expected job title and company from the fetched JD, produce parsed requirements without raw URL leakage, and complete recruiter-brief fit analysis
+- Tests that intentionally force heuristic fallback must clear generic provider-routing env vars as well as provider-specific API keys so newly added providers do not accidentally turn fallback tests into live-model tests
 - Fixture `expectedOutcome` is advisory rather than gating: outcome mismatches emit QA warnings but do not fail the test, while ingestion/parsing/analysis failures still fail the suite
 - Fit-analysis eval fixtures cover at least: non-AI product role, AI-native role, and obvious stretch role
 - Fit-analysis regression tests must cover: non-product-role gating, repeated-evidence collapsing, modern-LLM recency checks, and technology-context mismatch handling
@@ -77,6 +85,14 @@
 
 - Cloudflare and Vercel deployment paths remain documented
 - `npm run build` and `npm run cf:build` must fail if the enabled required live URL evals fail
+- Fit-analysis performance experiments should run through `npm run bench:fit -- --url <job-url>` so URL/requirement caches remain visible inside one process; model experiments should use per-command env overrides rather than editing `.env.local`
+- The benchmark report at `docs/qa/fit-analysis-benchmark-2026-03-17.md` is the canonical record for fit-analysis latency methodology, matrix results, and model-comparison conclusions; update it when new benchmark evidence materially changes the current performance picture
+- OpenRouter free-model evaluations must record, at minimum:
+  - provider/model per task
+  - stage timings versus the current baseline
+  - whether the candidate actually returns usable output
+  - output-quality notes for recruiter-facing fit summaries or chat answers
+  - embeddings viability, since the free-model collection does not currently include a suitable embedding candidate
 - Cloudflare adapter build produces `.open-next/worker.js` before release
 - Logs avoid raw JD and uploaded-document content
 - Analytics events remain lightweight

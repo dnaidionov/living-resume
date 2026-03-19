@@ -1,11 +1,27 @@
 import type { FitTargetSummary } from "@/types/ai";
 
-export async function fetchJobDescriptionFromUrl(url: string): Promise<string> {
-  const result = await fetchJobPostingFromUrl(url);
+const jobPostingCacheTtlMs = 10 * 60 * 1000;
+const jobPostingCache = new Map<string, { result: { content: string; targetSummary?: FitTargetSummary }; expiresAt: number }>();
+
+type JobPostingFetchOptions = {
+  useCache?: boolean;
+};
+
+export async function fetchJobDescriptionFromUrl(url: string, options?: JobPostingFetchOptions): Promise<string> {
+  const result = await fetchJobPostingFromUrl(url, options);
   return result.content;
 }
 
-export async function fetchJobPostingFromUrl(url: string): Promise<{ content: string; targetSummary?: FitTargetSummary }> {
+export async function fetchJobPostingFromUrl(
+  url: string,
+  options: JobPostingFetchOptions = {}
+): Promise<{ content: string; targetSummary?: FitTargetSummary }> {
+  const useCache = options.useCache !== false;
+  const cached = useCache ? jobPostingCache.get(url) : undefined;
+  if (cached && cached.expiresAt > Date.now()) {
+    return cached.result;
+  }
+
   const response = await fetch(url, {
     headers: {
       "user-agent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/136.0.0.0 Safari/537.36",
@@ -31,10 +47,19 @@ export async function fetchJobPostingFromUrl(url: string): Promise<{ content: st
     throw new Error("Fetched page did not contain enough readable job description content.");
   }
 
-  return {
+  const result = {
     content: normalized,
     targetSummary
   };
+
+  if (useCache) {
+    jobPostingCache.set(url, {
+      result,
+      expiresAt: Date.now() + jobPostingCacheTtlMs
+    });
+  }
+
+  return result;
 }
 
 export function extractReadableText(html: string): string {

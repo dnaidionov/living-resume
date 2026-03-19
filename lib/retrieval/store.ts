@@ -3,6 +3,7 @@ import type { EvidenceChunk } from "@/types/content";
 import { buildDocuments } from "@/lib/content/store";
 import { computeDeterministicEmbedding, cosineSimilarity } from "@/lib/retrieval/embeddings";
 import { requestEmbeddings } from "@/lib/ai/openai";
+import { hasProviderConfig } from "@/lib/ai/provider-config";
 import generatedEmbeddings from "@/content/retrieval/embeddings.generated.json";
 
 type EmbeddedChunk = EvidenceChunk & {
@@ -23,19 +24,26 @@ function modeFilter(mode: "resume_qa" | "fit_analysis" | "build_process", chunk:
 
 export const staticRetrievalStore: RetrievalStore = {
   async searchEvidence(query, mode) {
-    const chunks = await loadEmbeddedChunks();
-    const queryEmbedding = await embedQuery(query, usesSemanticEmbeddings(chunks));
-    const limit = mode === "fit_analysis" ? 12 : 5;
+    const [result] = await this.searchEvidenceBatch([query], mode);
+    return result ?? [];
+  },
 
-    return chunks
-      .filter((chunk) => modeFilter(mode, chunk))
-      .map((chunk) => ({
-        chunk,
-        score: cosineSimilarity(queryEmbedding, chunk.embedding)
-      }))
-      .sort((left, right) => right.score - left.score)
-      .slice(0, limit)
-      .map(({ chunk }) => chunk);
+  async searchEvidenceBatch(queries, mode) {
+    const chunks = await loadEmbeddedChunks();
+    const limit = mode === "fit_analysis" ? 12 : 5;
+    const queryEmbeddings = await embedQueries(queries, usesSemanticEmbeddings(chunks));
+    const filteredChunks = chunks.filter((chunk) => modeFilter(mode, chunk));
+
+    return queryEmbeddings.map((queryEmbedding) =>
+      filteredChunks
+        .map((chunk) => ({
+          chunk,
+          score: cosineSimilarity(queryEmbedding, chunk.embedding)
+        }))
+        .sort((left, right) => right.score - left.score)
+        .slice(0, limit)
+        .map(({ chunk }) => chunk)
+    );
   }
 };
 
@@ -44,16 +52,20 @@ function usesSemanticEmbeddings(chunks: EmbeddedChunk[]): boolean {
   return Array.isArray(first) && first.length > 24;
 }
 
-async function embedQuery(query: string, semantic: boolean): Promise<number[]> {
+async function embedQueries(queries: string[], semantic: boolean): Promise<number[][]> {
+  if (queries.length === 0) {
+    return [];
+  }
+
   if (!semantic) {
-    return computeDeterministicEmbedding(query);
+    return queries.map((query) => computeDeterministicEmbedding(query));
   }
 
   try {
-    const [embedding] = await requestEmbeddings([query]);
-    return embedding ?? computeDeterministicEmbedding(query);
+    const embeddings = await requestEmbeddings(queries);
+    return queries.map((query, index) => embeddings[index] ?? computeDeterministicEmbedding(query));
   } catch {
-    return computeDeterministicEmbedding(query);
+    return queries.map((query) => computeDeterministicEmbedding(query));
   }
 }
 
@@ -63,7 +75,7 @@ async function loadEmbeddedChunks(): Promise<EmbeddedChunk[]> {
     return staticChunks;
   }
 
-  if (!process.env.OPENAI_API_KEY) {
+  if (!hasProviderConfig("embeddings")) {
     return buildDeterministicChunks();
   }
 

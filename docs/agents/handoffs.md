@@ -86,6 +86,7 @@
 - render the fit-check handoff as explicit assistant actions (`Sure, do it`, `No, stay here`) instead of relying on typed confirmation; declining keeps chat open and replies `Ok, staying here.`
 - keep keyboard focus in the Ask AI composer on open and after in-chat replies or handoff dismissal so the chat remains type-ready without extra clicks
 - anchor the Ask AI message rail to the bottom of the panel so conversation starts near the composer and grows upward as messages are added
+- render Ask AI turns with explicit side separation after bottom-anchoring: user bubbles on the right, assistant bubbles on the left, and starter/typing states on the assistant side
 - add top-menu resume download icon button with tooltip `Download classic resume`, linked to `public/classic-resume.txt` download target
 - add resume download control to hero and menu; implement zero-delay attached callout label in place of native tooltip
 - update menu/hero resume download targets to latest PDF (`/DmitryNaidionov-cv.pdf`) copied from user-provided source path
@@ -187,6 +188,23 @@
 - prefer structured URL-ingestion metadata for that target summary; keep JD-text heuristics only as backup
 - resolve target-summary company/title in this precedence order: provider payloads, page metadata/title, URL-derived company identity, then JD-text heuristics as the last resort
 - if metadata title conflicts with a clearer recruiter-readable JD title, display the JD title while still taking company from the stronger structured/meta/URL source
+- batch fit-analysis semantic query embeddings so the broad JD query and prioritized per-requirement queries share one embeddings request
+- cache repeated URL-ingestion results by exact URL so iterative checks of the same posting reuse normalized JD text and target-summary metadata
+- cache repeated requirement extraction by normalized JD text so exact reruns of the same posting avoid an extra LLM round trip
+- add a dedicated `npm run bench:fit -- --url "<job-url>"` harness so fit-analysis latency can be compared across URL/text paths and model configurations in one process with caches visible
+- run fit-model experiments with per-command overrides on `OPENAI_REQUIREMENTS_MODEL` and `OPENAI_FIT_MODEL`; do not mutate `.env.local` just to compare candidate models
+- current live findings: URL fetch is not the dominant bottleneck, batched retrieval is sub-second, first-run requirement extraction is roughly 17 seconds, and warm reruns are still dominated by the final fit-synthesis model call
+- preliminary Sourgum model-matrix finding: `gpt-5-nano` was not a safe default speed win for either requirement extraction or fit synthesis and yielded more generic recruiter-facing bullets in at least one live quality check
+- AI runtime is now provider-neutral by task: chat, fit, requirements, and embeddings each resolve through `AI_*_PROVIDER` and `AI_*_MODEL`, with built-in OpenAI/OpenRouter support plus custom OpenAI-compatible providers via `AI_PROVIDER_<NAME>_*` env vars
+- requirement extraction inherits the fit provider/model when no explicit requirements-task override is set, so fit-model experiments do not require duplicate routing config
+- benchmark output now records provider/model for all four tasks, not only OpenAI model names
+- OpenRouter free-model benchmark outcome:
+  - best current `requirements` candidate: `openai/gpt-oss-120b:free`
+  - best current `fit` candidate: `openai/gpt-oss-120b:free` as the reconciled default, with `qwen/qwen3-next-80b-a3b-instruct:free` as the faster but weaker alternative
+  - tested free chat candidates failed in the current runtime and should not replace `gpt-5-mini` yet
+  - `nvidia/llama-nemotron-embed-vl-1b-v2:free` remains the next embedding candidate, but the final parallel pass did not complete a clean enough comparison to make it the default
+- Candidate discovery scope is now widened from the curated free-model collection to the broader zero-price model index at `https://openrouter.ai/models?max_price=0`; benchmarking remains shortlist-based rather than exhaustive.
+- Cloudflare deploys are now env-aware: `npm run cf:deploy` prints the exact routed AI env configuration, blocks on missing required values, and requires explicit `--confirm-env` acknowledgement before it will build and deploy.
 
 ## Ops / Release Agent -> Deployment Execution (Cloudflare Adapter Readiness 2026-03-07)
 

@@ -153,12 +153,11 @@ export async function resolveFitAnalysisEvidence(
   requirements: ExtractedRoleRequirement[]
 ): Promise<EvidenceChunk[]> {
   const queries = buildFitAnalysisQueries(roleText, requirements);
-  const results = await Promise.all(
-    queries.map(async (query, queryIndex) => ({
-      queryIndex,
-      chunks: await staticRetrievalStore.searchEvidence(query, "fit_analysis")
-    }))
-  );
+  const batches = await staticRetrievalStore.searchEvidenceBatch(queries, "fit_analysis");
+  const results = batches.map((chunks, queryIndex) => ({
+    queryIndex,
+    chunks
+  }));
 
   const scored = new Map<string, { chunk: EvidenceChunk; score: number; bestQueryIndex: number; bestRank: number }>();
 

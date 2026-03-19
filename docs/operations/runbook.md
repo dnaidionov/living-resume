@@ -9,11 +9,36 @@
 
 ## Environment variables
 
-- `OPENAI_API_KEY`
-- optional: `OPENAI_CHAT_MODEL` (defaults to `gpt-5-mini`)
-- optional: `OPENAI_FIT_MODEL` (defaults to `gpt-5-mini`)
-- optional: `NEXT_PUBLIC_FIT_PRESENTATION_MODE` (`recruiter_brief` or `scorecard`, defaults to `recruiter_brief`)
-- optional: `OPENAI_EMBEDDING_MODEL` (defaults to `text-embedding-3-small`)
+- task routing:
+  - `AI_CHAT_PROVIDER`
+  - `AI_FIT_PROVIDER`
+  - `AI_REQUIREMENTS_PROVIDER`
+  - `AI_EMBEDDINGS_PROVIDER`
+- task models:
+  - `AI_CHAT_MODEL`
+  - `AI_FIT_MODEL`
+  - `AI_REQUIREMENTS_MODEL`
+  - `AI_EMBEDDING_MODEL`
+- built-in provider credentials:
+  - `OPENAI_API_KEY`
+  - `OPENAI_BASE_URL` (optional, defaults to `https://api.openai.com/v1`)
+  - `OPENROUTER_API_KEY`
+  - `OPENROUTER_BASE_URL` (optional, defaults to `https://openrouter.ai/api/v1`)
+  - `OPENROUTER_HTTP_REFERER` (recommended for OpenRouter)
+  - `OPENROUTER_APP_TITLE` (recommended for OpenRouter)
+- custom OpenAI-compatible provider credentials:
+  - `AI_PROVIDER_<NAME>_COMPATIBILITY=openai`
+  - `AI_PROVIDER_<NAME>_API_KEY`
+  - `AI_PROVIDER_<NAME>_BASE_URL`
+- legacy compatibility:
+  - `OPENAI_CHAT_MODEL` still backs chat when `AI_CHAT_MODEL` is unset
+  - `OPENAI_FIT_MODEL` still backs fit when `AI_FIT_MODEL` is unset
+  - `OPENAI_REQUIREMENTS_MODEL` still backs requirements when `AI_REQUIREMENTS_MODEL` is unset
+  - `OPENAI_EMBEDDING_MODEL` still backs embeddings when `AI_EMBEDDING_MODEL` is unset
+  - if `AI_REQUIREMENTS_PROVIDER` is unset, it inherits `AI_FIT_PROVIDER` before falling back to `openai`
+- UI/runtime:
+  - `NEXT_PUBLIC_FIT_PRESENTATION_MODE` (`recruiter_brief` or `scorecard`, defaults to `recruiter_brief`)
+- Use [`.env.example`](/Users/Dmitry_Naidionov/Projects/living-resume/.env.example) as the starting point for local configuration.
 
 ## Semantic Retrieval Artifact
 
@@ -21,17 +46,54 @@
 - Do not rebuild embeddings for code-only changes such as UI work, route logic, prompt tuning, tests, deployment config, or styling when the retrieval corpus itself is unchanged.
 - The rebuild trigger is a retrieval-corpus change, not a specific agent role. Any agent that materially changes indexed content is responsible for regenerating the artifact before handoff or release.
 - This writes `content/retrieval/embeddings.generated.json`.
-- If the artifact is missing or empty in an environment with `OPENAI_API_KEY`, the app can build a live in-memory semantic index at runtime.
-- If neither the artifact nor the API key is available, retrieval falls back to deterministic local ranking.
+- If the artifact is missing or empty in an environment with an embeddings-capable provider configured, the app can build a live in-memory semantic index at runtime.
+- If neither the artifact nor an embeddings-capable provider is available, retrieval falls back to deterministic local ranking.
 
 ## Secret handling
 
 - Never commit API keys to the repository.
 - Never place production secrets in tracked files such as `next.config.ts`, JSON config, or docs.
 - For local development, use an untracked `.env.local`.
-- Standalone repo scripts such as `npm run embeddings:build` and `npm run content:build` load `.env.local` automatically.
-- For Cloudflare, store secrets in the project or Worker settings, or use `wrangler secret put OPENAI_API_KEY`.
-- For Vercel, store secrets in the project environment settings, or use `vercel env add OPENAI_API_KEY`.
+- Standalone repo scripts such as `npm run embeddings:build`, `npm run content:build`, and `npm run bench:fit` load `.env.local` automatically.
+- For Cloudflare, store provider secrets in the project or Worker settings, or use `wrangler secret put <KEY_NAME>`.
+- `npm run cf:deploy` now includes a deployment preflight that prints the exact Cloudflare env configuration it intends to deploy and refuses to continue until rerun with `--confirm-env`.
+- For Vercel, store provider secrets in the project environment settings or via `vercel env add <KEY_NAME>`.
+
+## Fit-analysis benchmarking
+
+- Run `npm run bench:fit -- --url "<job-url>"` to benchmark the live fit-analysis path in one process.
+- The detailed benchmark record, including methodology, comparison matrix, actual measured timings, and conclusions, lives in `docs/qa/fit-analysis-benchmark-2026-03-17.md`.
+- That benchmark record now also includes the OpenRouter free-model comparison for fit, requirements, chat, and embeddings viability.
+- Candidate scope for future OpenRouter benchmarking should come from the broader zero-price index `https://openrouter.ai/models?max_price=0`, not only the curated free-model collection page.
+- The benchmark reports:
+  - URL fetch first run vs rerun
+  - requirement extraction first run vs rerun
+  - evidence resolution
+  - end-to-end fit analysis for URL input first run vs rerun
+  - end-to-end fit analysis for pasted-text input first run vs rerun
+- The benchmark also prints the active provider/model for chat, fit, requirements, and embeddings so model comparisons are explicit.
+- For model experiments, prefer per-command env overrides rather than editing `.env.local`.
+- Safe experiment order:
+  - baseline: `npm run bench:fit -- --url "<job-url>"`
+  - faster extraction only: `OPENAI_REQUIREMENTS_MODEL=gpt-5-nano npm run bench:fit -- --url "<job-url>"`
+  - faster fit synthesis only: `OPENAI_FIT_MODEL=gpt-5-nano npm run bench:fit -- --url "<job-url>"`
+  - both faster: `OPENAI_REQUIREMENTS_MODEL=gpt-5-nano OPENAI_FIT_MODEL=gpt-5-nano npm run bench:fit -- --url "<job-url>"`
+- Keep `OPENAI_CHAT_MODEL` unchanged during fit-analysis benchmarks so chat behavior does not confound the results.
+- If you route fit experiments to another provider, keep chat and embeddings fixed unless the experiment explicitly targets them.
+- Current benchmark findings on the live path:
+  - URL fetch is sub-second and becomes effectively free on rerun with the URL cache.
+  - Requirement extraction was measured at roughly 17 seconds on first run and becomes effectively free on rerun with the exact-input cache.
+  - Batched evidence resolution was measured under 1 second.
+  - Warm end-to-end fit checks remain dominated by the final fit-synthesis model call.
+- Preliminary live model-matrix findings on the Sourgum JD:
+  - `OPENAI_REQUIREMENTS_MODEL=gpt-5-nano` was not a reliable latency win over the `gpt-5-mini` baseline and produced more generic recruiter-facing bullets.
+  - `OPENAI_FIT_MODEL=gpt-5-nano` also failed to produce a clean latency win in this setup.
+  - Do not change the default fit-analysis models to `gpt-5-nano` based on speed assumptions alone; require JD-level benchmark evidence plus output-quality review first.
+  - Current OpenRouter free-model recommendation is task-specific rather than global:
+    - `fit`: `openai/gpt-oss-120b:free` as the current default free candidate, with `qwen/qwen3-next-80b-a3b-instruct:free` as the faster but weaker alternative
+    - `requirements`: `openai/gpt-oss-120b:free`
+    - `chat`: keep `gpt-5-mini` for now because the tested free chat candidates failed in the current runtime
+    - `embeddings`: keep `text-embedding-3-small`; `nvidia/llama-nemotron-embed-vl-1b-v2:free` remains the next embedding candidate, but the final parallel benchmark pass did not complete cleanly enough to make it the default
 
 ## Release procedure
 
@@ -50,8 +112,21 @@
 - [ ] `.open-next/worker.js` exists.
 - [ ] `.open-next/assets` exists.
 - [ ] `OPENAI_API_KEY` is set in Cloudflare project settings or via `wrangler secret put OPENAI_API_KEY`.
-- [ ] Optional model overrides are set if needed: `OPENAI_CHAT_MODEL`, `OPENAI_FIT_MODEL`.
-- [ ] Deployment is triggered with `npm run cf:deploy`.
+- [ ] `OPENROUTER_API_KEY` is set if any task is routed to OpenRouter.
+- [ ] Task-routing and model env vars are set as intended:
+  - [ ] `AI_CHAT_PROVIDER`
+  - [ ] `AI_FIT_PROVIDER`
+  - [ ] `AI_REQUIREMENTS_PROVIDER`
+  - [ ] `AI_EMBEDDINGS_PROVIDER`
+  - [ ] `AI_CHAT_MODEL`
+  - [ ] `AI_FIT_MODEL`
+  - [ ] `AI_REQUIREMENTS_MODEL`
+  - [ ] `AI_EMBEDDING_MODEL`
+- [ ] OpenRouter metadata vars are set when OpenRouter is used:
+  - [ ] `OPENROUTER_BASE_URL`
+  - [ ] `OPENROUTER_HTTP_REFERER`
+  - [ ] `OPENROUTER_APP_TITLE`
+- [ ] Deployment is triggered with `npm run cf:deploy -- --confirm-env` only after the printed configuration is reviewed and confirmed.
 - [ ] The deployed `pages.dev` URL passes smoke tests:
   - [ ] homepage renders
   - [ ] chat returns an answer with citations

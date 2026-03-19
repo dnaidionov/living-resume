@@ -380,39 +380,47 @@ export function AskAiOverlay({
             {messages.length === 0 ? (
               <div
                 style={{
-                  alignSelf: "flex-start",
-                  maxWidth: "min(760px, 86%)",
-                  padding: "10px 14px",
-                  borderRadius: 14,
-                  border: "1px solid var(--line)",
-                  background: "var(--surface-alt)"
+                  width: "100%",
+                  display: "flex",
+                  justifyContent: "flex-start"
                 }}
               >
-                <p className="muted" style={{ margin: 0, marginBottom: 8 }}>
-                  Try one of these:
-                </p>
-                <div style={{ display: "flex", flexWrap: "wrap", gap: 8 }}>
-                  {starterPrompts.map((prompt) => (
-                    <button
-                      key={prompt}
-                      type="button"
-                      style={{
-                        border: "1px solid var(--line)",
-                        background: "rgba(255,255,255,0.03)",
-                        color: "var(--ink)",
-                        padding: "6px 10px",
-                        borderRadius: 999,
-                        fontSize: "0.84rem",
-                        lineHeight: 1.2,
-                        cursor: "pointer"
-                      }}
-                      onClick={() => {
-                        void sendMessage(prompt);
-                      }}
-                    >
-                      {prompt}
-                    </button>
-                  ))}
+                <div
+                  style={{
+                    width: "fit-content",
+                    maxWidth: "min(760px, 86%)",
+                    padding: "10px 14px",
+                    borderRadius: 14,
+                    border: "1px solid var(--line)",
+                    background: "var(--surface-alt)"
+                  }}
+                >
+                  <p className="muted" style={{ margin: 0, marginBottom: 8 }}>
+                    Try one of these:
+                  </p>
+                  <div style={{ display: "flex", flexWrap: "wrap", gap: 8 }}>
+                    {starterPrompts.map((prompt) => (
+                      <button
+                        key={prompt}
+                        type="button"
+                        style={{
+                          border: "1px solid var(--line)",
+                          background: "rgba(255,255,255,0.03)",
+                          color: "var(--ink)",
+                          padding: "6px 10px",
+                          borderRadius: 999,
+                          fontSize: "0.84rem",
+                          lineHeight: 1.2,
+                          cursor: "pointer"
+                        }}
+                        onClick={() => {
+                          void sendMessage(prompt);
+                        }}
+                      >
+                        {prompt}
+                      </button>
+                    ))}
+                  </div>
                 </div>
               </div>
             ) : null}
@@ -421,47 +429,57 @@ export function AskAiOverlay({
               <div
                 key={item.id}
                 style={{
-                  alignSelf: item.role === "user" ? "flex-end" : "flex-start",
-                  maxWidth: "min(760px, 86%)",
-                  padding: "10px 14px",
-                  borderRadius: 14,
-                  border: "1px solid var(--line)",
-                  background: item.role === "user" ? "var(--accent-soft)" : "var(--surface-alt)",
-                  whiteSpace: "pre-wrap"
+                  width: "100%",
+                  display: "flex",
+                  justifyContent: item.role === "user" ? "flex-end" : "flex-start"
                 }}
               >
-                <div>{item.role === "assistant" ? renderMessageContent(item.text) : item.text}</div>
-                {item.kind === "fit_handoff" ? (
-                  <div style={{ display: "flex", gap: 8, flexWrap: "wrap", marginTop: 12 }}>
-                    <button
-                      type="button"
-                      className="button secondary"
-                      style={{ minWidth: 0, padding: "6px 12px", minHeight: 34, fontSize: "0.84rem" }}
-                      onClick={() => {
-                        handleFitHandoffAccept();
-                      }}
-                    >
-                      Sure, let’s go
-                    </button>
-                    <button
-                      type="button"
-                      className="button secondary"
-                      style={{ minWidth: 0, padding: "6px 12px", minHeight: 34, fontSize: "0.84rem" }}
-                      onClick={() => {
-                        handleFitHandoffDecline();
-                      }}
-                    >
-                      No, stay here
-                    </button>
-                  </div>
-                ) : null}
+                <div
+                  style={{
+                    width: "fit-content",
+                    maxWidth: "min(760px, 86%)",
+                    padding: "10px 14px",
+                    borderRadius: 14,
+                    border: "1px solid var(--line)",
+                    background: item.role === "user" ? "var(--accent-soft)" : "var(--surface-alt)",
+                    whiteSpace: "pre-wrap"
+                  }}
+                >
+                  <div>{item.role === "assistant" ? renderMessageContent(item.text) : item.text}</div>
+                  {item.kind === "fit_handoff" ? (
+                    <div style={{ display: "flex", gap: 8, flexWrap: "wrap", marginTop: 12 }}>
+                      <button
+                        type="button"
+                        className="button secondary"
+                        style={{ minWidth: 0, padding: "6px 12px", minHeight: 34, fontSize: "0.84rem" }}
+                        onClick={() => {
+                          handleFitHandoffAccept();
+                        }}
+                      >
+                        Sure, let’s go
+                      </button>
+                      <button
+                        type="button"
+                        className="button secondary"
+                        style={{ minWidth: 0, padding: "6px 12px", minHeight: 34, fontSize: "0.84rem" }}
+                        onClick={() => {
+                          handleFitHandoffDecline();
+                        }}
+                      >
+                        No, stay here
+                      </button>
+                    </div>
+                  ) : null}
+                </div>
               </div>
             ))}
 
             {loading ? (
               <div
                 style={{
-                  alignSelf: "flex-start"
+                  width: "100%",
+                  display: "flex",
+                  justifyContent: "flex-start"
                 }}
                 aria-label="Assistant is typing"
               >

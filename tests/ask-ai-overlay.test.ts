@@ -25,8 +25,10 @@ test("ask-ai overlay anchors chat content to the bottom of the scroll rail", () 
 });
 
 test("ask-ai overlay aligns user messages right and assistant messages left", () => {
-  assert.match(overlaySource, /alignSelf:\s*item\.role === "user" \? "flex-end" : "flex-start"/);
-  assert.match(overlaySource, /alignSelf:\s*"flex-start"/);
+  assert.match(overlaySource, /justifyContent:\s*item\.role === "user" \? "flex-end" : "flex-start"/);
+  assert.match(overlaySource, /width:\s*"100%"/);
+  assert.match(overlaySource, /width:\s*"fit-content"/);
+  assert.match(overlaySource, /justifyContent:\s*"flex-start"/);
 });
 
 test("ask-ai overlay uses a typing indicator instead of a Thinking bubble", () => {

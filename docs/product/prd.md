@@ -27,6 +27,7 @@ Build a recruiter-first Career Twin that acts as a grounded, interactive profess
 - Resume chat keeps the composer focused on open and after replies so the user does not need extra clicks while the overlay is open.
 - Resume chat uses a compact typing-dots indicator instead of a loading bubble.
 - Resume chat should anchor conversation content to the bottom of the chat rail so the first message starts near the composer and the thread grows upward as messages are added.
+- Resume chat should use conventional turn alignment: recruiter/user messages on the right, Career Twin responses on the left.
 - Resume chat must politely decline off-scope personal questions and steer back to documented professional history and listed projects.
 - Resume-fit requests raised inside chat must be handed off to the dedicated Role Fit section instead of being answered in chat.
 - The fit-check handoff must present explicit actions:
@@ -59,7 +60,9 @@ Build a recruiter-first Career Twin that acts as a grounded, interactive profess
 - Chat handoff into fit analysis instead of in-chat pseudo-analysis
 - Repo-managed content system
 - Cloudflare-compatible deployment setup
+- Cloudflare deployment must surface the exact provider/model env configuration for review before release, rather than treating deployment config as implicit operator knowledge
 - Public documentation of process and architecture, plus GitHub source visibility
+- Provider-neutral AI runtime configuration so fit-analysis model experiments do not require a vendor-specific rewrite
 - Seed the live URL-eval fixture with additional non-product exploratory cases so QA can expand gating later without changing the harness; current seeded disabled cases cover software engineering, QA, sales, and customer support roles
 
 ## Planned enhancements

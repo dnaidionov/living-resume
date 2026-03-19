@@ -281,6 +281,58 @@ test("fetchJobDescriptionFromUrl reports JS-rendered pages explicitly when conte
   }
 });
 
+test("fetchJobPostingFromUrl caches repeated URL fetches for the same posting", async () => {
+  const originalFetch = globalThis.fetch;
+  let calls = 0;
+  globalThis.fetch = async () => {
+    calls += 1;
+    return new Response(
+      "<html><head><title>Staff Product Manager | Example | Acme</title></head><body><main><h1>Staff Product Manager</h1><p>Lead product strategy, roadmap planning, customer discovery, backlog prioritization, and cross-functional delivery for a B2B SaaS platform.</p><ul><li>Own roadmap definition</li><li>Partner with engineering and design</li></ul></main></body></html>",
+      {
+        status: 200,
+        headers: { "content-type": "text/html" }
+      }
+    );
+  };
+
+  try {
+    const { fetchJobPostingFromUrl } = await import("@/lib/platform/url-intake");
+    const first = await fetchJobPostingFromUrl("https://example.com/jobs/123");
+    const second = await fetchJobPostingFromUrl("https://example.com/jobs/123");
+
+    assert.equal(calls, 1);
+    assert.deepEqual(second, first);
+  } finally {
+    globalThis.fetch = originalFetch;
+  }
+});
+
+test("fetchJobPostingFromUrl can bypass repeated URL cache entries when requested", async () => {
+  const originalFetch = globalThis.fetch;
+  let calls = 0;
+  globalThis.fetch = async () => {
+    calls += 1;
+    return new Response(
+      "<html><head><title>Product Manager | Example | Acme</title></head><body><main><h1>Product Manager</h1><p>Lead roadmap, backlog management, and cross-functional delivery for a B2B SaaS platform.</p><ul><li>Own roadmap definition</li><li>Partner with engineering and design</li></ul></main></body></html>",
+      {
+        status: 200,
+        headers: { "content-type": "text/html" }
+      }
+    );
+  };
+
+  try {
+    const { fetchJobPostingFromUrl } = await import("@/lib/platform/url-intake");
+    const first = await fetchJobPostingFromUrl("https://example.com/jobs/456", { useCache: false });
+    const second = await fetchJobPostingFromUrl("https://example.com/jobs/456", { useCache: false });
+
+    assert.equal(calls, 2);
+    assert.deepEqual(second, first);
+  } finally {
+    globalThis.fetch = originalFetch;
+  }
+});
+
 test("parseUploadedRoleFile reads plain text files", async () => {
   const file = new File(["Lead AI platform product strategy and execution."], "role.txt", {
     type: "text/plain"
