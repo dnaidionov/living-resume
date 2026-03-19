@@ -13,9 +13,9 @@
     "id": "sourgum-director-of-product",
     "description": "Required build-gate product-role regression for an Ashby posting. Expected to ingest a real JD and land in the positive-fit band.",
     "url": "https://jobs.ashbyhq.com/sourgum/a8720ec5-99e8-4aa8-b8da-07aa0afa5be6?utm_source=VjydAOXMeB",
-    "expectedTitle": "Director of Product",
+    "expectedTitle": "Head of Product",
     "expectedCompany": "Sourgum",
-    "expectedTargetTitle": "Director of Product",
+    "expectedTargetTitle": "Head of Product",
     "expectedOutcome": "positive_fit",
     "enabled": true,
     "requiredForBuild": true
