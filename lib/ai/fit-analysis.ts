@@ -5,6 +5,9 @@ import { staticRetrievalStore } from "@/lib/retrieval/store";
 import { generateFitAnalysisWithOpenAI } from "@/lib/ai/openai";
 import { llmRequirementExtractionService } from "@/lib/ai/requirement-extraction";
 
+export const uploadedRoleRequirementsMissingError =
+  "Uploaded file was readable, but no job description requirements could be extracted. Upload a clearer job description.";
+
 function roleInputToText(input: RoleInput): string {
   if (input.kind === "text") {
     return input.text;
@@ -198,6 +201,32 @@ export async function resolveFitAnalysisEvidence(
     })
     .slice(0, 12)
     .map(({ chunk }) => chunk);
+}
+
+type UploadedRoleAnalysisDependencies = {
+  extractRequirements?: (roleText: string) => Promise<ExtractedRoleRequirement[]>;
+  resolveEvidence?: (roleText: string, requirements: ExtractedRoleRequirement[]) => Promise<EvidenceChunk[]>;
+  generateAnalysis?: typeof generateFitAnalysisWithOpenAI;
+};
+
+export async function analyzeUploadedRoleText(
+  roleText: string,
+  _sessionId: string,
+  presentationMode: FitPresentationMode = "recruiter_brief",
+  dependencies: UploadedRoleAnalysisDependencies = {}
+) {
+  const extractRequirements = dependencies.extractRequirements ?? ((input) => llmRequirementExtractionService.extract(input));
+  const resolveEvidence = dependencies.resolveEvidence ?? ((input, requirements) => resolveFitAnalysisEvidence(input, requirements));
+  const generateAnalysis = dependencies.generateAnalysis ?? generateFitAnalysisWithOpenAI;
+
+  const requirements = await extractRequirements(roleText);
+  if (requirements.length === 0) {
+    throw new Error(uploadedRoleRequirementsMissingError);
+  }
+
+  const targetSummary = extractRoleTargetSummary(roleText);
+  const evidence = await resolveEvidence(roleText, requirements);
+  return generateAnalysis(roleText, requirements, evidence, "file", presentationMode, targetSummary);
 }
 
 export const heuristicFitAnalysisService: FitAnalysisService = {

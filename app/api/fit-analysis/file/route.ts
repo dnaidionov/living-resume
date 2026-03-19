@@ -1,5 +1,5 @@
 import { NextResponse } from "next/server";
-import { heuristicFitAnalysisService } from "@/lib/ai/fit-analysis";
+import { analyzeUploadedRoleText } from "@/lib/ai/fit-analysis";
 import { buildFitAnalysisLogContext } from "@/lib/logging/fit-analysis-log";
 import { logEvent } from "@/lib/logging/logger";
 import { parseUploadedRoleFile } from "@/lib/platform/file-intake";
@@ -17,7 +17,7 @@ export async function POST(request: Request) {
 
   try {
     const text = await parseUploadedRoleFile(file);
-    const result = await heuristicFitAnalysisService.analyze({ kind: "text", text }, sessionId, presentationMode);
+    const result = await analyzeUploadedRoleText(text, sessionId, presentationMode);
     logEvent(
       "info",
       "fit_analysis_file_completed",

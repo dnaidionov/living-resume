@@ -218,6 +218,11 @@ Use this log for concise, chronological records of meaningful decisions that do 
 
 ### 2026-03-14
 
+- Agent role: Application Engineer
+- Decision: Harden uploaded fit-analysis documents so `TXT`, `PDF`, and `DOCX` uploads fail with a `400` when the file is readable but requirement extraction yields no defensible job requirements.
+- Rationale: Parsing a document into text is not enough to justify recruiter-facing fit output. Benefits pages, handbooks, and other non-JD files were otherwise able to flow into analysis despite not expressing actual hiring requirements.
+- Scope impact: `app/api/fit-analysis/file/route.ts`, `lib/ai/fit-analysis.ts`, `tests/platform-intake.test.ts`, `docs/product/prd.md`, `docs/qa/test-plan.md`, `docs/agents/decision-log.md`.
+
 - Agent role: Experience Designer
 - Decision: Renamed system-facing product copy from `Living Resume` to `Career Twin` while explicitly leaving the hero positioned around Dmitry rather than the product.
 - Rationale: The hero is personal positioning, not product taxonomy; the system surfaces needed a name that better matches the current fit-analysis and interactive-profile behavior.

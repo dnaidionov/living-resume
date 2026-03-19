@@ -30,7 +30,8 @@
 - URL-based fit-analysis tests must verify that fetched JD content, not the literal URL string, is used for requirement extraction and evidence retrieval while `metadata.inputKind` remains `url`
 - Live URL-ingestion regression coverage is fixture-driven from `tests/fixtures/url-fit-analysis-cases.json`; the enabled required build-gate set currently includes Waymo, Sourgum, Motive, and Netflix product-role URLs
 - Fit-analysis route supports both `recruiter_brief` and `scorecard` presentation modes
-- PDF and DOCX uploads parse into readable role text
+- `TXT`, `PDF`, and `DOCX` uploads parse into readable role text when the document contains extractable text
+- Upload-based fit analysis rejects readable `TXT`, `PDF`, and `DOCX` files when no defensible job requirements can be extracted from the parsed text
 - Build page renders documented process artifacts
 
 ## Quality

@@ -205,6 +205,7 @@
   - `nvidia/llama-nemotron-embed-vl-1b-v2:free` remains the next embedding candidate, but the final parallel pass did not complete a clean enough comparison to make it the default
 - Candidate discovery scope is now widened from the curated free-model collection to the broader zero-price model index at `https://openrouter.ai/models?max_price=0`; benchmarking remains shortlist-based rather than exhaustive.
 - Cloudflare deploys are now env-aware: `npm run cf:deploy` prints the exact routed AI env configuration, blocks on missing required values, and requires explicit `--confirm-env` acknowledgement before it will build and deploy.
+- uploaded fit-analysis files (`TXT`, `PDF`, `DOCX`) now have an extra validation gate after parsing: if requirement extraction returns no defensible JD requirements, the file request must fail instead of producing recruiter output
 
 ## Ops / Release Agent -> Deployment Execution (Cloudflare Adapter Readiness 2026-03-07)
 
