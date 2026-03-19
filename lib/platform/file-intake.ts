@@ -5,6 +5,7 @@ const supportedTextMimeTypes = new Set(["text/plain", "text/markdown", "applicat
 export async function parseUploadedRoleFile(file: File): Promise<string> {
   const buffer = await file.arrayBuffer();
   const mimeType = file.type || inferMimeType(file.name);
+  const hasExplicitMimeType = Boolean(file.type);
 
   if (supportedTextMimeTypes.has(mimeType)) {
     return decodePlainText(buffer);
@@ -16,6 +17,10 @@ export async function parseUploadedRoleFile(file: File): Promise<string> {
 
   if (mimeType === "application/vnd.openxmlformats-officedocument.wordprocessingml.document") {
     return parseDocx(buffer);
+  }
+
+  if (hasExplicitMimeType && mimeType !== "application/octet-stream") {
+    throw new Error("Unsupported file type. Upload TXT, PDF, or DOCX.");
   }
 
   const decoded = decodePlainText(buffer);

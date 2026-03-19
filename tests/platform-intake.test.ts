@@ -1,8 +1,16 @@
 import test from "node:test";
 import assert from "node:assert/strict";
-import JSZip from "jszip";
+import { readdirSync, readFileSync } from "node:fs";
+import path from "node:path";
 import { parseUploadedRoleFile } from "@/lib/platform/file-intake";
+import { analyzeUploadedRoleText, uploadedRoleRequirementsMissingError } from "@/lib/ai/fit-analysis";
 import { extractJobTargetSummary, extractReadableText, fetchJobDescriptionFromUrl } from "@/lib/platform/url-intake";
+
+const uploadedRoleFixturesDir = path.join(process.cwd(), "tests/fixtures/uploaded-role-files");
+const uploadedRoleFixtureNames = readdirSync(uploadedRoleFixturesDir).sort();
+const validBinaryFixtureNames = findUploadedRoleFixtureNames("valid jd", [".pdf", ".docx"]);
+const nonJobDescriptionFixtureNames = findUploadedRoleFixtureNames("non jd", [".pdf", ".docx"]);
+const unsupportedFixtureNames = findUploadedRoleFixtureNames("unsupported format");
 
 test("extractReadableText strips markup and keeps readable content", () => {
   const html = `
@@ -342,25 +350,189 @@ test("parseUploadedRoleFile reads plain text files", async () => {
   assert.equal(text, "Lead AI platform product strategy and execution.");
 });
 
-test("parseUploadedRoleFile extracts DOCX text", async () => {
-  const zip = new JSZip();
-  zip.file(
-    "word/document.xml",
-    `<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
-    <w:document xmlns:w="http://schemas.openxmlformats.org/wordprocessingml/2006/main">
-      <w:body>
-        <w:p><w:r><w:t>Senior Product Manager</w:t></w:r></w:p>
-        <w:p><w:r><w:t>Lead roadmap for AI systems</w:t></w:r></w:p>
-      </w:body>
-    </w:document>`
-  );
+for (const fixtureName of validBinaryFixtureNames) {
+  test(`parseUploadedRoleFile extracts readable text from fixture ${fixtureName}`, async () => {
+    const file = createUploadedRoleFixtureFile(fixtureName);
+    const text = await parseUploadedRoleFile(file);
 
-  const buffer = await zip.generateAsync({ type: "arraybuffer" });
-  const file = new File([buffer], "role.docx", {
-    type: "application/vnd.openxmlformats-officedocument.wordprocessingml.document"
+    assert.ok(text.trim().length >= 80, `${fixtureName} parsed too little text.`);
+    assert.match(text, /(product|manager|director|architect|requirements|responsibilities|experience)/i);
+  });
+}
+
+for (const fixtureName of validBinaryFixtureNames) {
+  test(`parseUploadedRoleFile infers mime type from filename for fixture ${fixtureName}`, async () => {
+    const file = createUploadedRoleFixtureFile(fixtureName, { omitMimeType: true });
+    const text = await parseUploadedRoleFile(file);
+
+    assert.ok(text.trim().length >= 80, `${fixtureName} failed filename-based mime inference.`);
+  });
+}
+
+for (const fixtureName of unsupportedFixtureNames) {
+  test(`parseUploadedRoleFile rejects unsupported fixture ${fixtureName}`, async () => {
+    const file = createUploadedRoleFixtureFile(fixtureName);
+    await assert.rejects(() => parseUploadedRoleFile(file), /Unsupported file type/i);
+  });
+}
+
+test("parseUploadedRoleFile rejects empty text files", async () => {
+  const file = new File(["   \n\t  "], "role.txt", {
+    type: "text/plain"
+  });
+
+  await assert.rejects(() => parseUploadedRoleFile(file), /did not contain readable text/i);
+});
+
+test("uploaded TXT fit analysis rejects readable files with no extractable job requirements", async () => {
+  const file = new File(["Welcome to the company handbook and benefits overview."], "role.txt", {
+    type: "text/plain"
   });
 
   const text = await parseUploadedRoleFile(file);
-  assert.match(text, /Senior Product Manager/);
-  assert.match(text, /Lead roadmap for AI systems/);
+  await assert.rejects(
+    () => analyzeUploadedRoleText(text, "test-session", "recruiter_brief", { extractRequirements: async () => [] }),
+    new RegExp(uploadedRoleRequirementsMissingError.replace(/[.*+?^${}()|[\]\\]/g, "\\$&"))
+  );
 });
+
+for (const fixtureName of nonJobDescriptionFixtureNames) {
+  test(`uploaded fixture ${fixtureName} rejects readable files with no extractable job requirements`, async () => {
+    const text = await parseUploadedRoleFile(createUploadedRoleFixtureFile(fixtureName));
+
+    await assert.rejects(
+      () => analyzeUploadedRoleText(text, "test-session", "recruiter_brief", { extractRequirements: async () => [] }),
+      new RegExp(uploadedRoleRequirementsMissingError.replace(/[.*+?^${}()|[\]\\]/g, "\\$&"))
+    );
+  });
+}
+
+test("uploaded TXT fit analysis succeeds when readable job requirements are extracted", async () => {
+  const file = new File(["Senior Product Manager\nLead roadmap and product requirements with engineering."], "role.txt", {
+    type: "text/plain"
+  });
+
+  const text = await parseUploadedRoleFile(file);
+  const result = await analyzeUploadedRoleText(text, "test-session", "recruiter_brief", {
+    extractRequirements: async () => [
+      {
+        text: "Lead roadmap and product requirements with engineering.",
+        category: "function",
+        priority: "important"
+      }
+    ],
+    resolveEvidence: async () => [],
+    generateAnalysis: async (_roleText, _requirements, _evidence, inputKind, presentationMode, targetSummary) => ({
+      presentation: {
+        mode: "recruiter_brief",
+        overallMatch: {
+          verdict: "probably_a_good_fit",
+          label: "Probably a Good Fit"
+        },
+        recommendation: "Worth a deeper look."
+      },
+      internal: {
+        overallSummary: "Good fit.",
+        overallScore: 7,
+        dimensions: [],
+        strengths: [],
+        gaps: [],
+        transferableAdvantages: [],
+        interviewAngles: []
+      },
+      citations: [],
+      confidence: "medium",
+      metadata: {
+        evaluatorVersion: "test",
+        inputKind,
+        presentationMode,
+        targetSummary
+      }
+    })
+  });
+
+  assert.equal(result.metadata?.inputKind, "file");
+  assert.match(result.metadata?.targetSummary?.roleTitle ?? "", /Senior Product Manager/);
+});
+
+for (const fixtureName of validBinaryFixtureNames) {
+  test(`uploaded fixture ${fixtureName} succeeds when readable job requirements are extracted`, async () => {
+    const text = await parseUploadedRoleFile(createUploadedRoleFixtureFile(fixtureName));
+    const result = await analyzeUploadedRoleText(text, "test-session", "recruiter_brief", {
+      extractRequirements: async () => [
+        {
+          text: "Lead roadmap and product requirements with engineering.",
+          category: "function",
+          priority: "important"
+        }
+      ],
+      resolveEvidence: async () => [],
+      generateAnalysis: async (_roleText, _requirements, _evidence, inputKind, presentationMode, targetSummary) => ({
+        presentation: {
+          mode: "recruiter_brief",
+          overallMatch: {
+            verdict: "probably_a_good_fit",
+            label: "Probably a Good Fit"
+          },
+          recommendation: "Worth a deeper look."
+        },
+        internal: {
+          overallSummary: "Good fit.",
+          overallScore: 7,
+          dimensions: [],
+          strengths: [],
+          gaps: [],
+          transferableAdvantages: [],
+          interviewAngles: []
+        },
+        citations: [],
+        confidence: "medium",
+        metadata: {
+          evaluatorVersion: "test",
+          inputKind,
+          presentationMode,
+          targetSummary
+        }
+      })
+    });
+
+    assert.equal(result.metadata?.inputKind, "file");
+    assert.equal(result.presentation.mode, "recruiter_brief");
+  });
+}
+
+function findUploadedRoleFixtureNames(prefix: string, extensions?: string[]): string[] {
+  return uploadedRoleFixtureNames.filter((name) => {
+    if (!name.startsWith(prefix)) {
+      return false;
+    }
+
+    if (!extensions || extensions.length === 0) {
+      return true;
+    }
+
+    const normalized = name.toLowerCase();
+    return extensions.some((extension) => normalized.endsWith(extension));
+  });
+}
+
+function createUploadedRoleFixtureFile(filename: string, options?: { omitMimeType?: boolean }): File {
+  const fixturePath = path.join(uploadedRoleFixturesDir, filename);
+  const contents = readFileSync(fixturePath);
+  const mimeType = options?.omitMimeType ? "" : inferFixtureMimeType(filename);
+  return new File([contents], filename, mimeType ? { type: mimeType } : undefined);
+}
+
+function inferFixtureMimeType(filename: string): string {
+  const normalized = filename.toLowerCase();
+  if (normalized.endsWith(".pdf")) {
+    return "application/pdf";
+  }
+  if (normalized.endsWith(".docx")) {
+    return "application/vnd.openxmlformats-officedocument.wordprocessingml.document";
+  }
+  if (normalized.endsWith(".xlsx")) {
+    return "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet";
+  }
+  return "application/octet-stream";
+}
