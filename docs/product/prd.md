@@ -12,7 +12,7 @@ Build a recruiter-first Career Twin that acts as a grounded, interactive profess
 
 ## Core experiences
 
-1. Chat-first homepage
+1. One-page homepage with section navigation and an `Ask AI` chat overlay
 2. Resume with `View AI Context` on every role
 3. Dedicated role-fit workflow from text, upload, or URL
 4. Public build/process section with source visibility
