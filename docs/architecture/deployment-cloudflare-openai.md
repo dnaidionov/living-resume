@@ -32,8 +32,8 @@ Keep the site cheap, stateless, and portable while supporting grounded resume ch
 
 ## Build pipeline
 
-- `npm run build` validates the standard Next.js production build
-- `npm run cf:build` generates the Cloudflare worker bundle and assets through OpenNext
+- `npm run build` runs embeddings verification, live URL regression gates, and then the standard Next.js production build
+- `npm run cf:build` runs the same embeddings/url gates before generating the Cloudflare worker bundle and assets through OpenNext
 - `npm run cf:deploy` now acts as a deployment preflight plus deploy wrapper:
   - loads local env
   - prints the exact Cloudflare env configuration it expects to deploy

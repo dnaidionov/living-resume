@@ -6,8 +6,8 @@ The MVP uses a portable architecture:
 
 - Next.js App Router for the frontend and API routes
 - Cloudflare Pages + Workers as the target deployment model
-- OpenAI behind a provider abstraction
-- Repo-managed content and static retrieval artifacts
+- provider-neutral AI routing with an OpenAI-compatible adapter layer
+- repo-managed content plus bundled semantic retrieval artifacts with deterministic fallback
 
 ## Design principles
 
@@ -19,7 +19,7 @@ The MVP uses a portable architecture:
 ## Main modules
 
 - `lib/content`: file-backed content loading and normalization
-- `lib/retrieval`: static retrieval and similarity ranking
+- `lib/retrieval`: bundled semantic retrieval with live-index and deterministic fallback paths
 - `lib/ai`: prompting, chat, fit analysis, provider wrappers
 - `lib/platform`: URL and file ingestion boundaries
 - `app/api/*`: thin API surfaces

@@ -26,8 +26,8 @@ The site is designed to:
 - `Next.js` App Router
 - `TypeScript`
 - `Cloudflare Pages + Workers`
-- `OpenAI` via provider abstraction
-- repo-managed content and static retrieval artifacts
+- provider-neutral AI routing with an OpenAI-compatible adapter layer
+- repo-managed content plus bundled semantic retrieval artifacts with deterministic fallback
 
 ## Local workflow
 

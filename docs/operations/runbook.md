@@ -38,7 +38,7 @@
   - if `AI_REQUIREMENTS_PROVIDER` is unset, it inherits `AI_FIT_PROVIDER` before falling back to `openai`
 - UI/runtime:
   - `NEXT_PUBLIC_FIT_PRESENTATION_MODE` (`recruiter_brief` or `scorecard`, defaults to `recruiter_brief`)
-- Use [`.env.example`](/Users/Dmitry_Naidionov/Projects/living-resume/.env.example) as the starting point for local configuration.
+- Use [`.env.example`](../../.env.example) as the starting point for local configuration.
 
 ## Semantic Retrieval Artifact
 
@@ -103,7 +103,7 @@
 - [ ] `npm run build` passes.
 - [ ] `npm run cf:build` passes before any Cloudflare release.
 - [ ] No logs or errors print raw job-description or uploaded-document content.
-- [ ] `OPENAI_API_KEY` is configured on the target platform before release.
+- [ ] Required provider credentials are configured for each routed task before release.
 
 ### Cloudflare deployment checklist
 
@@ -111,7 +111,7 @@
 - [ ] `npm run cf:build` completes successfully.
 - [ ] `.open-next/worker.js` exists.
 - [ ] `.open-next/assets` exists.
-- [ ] `OPENAI_API_KEY` is set in Cloudflare project settings or via `wrangler secret put OPENAI_API_KEY`.
+- [ ] Required provider credentials are set for the routed tasks in Cloudflare project settings or via `wrangler secret put <KEY_NAME>`.
 - [ ] `OPENROUTER_API_KEY` is set if any task is routed to OpenRouter.
 - [ ] Task-routing and model env vars are set as intended:
   - [ ] `AI_CHAT_PROVIDER`
@@ -129,7 +129,7 @@
 - [ ] Deployment is triggered with `npm run cf:deploy -- --confirm-env` only after the printed configuration is reviewed and confirmed.
 - [ ] The deployed `pages.dev` URL passes smoke tests:
   - [ ] homepage renders
-  - [ ] chat returns an answer with citations
+  - [ ] Ask AI chat returns a grounded answer in the overlay
   - [ ] pasted-text fit analysis returns a scorecard
   - [ ] URL fit analysis works for a readable public job page
   - [ ] `npm run test:url-evals` passes the enabled required live URL cases
@@ -140,12 +140,12 @@
 ### Vercel deployment checklist
 
 - [ ] The Vercel project is connected to the repository and target branch.
-- [ ] `OPENAI_API_KEY` is set in Vercel project settings or via `vercel env add OPENAI_API_KEY`.
-- [ ] Optional model overrides are set if needed: `OPENAI_CHAT_MODEL`, `OPENAI_FIT_MODEL`.
+- [ ] Required provider credentials are set in Vercel project settings or via `vercel env add <KEY_NAME>`.
+- [ ] Optional task-model overrides are set if needed: `AI_CHAT_MODEL`, `AI_FIT_MODEL`, `AI_REQUIREMENTS_MODEL`, `AI_EMBEDDING_MODEL`.
 - [ ] Deployment is triggered from the target branch.
 - [ ] The deployed `vercel.app` URL passes smoke tests:
   - [ ] homepage renders
-  - [ ] chat returns an answer with citations
+  - [ ] Ask AI chat returns a grounded answer in the overlay
   - [ ] pasted-text fit analysis returns a scorecard
   - [ ] URL fit analysis works for a readable public job page
   - [ ] `npm run test:url-evals` passes the enabled required live URL cases

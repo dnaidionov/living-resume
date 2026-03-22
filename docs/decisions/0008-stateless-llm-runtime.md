@@ -1,4 +1,4 @@
-# ADR 0005: Stateless LLM Runtime for Chat and Fit Analysis
+# ADR 0008: Stateless LLM Runtime for Chat and Fit Analysis
 
 ## Decision
 
