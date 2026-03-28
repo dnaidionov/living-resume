@@ -8,6 +8,31 @@
     "directory": ".open-next/assets",
     "binding": "ASSETS"
   },
+  "routes": [
+    {
+      "pattern": "www.naidionov.com/*",
+      "zone_name": "naidionov.com"
+    },
+    {
+      "pattern": "naidionov.com",
+      "zone_name": "naidionov.com",
+      "custom_domain": true
+    }
+  ],
+  "vars": {
+    "AI_CHAT_PROVIDER": "openai",
+    "AI_FIT_PROVIDER": "openai",
+    "AI_REQUIREMENTS_PROVIDER": "openai",
+    "AI_EMBEDDINGS_PROVIDER": "openai",
+    "AI_CHAT_MODEL": "gpt-5-mini",
+    "AI_FIT_MODEL": "gpt-5-mini",
+    "AI_REQUIREMENTS_MODEL": "gpt-5-mini",
+    "AI_EMBEDDING_MODEL": "text-embedding-3-small",
+    "NEXT_PUBLIC_GA_MEASUREMENT_ID": "G-94SLBMM5Z0",
+    "OPENAI_BASE_URL": "https://api.openai.com/v1",
+    "OPENROUTER_APP_TITLE": "Career Twin",
+    "OPENROUTER_HTTP_REFERER": "https://naidionov.com"
+  },
   "observability": {
     "enabled": true
   }
