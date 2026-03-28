@@ -325,3 +325,8 @@ Use this log for concise, chronological records of meaningful decisions that do 
 - Decision: Add Google Analytics as an optional root-layout integration behind `NEXT_PUBLIC_GA_MEASUREMENT_ID`, and reuse the existing `living-resume:analytics` browser event boundary to forward product events into `gtag`.
 - Rationale: The app already had an internal analytics contract. Bridging that contract into GA keeps vendor-specific code centralized, preserves the existing event model, and makes GA opt-in per environment rather than hardwired into feature code.
 - Scope impact: `app/layout.tsx`, `components/google-analytics.tsx`, `.env.example`, `tests/google-analytics.test.ts`, `docs/architecture/deployment-cloudflare-openai.md`, `docs/operations/runbook.md`, `docs/agents/decision-log.md`.
+
+- Agent role: Ops / Release Agent / Application Engineer
+- Decision: Enrich fit-analysis analytics events with recruiter-action metadata: `timestamp`, `input_method`, `company`, `role`, and `fit_verdict`, plus `submitted_url` when URL mode is used.
+- Rationale: This preserves the no-raw-JD privacy boundary while making recruiter activity materially observable in Google Analytics. The event payload now supports usage tracking and downstream notification logic without exporting pasted job text or uploaded document contents.
+- Scope impact: `lib/analytics/fit-analysis.ts`, `components/fit-analysis-form.tsx`, `tests/fit-analysis-analytics.test.ts`, `docs/architecture/deployment-cloudflare-openai.md`, `docs/operations/runbook.md`, `docs/agents/decision-log.md`.
