@@ -27,6 +27,8 @@ Keep the site cheap, stateless, and portable while supporting grounded resume ch
 
 - Cloudflare Workers Logs for runtime logs
 - Cloudflare Web Analytics for site analytics
+- Google Analytics can be enabled in parallel by setting `NEXT_PUBLIC_GA_MEASUREMENT_ID`; the root layout injects the `gtag.js` snippet once and forwards the app's custom analytics events into GA
+- fit-analysis analytics forwarded to GA now include `timestamp`, `input_method`, `company`, `role`, and `fit_verdict`, plus `submitted_url` when the recruiter used URL mode
 - logs should never include raw job-description or uploaded document content
 - successful fit-analysis requests log structured metadata such as source URL, extracted role/company, and fit verdict so downstream notification hooks can be added without storing raw JD content
 

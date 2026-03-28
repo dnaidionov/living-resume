@@ -38,7 +38,23 @@
   - if `AI_REQUIREMENTS_PROVIDER` is unset, it inherits `AI_FIT_PROVIDER` before falling back to `openai`
 - UI/runtime:
   - `NEXT_PUBLIC_FIT_PRESENTATION_MODE` (`recruiter_brief` or `scorecard`, defaults to `recruiter_brief`)
+  - `NEXT_PUBLIC_GA_MEASUREMENT_ID` (optional; enables Google Analytics `gtag.js` and forwards the app's custom analytics events into GA)
 - Use [`.env.example`](../../.env.example) as the starting point for local configuration.
+
+## Analytics events
+
+- `fit_analysis_started` forwards:
+  - `timestamp`
+  - `input_method`
+  - `submitted_url` when the recruiter used URL mode
+- `fit_analysis_completed` forwards:
+  - `timestamp`
+  - `input_method`
+  - `company`
+  - `role`
+  - `fit_verdict`
+  - `submitted_url` when the recruiter used URL mode
+- Do not forward raw pasted job-description text or uploaded file contents into Google Analytics.
 
 ## Semantic Retrieval Artifact
 

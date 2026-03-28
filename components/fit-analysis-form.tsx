@@ -2,6 +2,10 @@
 
 import { useCallback, useEffect, useMemo, useState, type ReactNode } from "react";
 import { trackEvent } from "@/lib/analytics/events";
+import {
+  buildFitAnalysisCompletedEventDetail,
+  buildFitAnalysisStartedEventDetail
+} from "@/lib/analytics/fit-analysis";
 import type {
   FitAnalysisResult,
   FitDimension,
@@ -252,7 +256,7 @@ export function FitAnalysisForm({ prefill }: { prefill?: FitAnalysisPrefill | nu
   }) => {
     setLoading(true);
     setError(null);
-    trackEvent("fit_analysis_started");
+    trackEvent("fit_analysis_started", buildFitAnalysisStartedEventDetail(inputMode, jobUrl));
 
     try {
       let response: Response;
@@ -294,7 +298,7 @@ export function FitAnalysisForm({ prefill }: { prefill?: FitAnalysisPrefill | nu
       }
 
       setResult(payload);
-      trackEvent("fit_analysis_completed");
+      trackEvent("fit_analysis_completed", buildFitAnalysisCompletedEventDetail(inputMode, jobUrl, payload));
     } catch (caughtError) {
       setError(caughtError instanceof Error ? caughtError.message : "Failed to analyze role.");
     } finally {
