@@ -43,6 +43,34 @@
 
 ## Analytics events
 
+- `chat_opened` forwards:
+  - `entry_point`
+- `chat_started` forwards:
+  - `entry_point`
+  - `prompt_type`
+  - `prompt_topic`
+- `chat_prompt_clicked` forwards:
+  - `prompt_topic`
+- `chat_response_received` forwards:
+  - `mode`
+  - `response_time_ms`
+  - `response_time_bucket`
+  - `message_count`
+  - `contains_link`
+- `chat_fit_handoff_shown` forwards:
+  - `detected_input_kind`
+- `chat_fit_handoff_accepted` forwards:
+  - `detected_input_kind`
+- `chat_fit_handoff_declined` forwards:
+  - `detected_input_kind`
+- `chat_closed` forwards:
+  - `message_count`
+  - `had_response`
+  - `session_duration_bucket`
+  - `close_reason`
+- `chat_error` forwards:
+  - `prompt_topic`
+  - `mode`
 - `fit_analysis_started` forwards:
   - `timestamp`
   - `input_method`
@@ -53,8 +81,17 @@
   - `company`
   - `role`
   - `fit_verdict`
+  - `response_time_ms`
+  - `response_time_bucket`
   - `submitted_url` when the recruiter used URL mode
+- `github_clicked` forwards:
+  - `surface`
+- `linkedin_clicked` forwards:
+  - `surface`
+- `resume_downloaded` forwards:
+  - `surface`
 - Do not forward raw pasted job-description text or uploaded file contents into Google Analytics.
+- Do not forward raw recruiter chat text or assistant responses into Google Analytics.
 
 ## Semantic Retrieval Artifact
 

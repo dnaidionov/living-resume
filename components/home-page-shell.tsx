@@ -1,6 +1,8 @@
 "use client";
 
 import { useRef, useState } from "react";
+import { trackEvent } from "@/lib/analytics/events";
+import type { ChatEntryPoint } from "@/lib/analytics/chat";
 import Image from "next/image";
 import type { AIContextExplainer, BuildDoc, ResumeRole } from "@/types/content";
 import { SiteHeader } from "@/components/site-header";
@@ -21,8 +23,14 @@ export function HomePageShell({
   buildDocs: BuildDoc[];
 }) {
   const [isChatOpen, setIsChatOpen] = useState(false);
+  const [chatEntryPoint, setChatEntryPoint] = useState<ChatEntryPoint>("hero_cta");
   const [fitPrefill, setFitPrefill] = useState<FitAnalysisPrefill | null>(null);
   const fitSectionRef = useRef<HTMLElement | null>(null);
+
+  function openChat(entryPoint: ChatEntryPoint) {
+    setChatEntryPoint(entryPoint);
+    setIsChatOpen(true);
+  }
 
   function startFitCheck(prefill: Omit<FitAnalysisPrefill, "id">) {
     setFitPrefill({ ...prefill, id: crypto.randomUUID() });
@@ -35,8 +43,8 @@ export function HomePageShell({
   return (
     <main className={`page-shell ${isChatOpen ? "is-blurred" : ""}`}>
       <div className="page-shell__content">
-        <SiteHeader onAskAi={() => setIsChatOpen(true)} />
-        <Hero onAskAi={() => setIsChatOpen(true)} />
+        <SiteHeader onAskAi={(entryPoint) => openChat(entryPoint)} />
+        <Hero onAskAi={(entryPoint) => openChat(entryPoint)} />
 
         <section id="experience" className="section shell">
           <span className="eyebrow">Experience</span>
@@ -97,6 +105,9 @@ export function HomePageShell({
               rel="noreferrer"
               className="button secondary"
               style={{ fontWeight: 600, minWidth: 0, padding: "10px 14px" }}
+              onClick={() => {
+                trackEvent("github_clicked", { surface: "how_built" });
+              }}
             >
               <GithubIcon size={18} />
               See it on GitHub
@@ -148,7 +159,13 @@ export function HomePageShell({
         <ContactPanel />
       </div>
 
-      {isChatOpen ? <AskAiOverlay onClose={() => setIsChatOpen(false)} onStartFitCheck={startFitCheck} /> : null}
+      {isChatOpen ? (
+        <AskAiOverlay
+          entryPoint={chatEntryPoint}
+          onClose={() => setIsChatOpen(false)}
+          onStartFitCheck={startFitCheck}
+        />
+      ) : null}
     </main>
   );
 }
