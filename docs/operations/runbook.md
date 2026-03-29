@@ -110,6 +110,7 @@
 - Standalone repo scripts such as `npm run embeddings:build`, `npm run content:build`, and `npm run bench:fit` load `.env.local` automatically.
 - For Cloudflare, store provider secrets in the project or Worker settings, or use `wrangler secret put <KEY_NAME>`.
 - `npm run cf:deploy` now includes a deployment preflight that prints the exact Cloudflare env configuration it intends to deploy and refuses to continue until rerun with `--confirm-env`.
+- Cloudflare deploy builds use a deploy-only external URL gate: required JD URL cases that drift or break are logged and skipped, but deployment is blocked if all required external URL cases fail.
 - For Vercel, store provider secrets in the project environment settings or via `vercel env add <KEY_NAME>`.
 
 ## Fit-analysis benchmarking
@@ -162,6 +163,7 @@
 
 - [ ] `npm install` has been run for the current checkout.
 - [ ] `npm run cf:build` completes successfully.
+- [ ] The deploy-only external URL gate leaves at least one required live JD URL case passing; broken or drifted cases are treated as warnings, not deploy blockers, unless all required URL cases fail.
 - [ ] `.open-next/worker.js` exists.
 - [ ] `.open-next/assets` exists.
 - [ ] Required provider credentials are set for the routed tasks in Cloudflare project settings or via `wrangler secret put <KEY_NAME>`.
@@ -185,7 +187,7 @@
   - [ ] Ask AI chat returns a grounded answer in the overlay
   - [ ] pasted-text fit analysis returns a scorecard
   - [ ] URL fit analysis works for a readable public job page
-  - [ ] `npm run test:url-evals` passes the enabled required live URL cases
+  - [ ] `npm run test:url-evals:deploy` leaves at least one required live URL case passing; investigate skipped cases separately in the full strict suite
   - [ ] TXT uploads are accepted
   - [ ] PDF uploads are accepted
   - [ ] DOCX uploads are accepted
