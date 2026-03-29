@@ -258,6 +258,11 @@ Use this log for concise, chronological records of meaningful decisions that do 
 - Rationale: Users need to confirm which posting is being analyzed without re-reading the input field; this is presentation metadata, not part of the verdict itself, so it should be extracted once and carried through the result payload.
 - Scope impact: `types/ai.ts`, `lib/ai/fit-analysis.ts`, `lib/ai/openai.ts`, `lib/ai/prompting.ts`, `components/fit-analysis-form.tsx`, `tests/fit-analysis-target.test.ts`, `tests/copy.test.ts`, `docs/product/prd.md`, `docs/architecture/ai-system.md`, `docs/qa/test-plan.md`, `docs/agents/handoffs.md`, `docs/agents/decision-log.md`.
 
+- Agent role: Ops / Release Agent
+- Decision: Deployment now uses a deploy-only external URL eval gate that skips broken or drifted JD test URLs unless every required external URL case fails; the full strict URL eval suite remains unchanged for regular testing.
+- Rationale: Third-party job-board pages change over time, so known external drift should not block release deployment after it has already been surfaced by normal testing, but a total outage across all required external URL cases still indicates a release-risking problem.
+- Scope impact: `package.json`, `scripts/verify-deploy-url-evals.ts`, `lib/deploy/url-eval-policy.ts`, `tests/deploy-url-eval-policy.test.ts`, `docs/operations/runbook.md`, `docs/agents/handoffs.md`, `docs/agents/decision-log.md`.
+
 - Agent role: AI Systems Architect
 - Decision: Move URL title/company extraction to the ingestion layer, prefer structured metadata there, and treat JD-text heuristics only as backup. Expand the live URL fixture contract so parsed-JD expectations and displayed target-summary expectations can differ when an ATS exposes inconsistent metadata vs body copy.
 - Rationale: The fit-result header is not a synthesis problem; it should come from the best available structured source. Some live ATS pages expose one title in structured metadata and another in the rendered body, so the regression harness must model both rather than forcing a false equivalence.
