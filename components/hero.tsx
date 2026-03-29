@@ -1,8 +1,10 @@
+import { trackEvent } from "@/lib/analytics/events";
+import type { ChatEntryPoint } from "@/lib/analytics/chat";
 import Image from "next/image";
 import { ChatIcon } from "@/components/chat-icon";
 import { DownloadIcon } from "@/components/download-icon";
 
-export function Hero({ onAskAi }: { onAskAi: () => void }) {
+export function Hero({ onAskAi }: { onAskAi: (entryPoint: ChatEntryPoint) => void }) {
   return (
     <section className="section shell" style={{ paddingTop: 36 }}>
       <div className="grid" style={{ alignItems: "stretch" }}>
@@ -37,6 +39,9 @@ export function Hero({ onAskAi }: { onAskAi: () => void }) {
               className="inline-logo-image-link"
               aria-label="LinkedIn profile"
               title="LinkedIn"
+              onClick={() => {
+                trackEvent("linkedin_clicked", { surface: "hero" });
+              }}
             >
               <Image src="/linkedin-mark.svg" alt="LinkedIn" className="inline-logo-image" width={22} height={22} />
             </a>
@@ -54,12 +59,15 @@ export function Hero({ onAskAi }: { onAskAi: () => void }) {
                 download="DmitryNaidionov-cv.pdf"
                 className="button secondary hero-download-button"
                 aria-label="Download classic resume"
+                onClick={() => {
+                  trackEvent("resume_downloaded", { surface: "hero" });
+                }}
               >
                 <DownloadIcon />
               </a>
               <span className="callout-bubble">Download classic resume</span>
             </span>
-            <button type="button" className="button primary-accent" onClick={onAskAi} style={{ fontWeight: 700 }}>
+            <button type="button" className="button primary-accent" onClick={() => onAskAi("hero_cta")} style={{ fontWeight: 700 }}>
               <ChatIcon size={22} />
               Ask AI About Me
             </button>

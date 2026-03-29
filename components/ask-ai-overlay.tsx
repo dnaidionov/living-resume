@@ -1,6 +1,13 @@
 "use client";
 
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import {
+  buildChatClosedDetail,
+  buildChatResponseReceivedDetail,
+  classifyChatPromptTopic,
+  inferChatModeForAnalytics,
+  type ChatEntryPoint
+} from "@/lib/analytics/chat";
 import { trackEvent } from "@/lib/analytics/events";
 import { extractFitCheckTarget, isAffirmativeFitHandoffReply, isNegativeFitHandoffReply, type FitCheckTarget } from "@/lib/chat-handoff";
 import { normalizeChatText } from "@/lib/chat-format";
@@ -68,9 +75,11 @@ function renderMessageContent(text: string) {
 }
 
 export function AskAiOverlay({
+  entryPoint,
   onClose,
   onStartFitCheck
 }: {
+  entryPoint: ChatEntryPoint;
   onClose: () => void;
   onStartFitCheck: (prefill: Omit<FitAnalysisPrefill, "id">) => void;
 }) {
@@ -80,6 +89,8 @@ export function AskAiOverlay({
   const [pendingFitRequest, setPendingFitRequest] = useState<FitCheckTarget | null>(null);
   const scrollRef = useRef<HTMLDivElement | null>(null);
   const textareaRef = useRef<HTMLTextAreaElement | null>(null);
+  const startedAtRef = useRef<number>(Date.now());
+  const hasTrackedChatStartedRef = useRef(false);
   const sessionId = useMemo(() => {
     if (typeof window === "undefined") {
       return "overlay-session";
@@ -171,6 +182,19 @@ export function AskAiOverlay({
     input.style.overflowY = input.scrollHeight > maxHeight ? "auto" : "hidden";
   }, [message]);
 
+  useEffect(() => {
+    trackEvent("chat_opened", { entry_point: entryPoint });
+  }, [entryPoint]);
+
+  function closeOverlay(reason: "close_button" | "fit_handoff_accepted") {
+    const assistantMessageCount = messages.filter((item) => item.role === "assistant").length;
+    trackEvent("chat_closed", {
+      ...buildChatClosedDetail(messages.length, assistantMessageCount > 0, Date.now() - startedAtRef.current),
+      close_reason: reason
+    });
+    onClose();
+  }
+
   function clearFitHandoffPrompt() {
     setMessages((current) => current.map((item) => (item.kind === "fit_handoff" ? { ...item, kind: undefined } : item)));
   }
@@ -180,6 +204,7 @@ export function AskAiOverlay({
       return;
     }
 
+    trackEvent("chat_fit_handoff_accepted", { detected_input_kind: pendingFitRequest.kind });
     clearFitHandoffPrompt();
     onStartFitCheck(
       pendingFitRequest.kind === "url"
@@ -188,10 +213,13 @@ export function AskAiOverlay({
     );
     setPendingFitRequest(null);
     setMessage("");
-    onClose();
+    closeOverlay("fit_handoff_accepted");
   }
 
   function handleFitHandoffDecline() {
+    if (pendingFitRequest) {
+      trackEvent("chat_fit_handoff_declined", { detected_input_kind: pendingFitRequest.kind });
+    }
     clearFitHandoffPrompt();
     setMessages((current) => [
       ...current.map((item) => (item.kind === "fit_handoff" ? { ...item, kind: undefined } : item)),
@@ -227,6 +255,7 @@ export function AskAiOverlay({
 
     const fitCheckTarget = extractFitCheckTarget(trimmed);
     if (fitCheckTarget) {
+      trackEvent("chat_fit_handoff_shown", { detected_input_kind: fitCheckTarget.kind });
       const userMessage: ChatMessage = {
         id: crypto.randomUUID(),
         role: "user",
@@ -258,7 +287,15 @@ export function AskAiOverlay({
     setMessages(nextMessages);
     setMessage("");
     setLoading(true);
-    trackEvent("chat_started", { surface: "overlay" });
+    if (!hasTrackedChatStartedRef.current) {
+      trackEvent("chat_started", {
+        entry_point: entryPoint,
+        prompt_type: "free_text",
+        prompt_topic: classifyChatPromptTopic(trimmed)
+      });
+      hasTrackedChatStartedRef.current = true;
+    }
+    const responseStartedAt = performance.now();
 
     try {
       const response = await fetch("/api/chat", {
@@ -280,15 +317,29 @@ export function AskAiOverlay({
         throw new Error(payload.error ?? "Failed to get response.");
       }
 
+      const normalizedAnswer = normalizeChatText(payload.answer);
       setMessages((current) => [
         ...current,
         {
           id: crypto.randomUUID(),
           role: "assistant",
-          text: normalizeChatText(payload.answer)
+          text: normalizedAnswer
         }
       ]);
+      trackEvent(
+        "chat_response_received",
+        buildChatResponseReceivedDetail(
+          inferChatModeForAnalytics(trimmed),
+          Math.round(performance.now() - responseStartedAt),
+          nextMessages.length + 1,
+          /https?:\/\//.test(normalizedAnswer)
+        )
+      );
     } catch (caughtError) {
+      trackEvent("chat_error", {
+        prompt_topic: classifyChatPromptTopic(trimmed),
+        mode: inferChatModeForAnalytics(trimmed)
+      });
       setMessages((current) => [
         ...current,
         {
@@ -337,7 +388,7 @@ export function AskAiOverlay({
           </div>
           <button
             type="button"
-            onClick={onClose}
+            onClick={() => closeOverlay("close_button")}
             aria-label="Close chat"
             style={{
               position: "absolute",
@@ -414,6 +465,17 @@ export function AskAiOverlay({
                           cursor: "pointer"
                         }}
                         onClick={() => {
+                          trackEvent("chat_prompt_clicked", {
+                            prompt_topic: classifyChatPromptTopic(prompt)
+                          });
+                          if (!hasTrackedChatStartedRef.current) {
+                            trackEvent("chat_started", {
+                              entry_point: entryPoint,
+                              prompt_type: "starter_prompt",
+                              prompt_topic: classifyChatPromptTopic(prompt)
+                            });
+                            hasTrackedChatStartedRef.current = true;
+                          }
                           void sendMessage(prompt);
                         }}
                       >

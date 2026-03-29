@@ -1,6 +1,8 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import { trackEvent } from "@/lib/analytics/events";
+import type { ChatEntryPoint } from "@/lib/analytics/chat";
 import { SparkleIcon } from "@/components/sparkle-icon";
 import { DownloadIcon } from "@/components/download-icon";
 
@@ -10,7 +12,7 @@ const links = [
   { href: "#how-built", label: "How this is built" }
 ];
 
-export function SiteHeader({ onAskAi }: { onAskAi?: () => void }) {
+export function SiteHeader({ onAskAi }: { onAskAi?: (entryPoint: ChatEntryPoint) => void }) {
   const [isScrolled, setIsScrolled] = useState(false);
 
   useEffect(() => {
@@ -50,13 +52,16 @@ export function SiteHeader({ onAskAi }: { onAskAi?: () => void }) {
               download="DmitryNaidionov-cv.pdf"
               className="menu-link menu-download-button"
               aria-label="Download classic resume"
+              onClick={() => {
+                trackEvent("resume_downloaded", { surface: "header" });
+              }}
             >
               <DownloadIcon />
             </a>
             <span className="callout-bubble">Download classic resume</span>
           </span>
           {onAskAi ? (
-            <button type="button" className="menu-cta" onClick={onAskAi}>
+            <button type="button" className="menu-cta" onClick={() => onAskAi("header_cta")}>
               <SparkleIcon size={28} />
               Ask AI
             </button>

@@ -67,6 +67,7 @@ test("buildFitAnalysisCompletedEventDetail tracks timestamp, method, role, compa
       "url",
       "https://jobs.example.com/role?gh_jid=123",
       makeRecruiterBriefResult(),
+      6250,
       "2026-03-27T10:05:00.000Z"
     ),
     {
@@ -75,7 +76,9 @@ test("buildFitAnalysisCompletedEventDetail tracks timestamp, method, role, compa
       submitted_url: "https://jobs.example.com/role?gh_jid=123",
       company: "Acme",
       role: "Director of Product",
-      fit_verdict: "probably_a_good_fit"
+      fit_verdict: "probably_a_good_fit",
+      response_time_ms: 6250,
+      response_time_bucket: "3s_to_8s"
     }
   );
 });
@@ -116,13 +119,15 @@ test("buildFitAnalysisCompletedEventDetail derives verdict for scorecard mode", 
   };
 
   assert.deepEqual(
-    buildFitAnalysisCompletedEventDetail("file", "", result, "2026-03-27T10:06:00.000Z"),
+    buildFitAnalysisCompletedEventDetail("file", "", result, 18_500, "2026-03-27T10:06:00.000Z"),
     {
       timestamp: "2026-03-27T10:06:00.000Z",
       input_method: "file",
       company: "Motive",
       role: "Staff Product Manager",
-      fit_verdict: "strong_fit_lets_talk"
+      fit_verdict: "strong_fit_lets_talk",
+      response_time_ms: 18500,
+      response_time_bucket: "15s_plus"
     }
   );
 });
@@ -130,6 +135,7 @@ test("buildFitAnalysisCompletedEventDetail derives verdict for scorecard mode", 
 test("fit-analysis form sends analytics payloads through trackEvent", () => {
   assert.match(formSource, /buildFitAnalysisStartedEventDetail/);
   assert.match(formSource, /buildFitAnalysisCompletedEventDetail/);
-  assert.match(formSource, /trackEvent\("fit_analysis_started", buildFitAnalysisStartedEventDetail\(/);
-  assert.match(formSource, /trackEvent\("fit_analysis_completed", buildFitAnalysisCompletedEventDetail\(/);
+  assert.match(formSource, /"fit_analysis_started", buildFitAnalysisStartedEventDetail\(/);
+  assert.match(formSource, /"fit_analysis_completed",\s*buildFitAnalysisCompletedEventDetail\(/);
+  assert.match(formSource, /Math\.round\(performance\.now\(\) - startedAt\)/);
 });
