@@ -12,6 +12,7 @@
 - Resume-chat overlay normalizes message whitespace so empty lines do not inflate bubble height
 - Resume-chat overlay shows a compact typing-dots indicator while waiting for an answer instead of a loading bubble
 - Resume-chat overlay routes fit-check requests into the dedicated Role Fit section instead of answering about system capability; if the user confirms, it should prefill the correct tab (`Use URL` or `Paste text`) and auto-submit the analysis
+- Resume-chat scope gating must reject unrelated task prompts and prompt-injection attempts before retrieval or model execution, while still allowing resume, project, and build/system questions
 - Resume-chat fit-check handoff should render explicit `Sure, do it` and `No, stay here` actions; declining should leave chat open and reply `Ok, staying here.`
 - Resume-chat composer should take focus on open and regain focus after replies or local handoff dismissal so the user can keep typing without extra clicks
 - Resume-chat scroll rail should be bottom-anchored so starter prompts and initial messages render near the composer instead of the top of the panel
@@ -29,6 +30,7 @@
 - Fit-analysis route returns structured output from text, URL, and file inputs
 - URL-based fit-analysis tests must verify that fetched JD content, not the literal URL string, is used for requirement extraction and evidence retrieval while `metadata.inputKind` remains `url`
 - Live URL-ingestion regression coverage is fixture-driven from `tests/fixtures/url-fit-analysis-cases.json`; the enabled required build-gate set currently includes Waymo, Sourgum, Motive, and Netflix product-role URLs
+- Disabled live URL fixtures should be retained for historical coverage context when possible; if a posting no longer resolves, keep the original fixture entry with `enabled: false` and record the current failure mode in fixture metadata instead of deleting it outright
 - Fit-analysis route supports both `recruiter_brief` and `scorecard` presentation modes
 - `TXT`, `PDF`, and `DOCX` uploads parse into readable role text when the document contains extractable text
 - Upload-based fit analysis rejects readable `TXT`, `PDF`, and `DOCX` files when no defensible job requirements can be extracted from the parsed text
