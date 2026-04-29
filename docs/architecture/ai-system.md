@@ -23,7 +23,7 @@ The current repo uses a portable stateless AI runtime:
 - `lib/ai/openai.ts` is the provider-neutral runtime entrypoint; it routes chat, fit synthesis, requirement extraction, and embeddings through task-specific provider config rather than hard-wiring the app to OpenAI.
 - `lib/ai/provider-config.ts` resolves provider/model selection per task with backward-compatible fallbacks to the existing `OPENAI_*` env vars.
 - `lib/ai/providers/openai-compatible.ts` is the first provider adapter and currently serves OpenAI, OpenRouter, and custom OpenAI-compatible providers configured through namespaced env vars.
-- `lib/ai/chat-service.ts` retrieves evidence and sends the latest chat turn plus a short history window to the model.
+- `lib/ai/chat-service.ts` gates chat scope before retrieval: deterministic rules allow/block obvious resume, project, build, unrelated-task, and prompt-injection prompts; ambiguous standalone prompts use a small chat-scope classifier and store the result in a bounded process-local cache before evidence retrieval or answer generation.
 - `lib/ai/fit-analysis.ts` extracts requirements, resolves evidence from a broad role query plus prioritized per-requirement queries, and then requests fit synthesis from the model.
 - Fit-analysis retrieval should batch the broad-role query and prioritized per-requirement queries into one embeddings request rather than issuing one semantic embedding round trip per query.
 - URL fit analysis must run on fetched JD content while preserving `inputKind: "url"` in the result metadata; the raw URL should be treated as provenance only, not as analysis text.

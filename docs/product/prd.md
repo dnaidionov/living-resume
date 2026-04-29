@@ -28,9 +28,10 @@ Build a recruiter-first Career Twin that acts as a grounded, interactive profess
 - Resume chat uses a compact typing-dots indicator instead of a loading bubble.
 - Resume chat should anchor conversation content to the bottom of the chat rail so the first message starts near the composer and the thread grows upward as messages are added.
 - Resume chat should use conventional turn alignment: recruiter/user messages on the right, Career Twin responses on the left.
-- Resume chat must answer only questions about Dmitry's resume, professional history, and listed projects.
 - Resume chat must answer questions about Dmitry's resume, professional history, listed projects, and how this work was built.
-- Resume chat must refuse unrelated tasks and adversarial prompt-injection attempts before retrieval or model execution so off-scope prompts do not spend tokens.
+- Resume chat must use a two-stage scope gate: deterministic rules allow or block obvious prompts before retrieval/model work, and ambiguous prompts go through a small scope classifier before evidence retrieval or answer generation.
+- Resume chat must cache standalone ambiguous scope-classifier decisions in a bounded process-local cache so repeated suspicious prompts do not repeatedly spend classifier tokens.
+- Resume chat must refuse unrelated tasks and adversarial prompt-injection attempts before retrieval or answer generation so off-scope prompts do not spend answer-model tokens.
 - Resume chat refusal copy for unrelated/off-scope use should stay short, witty, and polite.
 - Resume-fit requests raised inside chat must be handed off to the dedicated Role Fit section instead of being answered in chat.
 - The fit-check handoff must present explicit actions:

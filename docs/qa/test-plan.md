@@ -12,7 +12,8 @@
 - Resume-chat overlay normalizes message whitespace so empty lines do not inflate bubble height
 - Resume-chat overlay shows a compact typing-dots indicator while waiting for an answer instead of a loading bubble
 - Resume-chat overlay routes fit-check requests into the dedicated Role Fit section instead of answering about system capability; if the user confirms, it should prefill the correct tab (`Use URL` or `Paste text`) and auto-submit the analysis
-- Resume-chat scope gating must reject unrelated task prompts and prompt-injection attempts before retrieval or model execution, while still allowing resume, project, and build/system questions
+- Resume-chat scope gating must reject obvious unrelated task prompts and prompt-injection attempts before retrieval, classifier, or answer-model execution, while still allowing resume, project, and build/system questions
+- Ambiguous resume-chat prompts must run through scope classification before retrieval; allowed classifier results should proceed in the classified mode, rejected results should return the scoped refusal before retrieval, and repeated standalone ambiguous prompts should reuse the cached classification
 - Resume-chat fit-check handoff should render explicit `Sure, do it` and `No, stay here` actions; declining should leave chat open and reply `Ok, staying here.`
 - Resume-chat composer should take focus on open and regain focus after replies or local handoff dismissal so the user can keep typing without extra clicks
 - Resume-chat scroll rail should be bottom-anchored so starter prompts and initial messages render near the composer instead of the top of the panel

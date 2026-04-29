@@ -206,7 +206,7 @@
 - Cloudflare deploys are now env-aware: `npm run cf:deploy` prints the exact routed AI env configuration, blocks on missing required values, and requires explicit `--confirm-env` acknowledgement before it will build and deploy.
 - Cloudflare deploys now use a deploy-only live URL eval policy: broken or drifted external JD test URLs are skipped with warnings, but deployment is blocked if every required URL case fails; the full `npm run test:url-evals` suite remains strict for regular testing.
 - uploaded fit-analysis files (`TXT`, `PDF`, `DOCX`) now have an extra validation gate after parsing: if requirement extraction returns no defensible JD requirements, the file request must fail instead of producing recruiter output
-- resume chat now rejects high-confidence unrelated-task and prompt-injection prompts before retrieval or model execution, while still allowing resume/history/project/build questions
+- resume chat now uses a two-stage scope gate: deterministic rules reject obvious unrelated/prompt-injection prompts before classifier, retrieval, or answer-model work; ambiguous prompts use a small scope classifier; standalone classifier decisions are cached in a bounded process-local cache for repeated suspicious prompts
 - OpenRouter cheap/free model analysis was rerun against the current `/api/v1/models` catalog on 2026-04-29 using OpenRouter for generation and disabling direct OpenAI spend.
 - Current benchmark recommendation after that rerun:
   - `fit = qwen/qwen3-next-80b-a3b-instruct:free` for fastest zero-cost fit analysis
