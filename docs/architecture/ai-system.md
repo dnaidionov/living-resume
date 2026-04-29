@@ -111,12 +111,13 @@ This keeps the app deployable on both Cloudflare and Vercel without requiring a 
 - When structured/meta title and recruiter-readable JD title disagree, the displayed role title should prefer the recruiter-readable JD title while still keeping company identity from the strongest structured/meta/URL source available.
 - Current live benchmarking shows the remaining dominant latency is the model path, not retrieval: URL fetch is sub-second, batched evidence resolution is under a second, exact-input requirement extraction cache removes a ~17-second cold extraction step on reruns, and warm end-to-end fit checks are still dominated by the final synthesis model call.
 - Preliminary live experiments with `gpt-5-nano` did not produce a reliable latency win for this fit-analysis path and, for at least one representative JD, made recruiter-facing requirement bullets more generic. Model downgrades should therefore remain benchmark-and-review experiments rather than default config changes.
-- The first OpenRouter free-model benchmark showed that fit-analysis is a viable task-routed hybrid:
-  - `requirements` worked well on both `qwen/qwen3-next-80b-a3b-instruct:free` and `openai/gpt-oss-120b:free`, with `gpt-oss-120b:free` winning the final requirements-only quality-vs-speed comparison
-  - `fit` worked well on both `qwen/qwen3-next-80b-a3b-instruct:free` and `openai/gpt-oss-120b:free`, with `qwen3-next` winning on raw speed and `gpt-oss-120b` winning on the reconciled default recommendation
-  - `stepfun/step-3.5-flash:free` was rejected for fit because it remained slow and showed unstable verdict behavior
-  - the tested free chat candidates failed in the current runtime, so chat remains on `gpt-5-mini`
-  - `nvidia/llama-nemotron-embed-vl-1b-v2:free` remains the next embedding candidate, but the final parallel pass did not complete a clean enough embeddings comparison to justify changing the default away from `text-embedding-3-small`
+- OpenRouter model recommendations are benchmark-bound and should be treated as time-sensitive because provider routing, free tiers, and model behavior change:
+  - the 2026-04-29 rerun found `qwen/qwen3-next-80b-a3b-instruct:free` to be the fastest successful free fit/requirements path
+  - `google/gemini-2.5-flash-lite` is the strongest cheap non-free fit/requirements fallback from that rerun
+  - `openai/gpt-oss-120b:free` still worked despite missing structured-output metadata; it is slower and less predictable than Qwen in benchmark timing, but remains the selected quality-oriented free fit/requirements model for the active OpenRouter runtime
+  - for chat, `openai/gpt-5.4-nano` is the best cheap OpenRouter-hosted candidate and `google/gemini-2.5-flash-lite` is the best cheap non-OpenAI-family candidate from the rerun
+  - `openai/text-embedding-3-small` works through OpenRouter's embeddings API and is the selected embeddings model for the active OpenRouter runtime, even though it may not appear in the general OpenRouter text-model catalog
+- Active configured model routing is currently OpenRouter for all AI tasks: chat uses `openai/gpt-5.4-nano`, fit and requirements use `openai/gpt-oss-120b:free`, and embeddings use `openai/text-embedding-3-small`.
 - Resume-fit requests raised inside chat should hand off into the dedicated fit-analysis workflow rather than being answered as chat responses.
 - The fit-check handoff should offer explicit `Sure, let's go` and `No, stay here` actions, with the decline path handled locally rather than via an LLM round trip.
 - Build/process questions such as `how this is built` should be interpreted as questions about the Career Twin product itself, and build answers should end with a short GitHub/source-doc pointer.

@@ -198,15 +198,28 @@
 - AI runtime is now provider-neutral by task: chat, fit, requirements, and embeddings each resolve through `AI_*_PROVIDER` and `AI_*_MODEL`, with built-in OpenAI/OpenRouter support plus custom OpenAI-compatible providers via `AI_PROVIDER_<NAME>_*` env vars
 - requirement extraction inherits the fit provider/model when no explicit requirements-task override is set, so fit-model experiments do not require duplicate routing config
 - benchmark output now records provider/model for all four tasks, not only OpenAI model names
-- OpenRouter free-model benchmark outcome:
-  - best current `requirements` candidate: `openai/gpt-oss-120b:free`
-  - best current `fit` candidate: `openai/gpt-oss-120b:free` as the reconciled default, with `qwen/qwen3-next-80b-a3b-instruct:free` as the faster but weaker alternative
-  - tested free chat candidates failed in the current runtime and should not replace `gpt-5-mini` yet
-  - `nvidia/llama-nemotron-embed-vl-1b-v2:free` remains the next embedding candidate, but the final parallel pass did not complete a clean enough comparison to make it the default
+- Earlier OpenRouter free-model benchmark outcome, now superseded by the 2026-04-29 rerun:
+  - `openai/gpt-oss-120b:free` had been the reconciled default for `fit` and `requirements`
+  - `qwen/qwen3-next-80b-a3b-instruct:free` had been the faster but weaker alternative
+  - free chat candidates tested in that earlier pass failed in the runtime
 - Candidate discovery scope is now widened from the curated free-model collection to the broader zero-price model index at `https://openrouter.ai/models?max_price=0`; benchmarking remains shortlist-based rather than exhaustive.
 - Cloudflare deploys are now env-aware: `npm run cf:deploy` prints the exact routed AI env configuration, blocks on missing required values, and requires explicit `--confirm-env` acknowledgement before it will build and deploy.
 - Cloudflare deploys now use a deploy-only live URL eval policy: broken or drifted external JD test URLs are skipped with warnings, but deployment is blocked if every required URL case fails; the full `npm run test:url-evals` suite remains strict for regular testing.
 - uploaded fit-analysis files (`TXT`, `PDF`, `DOCX`) now have an extra validation gate after parsing: if requirement extraction returns no defensible JD requirements, the file request must fail instead of producing recruiter output
+- OpenRouter cheap/free model analysis was rerun against the current `/api/v1/models` catalog on 2026-04-29 using OpenRouter for generation and disabling direct OpenAI spend.
+- Current benchmark recommendation after that rerun:
+  - `fit = qwen/qwen3-next-80b-a3b-instruct:free` for fastest zero-cost fit analysis
+  - `requirements = qwen/qwen3-next-80b-a3b-instruct:free` for fastest zero-cost requirement extraction
+  - `google/gemini-2.5-flash-lite` as the strongest cheap non-free fallback for fit and requirements
+  - `chat = openai/gpt-5.4-nano` as the best cheap OpenRouter-hosted chat candidate
+  - `chat = google/gemini-2.5-flash-lite` if avoiding OpenAI-family chat models
+  - `openai/text-embedding-3-small` works through OpenRouter embeddings even though it is not visible in the general text-model catalog
+- Active configured runtime after user selection:
+  - `chat = openai/gpt-5.4-nano` via OpenRouter
+  - `fit = openai/gpt-oss-120b:free` via OpenRouter
+  - `requirements = openai/gpt-oss-120b:free` via OpenRouter
+  - `embeddings = openai/text-embedding-3-small` via OpenRouter
+- The 2026-04-29 rerun found that `openai/gpt-oss-120b:free` works in this runtime despite missing structured-output metadata, but its latency was inconsistent; monitor fit-analysis response time after deployment.
 
 ## Ops / Release Agent -> Deployment Execution (Cloudflare Adapter Readiness 2026-03-07)
 

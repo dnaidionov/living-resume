@@ -93,7 +93,8 @@
   - stage timings versus the current baseline
   - whether the candidate actually returns usable output
   - output-quality notes for recruiter-facing fit summaries or chat answers
-  - embeddings viability, since the free-model collection does not currently include a suitable embedding candidate
+  - embeddings viability, checking both the general text-model catalog and the embeddings API/model pages because `openai/text-embedding-3-small` is supported through OpenRouter embeddings even when absent from `/api/v1/models`
+  - the catalog snapshot source and count when recommendations are based on current OpenRouter availability
 - Cloudflare adapter build produces `.open-next/worker.js` before release
 - Logs avoid raw JD and uploaded-document content
 - Analytics events remain lightweight
