@@ -4,7 +4,7 @@ import { useRef, useState } from "react";
 import { trackEvent } from "@/lib/analytics/events";
 import type { ChatEntryPoint } from "@/lib/analytics/chat";
 import Image from "next/image";
-import type { AIContextExplainer, BuildDoc, ResumeRole } from "@/types/content";
+import type { AIContextExplainer, BuildDoc, ProjectBrief, ResumeRole } from "@/types/content";
 import { SiteHeader } from "@/components/site-header";
 import { Hero } from "@/components/hero";
 import { RoleCard } from "@/components/role-card";
@@ -16,11 +16,13 @@ import { GithubIcon } from "@/components/github-icon";
 export function HomePageShell({
   roles,
   explainers,
-  buildDocs
+  buildDocs,
+  projects
 }: {
   roles: ResumeRole[];
   explainers: AIContextExplainer[];
   buildDocs: BuildDoc[];
+  projects: ProjectBrief[];
 }) {
   const [isChatOpen, setIsChatOpen] = useState(false);
   const [chatEntryPoint, setChatEntryPoint] = useState<ChatEntryPoint>("hero_cta");
@@ -71,6 +73,87 @@ export function HomePageShell({
             ))}
           </div>
 
+        </section>
+
+        <section id="projects" className="section shell">
+          <span className="eyebrow">Projects</span>
+          <h2 className="section-title">Selected Projects</h2>
+          <p className="muted section-intro">
+            A mix of product systems and independent builds that show how I frame problems, shape
+            systems, and make things real.
+          </p>
+          <div className="grid" style={{ marginTop: 24 }}>
+            {projects.map((project) => (
+              <article key={project.id} className="card" style={{ padding: 24 }}>
+                <div
+                  style={{
+                    display: "flex",
+                    alignItems: "baseline",
+                    justifyContent: "space-between",
+                    gap: 12,
+                    flexWrap: "wrap"
+                  }}
+                >
+                  <h3 style={{ marginBottom: 0 }}>{project.name}</h3>
+                  {project.link ? (
+                    <a
+                      href={project.link}
+                      target="_blank"
+                      rel="noreferrer"
+                      className="button secondary"
+                      style={{ fontWeight: 600, minWidth: 0, padding: "8px 12px" }}
+                    >
+                      <GithubIcon size={16} />
+                      GitHub
+                    </a>
+                  ) : null}
+                </div>
+                <p className="muted">{project.summary}</p>
+                {project.projectType === "product_system" ? (
+                  <>
+                    {project.context ? (
+                      <p>
+                        <strong>What it solves:</strong> {project.context}
+                      </p>
+                    ) : null}
+                    {project.build ? (
+                      <p>
+                        <strong>What I built:</strong> {project.build}
+                      </p>
+                    ) : null}
+                    {project.keyDecisions && project.keyDecisions.length > 0 ? (
+                      <div>
+                        <strong>Key decisions:</strong>
+                        <ul style={{ marginTop: 12, paddingLeft: 20 }}>
+                          {project.keyDecisions.map((decision) => (
+                            <li key={decision} style={{ marginBottom: 8 }}>
+                              {decision}
+                            </li>
+                          ))}
+                        </ul>
+                      </div>
+                    ) : null}
+                    {project.significance ? (
+                      <p>
+                        <strong>Why it matters:</strong> {project.significance}
+                      </p>
+                    ) : null}
+                  </>
+                ) : (
+                  <>
+                    {project.why ? (
+                      <p>
+                        <strong>Why I made it:</strong> {project.why}
+                      </p>
+                    ) : null}
+                  </>
+                )}
+                <p>
+                  <strong>Status:</strong> {project.status}
+                </p>
+              </article>
+            ))}
+          </div>
         </section>
 
         <section id="fit-check" className="section shell" ref={fitSectionRef}>

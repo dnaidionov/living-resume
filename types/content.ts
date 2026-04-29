@@ -20,10 +20,15 @@ export type ResumeRole = {
 export type ProjectBrief = {
   id: string;
   name: string;
+  projectType: "product_system" | "personal_build";
   summary: string;
-  problem: string;
-  actions: string[];
-  outcomes: string[];
+  context?: string;
+  build?: string;
+  keyDecisions?: string[];
+  significance?: string;
+  why?: string;
+  status: string;
+  link?: string;
   tags: string[];
   relatedRoleIds: string[];
 };

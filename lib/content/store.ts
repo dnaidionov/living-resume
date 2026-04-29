@@ -83,35 +83,91 @@ export async function buildDocuments(): Promise<ContentDocument[]> {
         }
       }))
     ]),
-    ...projects.flatMap((project) => [
-      {
-        id: `project-${project.id}-summary`,
-        sourceType: "project" as const,
-        title: project.name,
-        section: "summary",
-        text: project.summary,
-        tags: project.tags,
-        metadata: buildProjectMetadata(project.relatedRoleIds, roleDateById, roleMetaById)
-      },
-      {
-        id: `project-${project.id}-problem`,
-        sourceType: "project" as const,
-        title: project.name,
-        section: "problem",
-        text: project.problem,
-        tags: project.tags,
-        metadata: buildProjectMetadata(project.relatedRoleIds, roleDateById, roleMetaById)
-      },
-      ...project.actions.map((action, index) => ({
-        id: `project-${project.id}-action-${index + 1}`,
-        sourceType: "project" as const,
-        title: project.name,
-        section: `action-${index + 1}`,
-        text: action,
-        tags: project.tags,
-        metadata: buildProjectMetadata(project.relatedRoleIds, roleDateById, roleMetaById)
-      }))
-    ]),
+    ...projects.flatMap((project) => {
+      const metadata = buildProjectMetadata(project.relatedRoleIds, roleDateById, roleMetaById);
+
+      return [
+        {
+          id: `project-${project.id}-summary`,
+          sourceType: "project" as const,
+          title: project.name,
+          section: "summary",
+          text: project.summary,
+          tags: project.tags,
+          metadata
+        },
+        ...(project.context
+          ? [
+              {
+                id: `project-${project.id}-context`,
+                sourceType: "project" as const,
+                title: project.name,
+                section: "context",
+                text: project.context,
+                tags: project.tags,
+                metadata
+              }
+            ]
+          : []),
+        ...(project.build
+          ? [
+              {
+                id: `project-${project.id}-build`,
+                sourceType: "project" as const,
+                title: project.name,
+                section: "build",
+                text: project.build,
+                tags: project.tags,
+                metadata
+              }
+            ]
+          : []),
+        ...(project.keyDecisions ?? []).map((decision, index) => ({
+          id: `project-${project.id}-decision-${index + 1}`,
+          sourceType: "project" as const,
+          title: project.name,
+          section: `decision-${index + 1}`,
+          text: decision,
+          tags: project.tags,
+          metadata
+        })),
+        ...(project.significance
+          ? [
+              {
+                id: `project-${project.id}-significance`,
+                sourceType: "project" as const,
+                title: project.name,
+                section: "significance",
+                text: project.significance,
+                tags: project.tags,
+                metadata
+              }
+            ]
+          : []),
+        ...(project.why
+          ? [
+              {
+                id: `project-${project.id}-why`,
+                sourceType: "project" as const,
+                title: project.name,
+                section: "why",
+                text: project.why,
+                tags: project.tags,
+                metadata
+              }
+            ]
+          : []),
+        {
+          id: `project-${project.id}-status`,
+          sourceType: "project" as const,
+          title: project.name,
+          section: "status",
+          text: project.status,
+          tags: project.tags,
+          metadata
+        }
+      ];
+    }),
     ...explainers.flatMap((explainer) => [
       {
         id: `ai-context-${explainer.id}-summary`,

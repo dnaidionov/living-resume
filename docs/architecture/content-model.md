@@ -15,6 +15,28 @@
 - Roles should map to one AI context explainer, except intentionally condensed legacy roles where AI context is explicitly omitted.
 - Build docs are first-class retrieval content, not only docs.
 - Public UI should derive from the same content artifacts used by the AI.
+- Project entries may use different narrative shapes depending on project type, but the content artifact remains the shared source for both page rendering and retrieval indexing.
+
+## Project Shape
+
+- Projects are stored in `content/projects/projects.json`.
+- Each project entry includes:
+  - `id`
+  - `name`
+  - `projectType`
+  - `summary`
+  - `status`
+  - `tags`
+  - `relatedRoleIds`
+- Product/system projects may also include:
+  - `context`
+  - `build`
+  - `keyDecisions[]`
+  - `significance`
+  - optional `link`
+- Personal-build projects may also include:
+  - `why`
+  - optional `link`
 
 ## AI Context Shape
 
