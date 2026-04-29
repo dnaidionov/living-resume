@@ -572,3 +572,103 @@ Interpretation:
 - `nvidia/llama-nemotron-embed-vl-1b-v2:free` remains a viable next candidate
 - but the final parallel pass did not produce a clean completed timing + retrieval-quality comparison
 - so the recommendation does **not** move embeddings yet
+
+## OpenRouter Cheap/Free Rerun 2026-04-29
+
+### Objective
+
+Rerun the OpenRouter model analysis against the current catalog, including free models and paid models priced below `gpt-5-mini`, while avoiding direct OpenAI spend.
+
+### Scope and methodology
+
+- Current OpenRouter catalog source: `https://openrouter.ai/api/v1/models`
+- Catalog snapshot:
+  - `369` total models
+  - `155` models strictly cheaper than `gpt-5-mini` on both input and output
+  - `32` zero-price text models
+- Price threshold:
+  - `gpt-5-mini`: `$0.25 / 1M input`, `$2.00 / 1M output`
+- Primary benchmark JD:
+  - Sourgum Ashby posting used in previous fit-analysis benchmarks
+- All generation calls were routed through OpenRouter.
+- Direct OpenAI use was disabled for the rerun.
+- OpenRouter did not expose embeddings in the general text-model API catalog used for the rerun, so the benchmark used the repo fallback path for query embeddings. A later direct embeddings smoke test confirmed `openai/text-embedding-3-small` works through OpenRouter's embeddings API, so future embedding evaluations should test that endpoint directly instead of relying only on `/api/v1/models`.
+
+### Fit and requirements matrix
+
+| Configuration | Fit model | Requirements model | `requirements_first` | `evidence_resolution` | `fit_url_first` | `fit_text_first` | Verdict | Notes |
+| --- | --- | --- | ---: | ---: | ---: | ---: | --- | --- |
+| OpenRouter baseline | `openai/gpt-5-mini` | `openai/gpt-5-mini` | `22.064 s` | `89 ms` | `28.067 s` | `28.038 s` | `Strong Fit - Let's talk` | Baseline using OpenRouter balance |
+| GPT OSS free | `openai/gpt-oss-120b:free` | `openai/gpt-oss-120b:free` | `32.345 s` | `85 ms` | `1.170 s` | `3.116 s` | `Strong Fit - Let's talk` | Worked despite no structured-output metadata, but latency was erratic |
+| GPT OSS paid | `openai/gpt-oss-120b` | `openai/gpt-oss-120b` | `38.513 s` | `57 ms` | `54.181 s` | `13.403 s` | `Strong Fit - Let's talk` | Structured-output metadata exists, but current latency was poor |
+| DeepSeek V4 Flash | `deepseek/deepseek-v4-flash` | `deepseek/deepseek-v4-flash` | `2.410 s` | `132 ms` | `96.084 s` | `36.923 s` | `Strong Fit - Let's talk` | Fast extraction, unacceptable fit latency |
+| Qwen 3.6 35B | `qwen/qwen3.6-35b-a3b` | `qwen/qwen3.6-35b-a3b` | `11.035 s` | `108 ms` | `23.251 s` | `19.530 s` | `Strong Fit - Let's talk` | Cheaper than baseline, but not compelling |
+| Qwen Next free | `qwen/qwen3-next-80b-a3b-instruct:free` | `qwen/qwen3-next-80b-a3b-instruct:free` | `154 ms` | `103 ms` | `278 ms` | `200 ms` | `Strong Fit - Let's talk` | Fastest successful fit path |
+| Gemini 2.5 Flash Lite | `google/gemini-2.5-flash-lite` | `google/gemini-2.5-flash-lite` | `1.238 s` | `95 ms` | `3.300 s` | `4.055 s` | `Strong Fit - Let's talk` | Best cheap non-free candidate in this rerun |
+| Gemini 2.0 Flash Lite | `google/gemini-2.0-flash-lite-001` | `google/gemini-2.0-flash-lite-001` | `2.620 s` | `82 ms` | `5.152 s` | `5.465 s` | `Strong Fit - Let's talk` | Good, but slower than Gemini 2.5 Flash Lite |
+
+### Chat matrix
+
+Prompt:
+- `Which experience best proves product strategy and execution together?`
+
+| Configuration | Chat model | Time | Result | Notes |
+| --- | --- | ---: | --- | --- |
+| OpenRouter baseline | `openai/gpt-5-mini` | `16.818 s` | Success | Specific but slow |
+| GPT-5.4 Nano | `openai/gpt-5.4-nano` | `2.092 s` | Success | Best cheap quality/speed tradeoff in this pass |
+| DeepSeek V4 Flash | `deepseek/deepseek-v4-flash` | `7.899 s` | Success | Usable, not fast enough to prefer |
+| Qwen 3.6 35B | `qwen/qwen3.6-35b-a3b` | `8.172 s` | Success | Usable, slower than stronger alternatives |
+| Qwen Next free | `qwen/qwen3-next-80b-a3b-instruct:free` | `292 ms` | Failure | Provider error |
+| Gemini 2.5 Flash Lite | `google/gemini-2.5-flash-lite` | `2.049 s` | Success | Good low-cost non-OpenAI-family candidate |
+| Gemini 2.0 Flash Lite | `google/gemini-2.0-flash-lite-001` | `898 ms` | Success | Fastest successful chat result, but terse |
+| Gemma 4 31B free | `google/gemma-4-31b-it:free` | `364 ms` | Failure | Provider error |
+| MiniMax M2.5 free | `minimax/minimax-m2.5:free` | `28.852 s` | Success | Too slow |
+| GPT OSS 120B free | `openai/gpt-oss-120b:free` | `9.994 s` | Success | Works, but not a chat recommendation |
+
+### Updated conclusions
+
+- `openai/gpt-oss-120b:free` does work in the current runtime for fit analysis despite not advertising structured-output support, but current latency is inconsistent enough that it should not be treated as the default recommendation.
+- `openai/gpt-oss-120b` paid is not attractive in this rerun; structured-output support exists, but latency was worse than expected.
+- `qwen/qwen3-next-80b-a3b-instruct:free` is again the fastest successful fit and requirements path.
+- `google/gemini-2.5-flash-lite` is the strongest cheap non-free fit/requirements candidate from this rerun.
+- For chat, `openai/gpt-5.4-nano` is the best cheap quality/speed candidate through OpenRouter. If avoiding OpenAI-family models entirely, `google/gemini-2.5-flash-lite` is the best candidate to test further.
+- `google/gemini-2.0-flash-lite-001` is very fast for chat but produced a terse answer, so it is better as a low-latency experiment than as the default.
+- OpenRouter's general text-model API catalog did not expose usable embeddings in this rerun, but direct smoke testing later confirmed `openai/text-embedding-3-small` works through OpenRouter's embeddings API with the expected 1536-dimensional output. Retrieval-quality benchmarking is still needed if embeddings behavior becomes a release-critical change.
+
+### Updated recommendation after 2026-04-29 rerun
+
+- Fit:
+  - fastest/free candidate: `qwen/qwen3-next-80b-a3b-instruct:free`
+  - cheap non-free fallback: `google/gemini-2.5-flash-lite`
+- Requirements:
+  - fastest/free candidate: `qwen/qwen3-next-80b-a3b-instruct:free`
+  - cheap non-free fallback: `google/gemini-2.5-flash-lite`
+- Chat:
+  - best cheap candidate: `openai/gpt-5.4-nano`
+  - best cheap non-OpenAI-family candidate: `google/gemini-2.5-flash-lite`
+- Embeddings:
+  - configured runtime: `AI_EMBEDDINGS_PROVIDER=openrouter` with `AI_EMBEDDING_MODEL=openai/text-embedding-3-small`
+  - direct smoke testing confirmed this OpenRouter embeddings path returns the expected 1536-dimensional vectors
+  - pricing observed for `openai/text-embedding-3-small` through OpenRouter matches OpenAI direct at `$0.02 / 1M input`
+
+### Configured runtime after user selection
+
+The active repo configuration now intentionally differs from the fastest-only benchmark recommendation.
+
+- `AI_CHAT_PROVIDER=openrouter`
+- `AI_CHAT_MODEL=openai/gpt-5.4-nano`
+- `AI_FIT_PROVIDER=openrouter`
+- `AI_FIT_MODEL=openai/gpt-oss-120b:free`
+- `AI_REQUIREMENTS_PROVIDER=openrouter`
+- `AI_REQUIREMENTS_MODEL=openai/gpt-oss-120b:free`
+- `AI_EMBEDDINGS_PROVIDER=openrouter`
+- `AI_EMBEDDING_MODEL=openai/text-embedding-3-small`
+
+Rationale:
+- single-provider routing through OpenRouter matches the current deployment preference and available balance
+- `openai/gpt-5.4-nano` had the strongest cheap chat quality/speed tradeoff in the OpenRouter chat pass
+- `openai/gpt-oss-120b:free` was not the fastest fit/requirements option, but it remained the stronger quality-oriented free candidate in stricter review than the faster Qwen option
+- `openai/text-embedding-3-small` has a validated OpenRouter embeddings path and pricing parity with OpenAI direct
+
+Risk:
+- `openai/gpt-oss-120b:free` latency was erratic in the rerun, so production monitoring should watch fit-analysis response time after deployment

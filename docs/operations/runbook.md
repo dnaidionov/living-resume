@@ -143,11 +143,20 @@
   - `OPENAI_REQUIREMENTS_MODEL=gpt-5-nano` was not a reliable latency win over the `gpt-5-mini` baseline and produced more generic recruiter-facing bullets.
   - `OPENAI_FIT_MODEL=gpt-5-nano` also failed to produce a clean latency win in this setup.
   - Do not change the default fit-analysis models to `gpt-5-nano` based on speed assumptions alone; require JD-level benchmark evidence plus output-quality review first.
-  - Current OpenRouter free-model recommendation is task-specific rather than global:
-    - `fit`: `openai/gpt-oss-120b:free` as the current default free candidate, with `qwen/qwen3-next-80b-a3b-instruct:free` as the faster but weaker alternative
-    - `requirements`: `openai/gpt-oss-120b:free`
-    - `chat`: keep `gpt-5-mini` for now because the tested free chat candidates failed in the current runtime
-    - `embeddings`: keep `text-embedding-3-small`; `nvidia/llama-nemotron-embed-vl-1b-v2:free` remains the next embedding candidate, but the final parallel benchmark pass did not complete cleanly enough to make it the default
+  - Current configured OpenRouter runtime:
+    - `AI_CHAT_PROVIDER=openrouter`
+    - `AI_CHAT_MODEL=openai/gpt-5.4-nano`
+    - `AI_FIT_PROVIDER=openrouter`
+    - `AI_FIT_MODEL=openai/gpt-oss-120b:free`
+    - `AI_REQUIREMENTS_PROVIDER=openrouter`
+    - `AI_REQUIREMENTS_MODEL=openai/gpt-oss-120b:free`
+    - `AI_EMBEDDINGS_PROVIDER=openrouter`
+    - `AI_EMBEDDING_MODEL=openai/text-embedding-3-small`
+  - Benchmark context for that selection:
+    - `qwen/qwen3-next-80b-a3b-instruct:free` remains the fastest successful free fit/requirements candidate, but it was more generic in stricter quality review than `openai/gpt-oss-120b:free`
+    - `google/gemini-2.5-flash-lite` remains the strongest cheap non-free fit/requirements fallback
+    - `openai/gpt-5.4-nano` remains the best cheap OpenRouter-hosted chat candidate from the rerun
+    - `openai/text-embedding-3-small` works through OpenRouter's embeddings API and has pricing parity with OpenAI direct; it may not appear in the general OpenRouter `/api/v1/models` text-model catalog
 
 ## Release procedure
 
