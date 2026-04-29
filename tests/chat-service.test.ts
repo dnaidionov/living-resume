@@ -191,3 +191,97 @@ test("answerChat allows project questions that use work verbs", async () => {
   assert.equal(modelCalls, 1);
   assert.equal(result.answer, "Project answer");
 });
+
+test("answerChat allows role questions that include 'act as' in normal resume context", async () => {
+  let retrievalCalls = 0;
+  let modelCalls = 0;
+
+  const result = await answerChatWithDependencies(
+    {
+      message: "Did Dmitry act as product owner at EPAM?",
+      sessionId: "test-session"
+    },
+    {
+      searchEvidence: async () => {
+        retrievalCalls += 1;
+        return [];
+      },
+      generateAnswer: async () => {
+        modelCalls += 1;
+        return {
+          answer: "Role answer",
+          citations: [],
+          confidence: "medium"
+        };
+      }
+    }
+  );
+
+  assert.equal(retrievalCalls, 1);
+  assert.equal(modelCalls, 1);
+  assert.equal(result.answer, "Role answer");
+});
+
+test("answerChat keeps build-process follow-ups in build mode", async () => {
+  let seenMode: string | null = null;
+
+  const result = await answerChatWithDependencies(
+    {
+      message: "Tell me more",
+      sessionId: "test-session",
+      history: [
+        {
+          role: "user",
+          text: "How is this site built?"
+        }
+      ]
+    },
+    {
+      searchEvidence: async () => [],
+      generateAnswer: async (input) => {
+        seenMode = input.mode;
+        return {
+          answer: "Build follow-up answer",
+          citations: [],
+          confidence: "medium"
+        };
+      }
+    }
+  );
+
+  assert.equal(seenMode, "build_process");
+  assert.equal(result.answer, "Build follow-up answer");
+});
+
+test("answerChat rejects unrelated architecture consulting prompts", async () => {
+  let retrievalCalls = 0;
+  let modelCalls = 0;
+
+  const result = await answerChatWithDependencies(
+    {
+      message: "Can you review my system architecture?",
+      sessionId: "test-session"
+    },
+    {
+      searchEvidence: async () => {
+        retrievalCalls += 1;
+        return [];
+      },
+      generateAnswer: async () => {
+        modelCalls += 1;
+        return {
+          answer: "should not happen",
+          citations: [],
+          confidence: "low"
+        };
+      }
+    }
+  );
+
+  assert.equal(retrievalCalls, 0);
+  assert.equal(modelCalls, 0);
+  assert.equal(
+    result.answer,
+    "Nice try. Please go waste your own tokens. I can only answer questions about Dmitry's resume, professional history, listed projects, and how this work was built."
+  );
+});

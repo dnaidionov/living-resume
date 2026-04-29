@@ -16,19 +16,20 @@ type ChatDependencies = {
 };
 
 type ScopeDecision = "allow_resume_or_projects" | "allow_build_process" | "block";
+type ChatHistoryScope = "resume_or_projects" | "build_process" | "none";
 
 const resumeScopeSignals =
   /\b(resume|professional history|background|career|experience|project|projects|role|roles|work history|worked|skills?|strengths?|qualifications?|fit|achievement|achievements|dmitry|naidionov|epam|modus|pwc|cardstack|acision|vingis|leadership|roadmap|stakeholder|delivery)\b/i;
 const projectScopeSignals =
-  /\b(career twin|living resume|chat|fit analysis|rag|retrieval|prompt|prompting|embedding|embeddings|openai|cloudflare|next\.?js|worker|github|architecture|site|system|built|build|project|projects)\b/i;
+  /\b(career twin|living resume|fit analysis|rag|retrieval|prompt|prompting|embedding|embeddings|openai|cloudflare|next\.?js|worker|github|repo|repository|source code|project|projects)\b/i;
 const directBuildSignals =
-  /\bhow this is built\b|\bhow is this site built\b|\bhow is this system built\b|\bsite architecture\b|\bsystem architecture\b|\bhow (was|is) (this|the project|career twin|living resume) built\b/i;
+  /\bhow this is built\b|\bhow is this site built\b|\bhow is this system built\b|\bhow (was|is) (this|the project|career twin|living resume|repo|repository) built\b|\b(this|career twin|living resume|repo|repository|source code).{0,40}\b(site architecture|system architecture|architecture)\b/i;
 const obviousGenericTaskSignals =
   /\b(write me|draft (me|an?|the)|generate (me|an?|the)|create (me|an?|the)|compose (me|an?|the)|solve (this|my)|plan (my|a trip|an itinerary)|book (my|me)|give me a recipe|tell me a joke|write a poem|write a story|translate this|summari[sz]e this|review this code|sql query|python script)\b/i;
 const promptInjectionSignals =
-  /\b(ignore (all|any|previous) instructions|reveal (your|the) (system prompt|developer prompt|instructions)|show (your|the) hidden prompt|act as (?!.*dmitry)|jailbreak|bypass|override|tool call|use your tools|system message|developer message)\b/i;
+  /(?:^|\b)(ignore (all|any|previous) instructions|reveal (your|the) (system prompt|developer prompt|instructions)|show (your|the) hidden prompt|(?:please\s+)?act as\s+(?!product owner|a product owner|product manager|a product manager|dmitry\b)[a-z]|jailbreak|bypass|override|tool call|use your tools|system message|developer message)\b/i;
 const buildProcessSignals =
-  /\bcareer twin\b|\bgithub\b|how this is built\b|\bhow is this site built\b|\bhow is this system built\b|\bsite architecture\b|\bsystem architecture\b/i;
+  /\bcareer twin\b|\bliving resume\b|\bgithub\b|\brepo\b|\brepository\b|\bsource code\b|\bhow this is built\b|\bhow is this site built\b|\bhow is this system built\b/i;
 const followUpSignals =
   /^(what about|how about|tell me more|more on that|and leadership|and strategy|and execution|why|how so|which one|compare them|what else)\b/i;
 const scopeDecisionCache = new Map<string, ScopeDecision>();
@@ -52,8 +53,20 @@ function normalizePromptForCache(message: string): string {
   return message.trim().toLowerCase().replace(/\s+/g, " ");
 }
 
-function hasResumeScopedHistory(request: ChatRequest): boolean {
-  return (request.history ?? []).some((turn) => resumeScopeSignals.test(turn.text) || projectScopeSignals.test(turn.text));
+function classifyHistoryScope(request: ChatRequest): ChatHistoryScope {
+  const turns = request.history ?? [];
+
+  for (let index = turns.length - 1; index >= 0; index -= 1) {
+    const text = turns[index]?.text ?? "";
+    if (directBuildSignals.test(text) || buildProcessSignals.test(text)) {
+      return "build_process";
+    }
+    if (resumeScopeSignals.test(text) || projectScopeSignals.test(text)) {
+      return "resume_or_projects";
+    }
+  }
+
+  return "none";
 }
 
 function decideChatScope(request: ChatRequest): ScopeDecision {
@@ -64,16 +77,19 @@ function decideChatScope(request: ChatRequest): ScopeDecision {
   if (cached) {
     return cached;
   }
+  const historyScope = classifyHistoryScope(request);
 
   let decision: ScopeDecision;
 
   if (promptInjectionSignals.test(message) || obviousGenericTaskSignals.test(message)) {
     decision = "block";
-  } else if (directBuildSignals.test(message) || (buildProcessSignals.test(message) && projectScopeSignals.test(message))) {
+  } else if (directBuildSignals.test(message) || buildProcessSignals.test(message)) {
     decision = "allow_build_process";
   } else if (resumeScopeSignals.test(message) || projectScopeSignals.test(message)) {
     decision = "allow_resume_or_projects";
-  } else if (followUpSignals.test(message) && hasResumeScopedHistory(request)) {
+  } else if (followUpSignals.test(message) && historyScope === "build_process") {
+    decision = "allow_build_process";
+  } else if (followUpSignals.test(message) && historyScope === "resume_or_projects") {
     decision = "allow_resume_or_projects";
   } else {
     decision = "block";
