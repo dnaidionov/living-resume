@@ -1,56 +1,66 @@
 [
   {
     "id": "living-resume",
-    "name": "Living Resume",
-    "summary": "A recruiter-facing digital twin that answers grounded resume questions and performs candid fit analysis.",
-    "problem": "Traditional portfolios are passive and do not demonstrate how someone thinks or how they execute in AI-native environments.",
-    "actions": [
-      "Designed a chat-first recruiter journey.",
-      "Added structured AI explainers behind each role to make resume claims inspectable.",
-      "Chose a low-cost deployment strategy that still preserves architectural portability."
+    "name": "Digital Career Twin (this project)",
+    "projectType": "product_system",
+    "summary": "A recruiter-facing digital twin that turns a resume into a grounded conversation.",
+    "context": "Traditional resumes are static and one-directional. They make claims, but they do not show much of the reasoning, tradeoffs, or evidence behind them.",
+    "build": "Built a chat-first career site that combines structured career history, project evidence, role-level AI context, and fit analysis so people can see not just what I have done, but how I think and work. The system uses structured content as the source of truth for both the public UI and the AI layer, and includes role-level context plus a fit-analysis workflow that separates supported experience from adjacent or unsupported claims.",
+    "keyDecisions": [
+      "Treat structured content as the source of truth for both the public UI and the AI layer.",
+      "Expose role-level AI context so experience claims are inspectable rather than decorative.",
+      "Make fit analysis candid by separating supported experience from adjacent or unsupported claims."
     ],
-    "outcomes": [
-      "Transforms resume review into an active conversation.",
-      "Demonstrates product, architecture, and AI-system thinking in one artifact.",
-      "Creates a reusable showcase for collaboration and hiring conversations."
-    ],
-    "tags": ["ai", "portfolio", "retrieval"],
-    "relatedRoleIds": ["ohny", "consulting"]
+    "significance": "Brings together product thinking, content strategy, retrieval design, evaluation logic, and delivery discipline in one artifact, while showing a practical AI-native interaction model beyond basic chat.",
+    "status": "Active and evolving.",
+    "link": "https://github.com/dnaidionov/living-resume",
+    "tags": ["ai", "portfolio", "retrieval", "evaluation", "product"],
+    "relatedRoleIds": ["epam", "modus-create", "vingis"]
   },
   {
-    "id": "agentic-delivery",
-    "name": "Agentic Delivery Framework",
-    "summary": "Defined a role-based agent workflow with explicit handoffs, artifacts, and review gates for shipping AI-native products.",
-    "problem": "Agentic workflows often sound impressive but collapse under unclear ownership and poor artifact boundaries.",
-    "actions": [
-      "Separated delivery into product, content, AI architecture, application, QA, and ops roles.",
-      "Required every handoff to include decisions, assumptions, and acceptance criteria.",
-      "Integrated process documentation into the final product instead of hiding it."
+    "id": "research-assistant",
+    "name": "Research Assistant",
+    "projectType": "product_system",
+    "summary": "A framework for running structured, auditable research workflows across multiple LLMs without mixing framework code and research data.",
+    "context": "Built after running into a complex, multi-part research problem for a company producing high-precision testing and measurement equipment. The work needed more than a single prompt, and more traceability than ordinary chat workflows provide.",
+    "build": "Designed a framework that breaks research into stages such as intake, parallel research passes, critique, judgment, claim extraction, and final artifact generation. Built the orchestration layer around that process, including prompts, schemas, scripts, templates, a local dashboard, and the overall operating model.",
+    "keyDecisions": [
+      "Keep the assistant repo separate from individual research-job repos so the framework stays reusable and research artifacts stay isolated and auditable.",
+      "Preserve disagreement between models instead of flattening it too early.",
+      "Treat citations, claim extraction, and execution records as first-class outputs."
     ],
-    "outcomes": [
-      "Reduced ambiguity across implementation.",
-      "Made the delivery model itself part of the portfolio story.",
-      "Created reusable templates for future projects."
-    ],
-    "tags": ["agents", "delivery", "architecture"],
-    "relatedRoleIds": ["ohny"]
+    "significance": "Treats AI research as a system with structure, traceability, and operational discipline, not as a prompt-writing exercise.",
+    "status": "Active and evolving.",
+    "link": "https://github.com/dnaidionov/research-assistant",
+    "tags": ["ai", "research", "orchestration", "evaluation", "auditing"],
+    "relatedRoleIds": ["epam", "vingis"]
   },
   {
-    "id": "fit-analysis",
-    "name": "Role Fit Analysis Workflow",
-    "summary": "A structured evaluator that compares external job requirements against curated evidence from the resume corpus.",
-    "problem": "Recruiters need a quick, trustworthy way to understand how experience maps to a role without reading everything manually.",
-    "actions": [
-      "Defined a scoring rubric for domain, execution, AI fluency, and leadership.",
-      "Separated proven experience from adjacent experience and unsupported claims.",
-      "Designed support for paste, upload, and URL job-description intake."
+    "id": "mybrain",
+    "name": "MyBrain",
+    "projectType": "product_system",
+    "summary": "An extension and fork of robertsfreir/mybrain, focused on making the system more automatic and more useful across personal workspace and multiple projects.",
+    "context": "The original project already handled the core foundation well: manual capture, ranking, retrieval, and local or remote deployment. This extension focuses on the places where day-to-day usefulness matters most.",
+    "build": "Extended the base system with automatic thought capture and cross-tool continuity, so thoughts captured in one environment can still be available in another. A thought captured in Codex, for example, can later be available in Claude Code, rather than staying trapped inside one assistant workflow.",
+    "keyDecisions": [
+      "Build on a working foundation instead of rebuilding memory and retrieval from scratch.",
+      "Focus the extension on automatic capture and shared memory across projects and assistant environments.",
+      "Keep the system useful across tools rather than tying it to a single AI surface."
     ],
-    "outcomes": [
-      "Makes fit evaluation faster and more transparent.",
-      "Shows candor instead of generic self-promotion.",
-      "Adds a concrete AI-native workflow beyond basic chat."
-    ],
-    "tags": ["evaluation", "recruiting", "ai"],
-    "relatedRoleIds": ["consulting", "platform"]
+    "significance": "Shows product judgment in extending an existing system where usability and coverage matter most: less manual effort, broader scope, and memory that is not tied to one assistant.",
+    "status": "Active extension work.",
+    "link": "https://github.com/dnaidionov/mybrain",
+    "tags": ["memory", "mcp", "postgres", "pgvector", "ai-tools"],
+    "relatedRoleIds": ["epam", "soli"]
+  },
+  {
+    "id": "dalek",
+    "name": "Dalek",
+    "projectType": "personal_build",
+    "summary": "A full-scale Doctor Who NSD Dalek that I built for fun out of plywood, cardboard, and styrofoam, with Arduino-controlled electronics and mechanical parts, a voice changer, lighting effects, and water-gun energy weapons.",
+    "why": "For fun.",
+    "status": "Waiting to be rebuilt, this time with more electronics and 3D-printed parts.",
+    "tags": ["hardware", "arduino", "fabrication", "electronics", "personal-build"],
+    "relatedRoleIds": []
   }
 ]

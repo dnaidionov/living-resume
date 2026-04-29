@@ -121,6 +121,11 @@ Use this log for concise, chronological records of meaningful decisions that do 
 - Rationale: Keep local secret handling out of git while making script behavior consistent across shell sessions and future threads.
 - Scope impact: `lib/env/load-local-env.ts`, `scripts/build-embeddings.ts`, `scripts/build-content-index.ts`, `docs/operations/runbook.md`.
 
+- Agent role: Ops / Release Agent
+- Decision: Correct the committed Cloudflare runtime defaults to the active OpenRouter task routing and add a test that keeps `wrangler.jsonc` aligned with `.env.example`.
+- Rationale: The deploy preflight was reading the current OpenRouter runtime from env while Cloudflare was still shipping stale OpenAI defaults from `wrangler.jsonc`, which created a silent release drift between the intended and actual production runtime.
+- Scope impact: `wrangler.jsonc`, `.env.example`, `tests/cf-deploy-script.test.ts`, `docs/operations/runbook.md`, `docs/agents/handoffs.md`.
+
 - Agent role: Content Strategist
 - Decision: Strengthened EPAM AI Experience AI-context wording to explicitly capture multi-agent orchestration, Anthropic/Claude implementation details, and added `LLM Orchestration` skill while preserving requested wording constraints.
 - Rationale: Improve precision and evidence depth for LLM orchestration claims in hero and role narrative alignment.
@@ -216,12 +221,39 @@ Use this log for concise, chronological records of meaningful decisions that do 
 - Rationale: The latest role and AI-context evidence supports portfolio-level transformation and strategic leadership more strongly than DevEx specialization, which better matches senior/staff PM to director positioning.
 - Scope impact: `components/home-page-shell.tsx`.
 
+- Agent role: Content Strategist
+- Decision: Reframed the projects page as `Selected Projects`, replacing the earlier showcase-style `problem/actions/outcomes` content with narrative project entries for Living Resume, Research Assistant, MyBrain, and Dalek.
+- Rationale: The old structure was too generic for architecture-heavy AI/product work and forced the wrong tone onto the Dalek build. The new content better reflects product/system projects while allowing the personal build to stay lighter and more human.
+- Scope impact: `content/projects/projects.json`, `app/projects/page.tsx`, `types/content.ts`, `lib/content/store.ts`, `docs/architecture/content-model.md`.
+
+- Agent role: Content Strategist
+- Decision: Introduced typed project narratives with distinct fields for `product_system` and `personal_build` entries, while keeping both shapes in the same content collection and retrieval corpus.
+- Rationale: A shared section was the right presentation choice, but the site needed schema-level support to avoid forcing identical framing across professional systems projects and hobby builds.
+- Scope impact: `content/projects/projects.json`, `types/content.ts`, `lib/content/store.ts`, `docs/architecture/content-model.md`.
+
 ### 2026-03-14
+
+- Agent role: Application Engineer
+- Decision: Move resume-chat scope protection ahead of retrieval/model execution and restrict chat answers to Dmitry's resume, professional history, and listed projects only.
+- Rationale: Prompt-level redirects still spend tokens on unrelated or adversarial prompts. The scope gate needs to reject off-scope task requests and build/system questions before retrieval or model calls.
+- Scope impact: `lib/ai/chat-service.ts`, `lib/ai/prompting.ts`, `tests/chat-service.test.ts`, `tests/prompting.test.ts`, `docs/product/prd.md`, `docs/qa/test-plan.md`, `docs/agents/decision-log.md`.
+
+- Agent role: Application Engineer
+- Decision: Relax the resume-chat gate so project/build questions remain in scope, while narrowing the block list to high-confidence generic-task and prompt-injection patterns only.
+- Rationale: Broad work-verb keyword blocking caused false positives for legitimate questions about Dmitry's work. Build/system questions are product-relevant and should be answered, but unrelated assistant tasks should still be cut off before token spend.
+- Scope impact: `lib/ai/chat-service.ts`, `lib/ai/prompting.ts`, `tests/chat-service.test.ts`, `tests/prompting.test.ts`, `docs/product/prd.md`, `docs/qa/test-plan.md`, `docs/agents/decision-log.md`.
 
 - Agent role: Application Engineer
 - Decision: Harden uploaded fit-analysis documents so `TXT`, `PDF`, and `DOCX` uploads fail with a `400` when the file is readable but requirement extraction yields no defensible job requirements.
 - Rationale: Parsing a document into text is not enough to justify recruiter-facing fit output. Benefits pages, handbooks, and other non-JD files were otherwise able to flow into analysis despite not expressing actual hiring requirements.
 - Scope impact: `app/api/fit-analysis/file/route.ts`, `lib/ai/fit-analysis.ts`, `tests/platform-intake.test.ts`, `docs/product/prd.md`, `docs/qa/test-plan.md`, `docs/agents/decision-log.md`.
+
+### 2026-04-29
+
+- Agent role: Application Engineer
+- Decision: Preserve dead live-URL eval fixtures in place with `enabled: false` plus an explicit `disabledReason`, rather than deleting the original URLs once a posting disappears.
+- Rationale: The historical fixture still documents what role family and ATS pattern the harness once covered. Keeping the entry while recording the current redirect/error state is more useful than silently dropping it.
+- Scope impact: `tests/fixtures/url-fit-analysis-cases.json`, `docs/qa/test-plan.md`, `docs/agents/decision-log.md`.
 
 - Agent role: Experience Designer
 - Decision: Renamed system-facing product copy from `Living Resume` to `Career Twin` while explicitly leaving the hero positioned around Dmitry rather than the product.

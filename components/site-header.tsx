@@ -8,6 +8,7 @@ import { DownloadIcon } from "@/components/download-icon";
 
 const links = [
   { href: "#experience", label: "Experience" },
+  { href: "#projects", label: "Projects" },
   { href: "#fit-check", label: "Fit Check" },
   { href: "#how-built", label: "How this is built" }
 ];
