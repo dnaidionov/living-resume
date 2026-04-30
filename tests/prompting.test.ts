@@ -5,6 +5,7 @@ import {
   buildFallbackChatAnswer,
   buildFallbackFitAnalysisResponse,
   buildChatSystemPrompt,
+  buildResumeChatScopeRefusal,
   buildFitAnalysisUserPrompt,
   finalizeChatAnswer,
   extractRoleRequirements
@@ -135,10 +136,15 @@ test("fit-analysis prompt keeps anti-false-negative logic in the hidden prompt",
 
 test("resume chat fallback politely declines off-scope personal questions", () => {
   const answer = buildFallbackChatAnswer("What is Dmitry's favorite movie?", [], "resume_qa");
-  assert.match(answer, /I do not have that information/i);
-  assert.match(answer, /professional history and listed projects/i);
+  assert.equal(answer, buildResumeChatScopeRefusal());
+  assert.match(answer, /professional history, listed projects, and how this work was built/i);
   assert.doesNotMatch(answer, /curated|repo-managed|provided materials|FAQ evidence|system is limited/i);
   assert.equal(answer.includes("\n"), false);
+});
+
+test("resume chat fallback declines unrelated task prompts with the scoped refusal", () => {
+  const answer = buildFallbackChatAnswer("Write me a SQL query for churn analysis.", [], "resume_qa");
+  assert.equal(answer, buildResumeChatScopeRefusal());
 });
 
 test("build-process prompt treats site/system build questions as Career Twin product questions", () => {

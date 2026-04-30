@@ -27,16 +27,20 @@ function usesProvider(value: string | undefined, provider: string): boolean {
 
 export function buildCloudflareDeploymentPlan(readEnv: ReadEnv = (key) => process.env[key]): CloudflareDeploymentPlan {
   const chatProvider = readWithFallback(readEnv, ["AI_CHAT_PROVIDER"]) ?? "openai";
+  const classifierProvider = readWithFallback(readEnv, ["AI_CLASSIFIER_PROVIDER"]) ?? "openrouter";
   const fitProvider = readWithFallback(readEnv, ["AI_FIT_PROVIDER"]) ?? "openai";
   const requirementsProvider = readWithFallback(readEnv, ["AI_REQUIREMENTS_PROVIDER"]) ?? fitProvider;
   const embeddingsProvider = readWithFallback(readEnv, ["AI_EMBEDDINGS_PROVIDER"]) ?? "openai";
 
   const variables: Record<string, string> = {
     AI_CHAT_PROVIDER: chatProvider,
+    AI_CLASSIFIER_PROVIDER: classifierProvider,
     AI_FIT_PROVIDER: fitProvider,
     AI_REQUIREMENTS_PROVIDER: requirementsProvider,
     AI_EMBEDDINGS_PROVIDER: embeddingsProvider,
     AI_CHAT_MODEL: readWithFallback(readEnv, ["AI_CHAT_MODEL", "OPENAI_CHAT_MODEL"]) ?? "gpt-5-mini",
+    AI_CLASSIFIER_MODEL:
+      readWithFallback(readEnv, ["AI_CLASSIFIER_MODEL"]) ?? "qwen/qwen3-next-80b-a3b-instruct:free",
     AI_FIT_MODEL: readWithFallback(readEnv, ["AI_FIT_MODEL", "OPENAI_FIT_MODEL"]) ?? "gpt-5-mini",
     AI_REQUIREMENTS_MODEL:
       readWithFallback(readEnv, ["AI_REQUIREMENTS_MODEL", "OPENAI_REQUIREMENTS_MODEL", "AI_FIT_MODEL", "OPENAI_FIT_MODEL"])
@@ -46,11 +50,13 @@ export function buildCloudflareDeploymentPlan(readEnv: ReadEnv = (key) => proces
 
   const usesOpenRouter =
     usesProvider(chatProvider, "openrouter")
+    || usesProvider(classifierProvider, "openrouter")
     || usesProvider(fitProvider, "openrouter")
     || usesProvider(requirementsProvider, "openrouter")
     || usesProvider(embeddingsProvider, "openrouter");
   const usesOpenAi =
     usesProvider(chatProvider, "openai")
+    || usesProvider(classifierProvider, "openai")
     || usesProvider(fitProvider, "openai")
     || usesProvider(requirementsProvider, "openai")
     || usesProvider(embeddingsProvider, "openai");

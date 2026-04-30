@@ -206,6 +206,7 @@
 - Cloudflare deploys are now env-aware: `npm run cf:deploy` prints the exact routed AI env configuration, blocks on missing required values, and requires explicit `--confirm-env` acknowledgement before it will build and deploy.
 - Cloudflare deploys now use a deploy-only live URL eval policy: broken or drifted external JD test URLs are skipped with warnings, but deployment is blocked if every required URL case fails; the full `npm run test:url-evals` suite remains strict for regular testing.
 - uploaded fit-analysis files (`TXT`, `PDF`, `DOCX`) now have an extra validation gate after parsing: if requirement extraction returns no defensible JD requirements, the file request must fail instead of producing recruiter output
+- resume chat now uses a two-stage scope gate: deterministic rules reject obvious unrelated/prompt-injection prompts before classifier, retrieval, or answer-model work; ambiguous prompts use the dedicated `classifier` task, defaulting to `qwen/qwen3-next-80b-a3b-instruct:free` through OpenRouter; standalone classifier decisions are cached in a bounded process-local cache; classifier unavailability falls back to resume-mode retrieval for ambiguous prompts
 - OpenRouter cheap/free model analysis was rerun against the current `/api/v1/models` catalog on 2026-04-29 using OpenRouter for generation and disabling direct OpenAI spend.
 - Current benchmark recommendation after that rerun:
   - `fit = qwen/qwen3-next-80b-a3b-instruct:free` for fastest zero-cost fit analysis
@@ -220,6 +221,7 @@
   - `requirements = openai/gpt-oss-120b:free` via OpenRouter
   - `embeddings = openai/text-embedding-3-small` via OpenRouter
 - The 2026-04-29 rerun found that `openai/gpt-oss-120b:free` works in this runtime despite missing structured-output metadata, but its latency was inconsistent; monitor fit-analysis response time after deployment.
+- Cloudflare release note: `wrangler.jsonc` must mirror that active OpenRouter runtime. A parity test now compares the committed Cloudflare vars against `.env.example` so local benchmark overrides cannot silently diverge from the production deploy config.
 
 ## Ops / Release Agent -> Deployment Execution (Cloudflare Adapter Readiness 2026-03-07)
 

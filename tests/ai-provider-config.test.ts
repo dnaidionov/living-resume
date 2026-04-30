@@ -20,6 +20,7 @@ test("resolveProviderConfig preserves current OpenAI defaults when generic AI va
   }));
 
   const chat = resolver("chat");
+  assert.throws(() => resolver("classifier"), /Missing API key/);
   const fit = resolver("fit");
   const requirements = resolver("requirements");
   const embeddings = resolver("embeddings");
@@ -37,6 +38,36 @@ test("resolveProviderConfig preserves current OpenAI defaults when generic AI va
 
   assert.equal(embeddings.provider, "openai");
   assert.equal(embeddings.model, "text-embedding-3-small");
+});
+
+test("resolveProviderConfig defaults classifier to the free OpenRouter Qwen model", () => {
+  const resolver = createProviderConfigResolver(makeEnv({
+    OPENROUTER_API_KEY: "router-key",
+    OPENROUTER_HTTP_REFERER: "https://career-twin.example",
+    OPENROUTER_APP_TITLE: "Career Twin"
+  }));
+
+  const classifier = resolver("classifier");
+
+  assert.equal(classifier.provider, "openrouter");
+  assert.equal(classifier.model, "qwen/qwen3-next-80b-a3b-instruct:free");
+  assert.equal(classifier.baseUrl, "https://openrouter.ai/api/v1");
+  assert.equal(classifier.apiKey, "router-key");
+  assert.equal(classifier.headers["HTTP-Referer"], "https://career-twin.example");
+});
+
+test("resolveProviderConfig allows classifier provider and model overrides", () => {
+  const resolver = createProviderConfigResolver(makeEnv({
+    AI_CLASSIFIER_PROVIDER: "openai",
+    AI_CLASSIFIER_MODEL: "gpt-5.4-nano",
+    OPENAI_API_KEY: "openai-key"
+  }));
+
+  const classifier = resolver("classifier");
+
+  assert.equal(classifier.provider, "openai");
+  assert.equal(classifier.model, "gpt-5.4-nano");
+  assert.equal(classifier.baseUrl, "https://api.openai.com/v1");
 });
 
 test("resolveProviderConfig routes a task to OpenRouter with provider-specific headers", () => {
@@ -130,4 +161,3 @@ test("resolveProviderConfig helper uses process env by default", () => {
     delete process.env.OPENAI_CHAT_MODEL;
   }
 });
-

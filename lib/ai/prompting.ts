@@ -21,6 +21,8 @@ const dimensionOrder: FitDimension["name"][] = [
   "context_readiness"
 ];
 type TargetSummary = NonNullable<FitAnalysisResult["metadata"]>["targetSummary"];
+const resumeChatScopeRefusal =
+  "Nice try. Please go waste your own tokens. I can only answer questions about Dmitry's resume, professional history, listed projects, and how this work was built.";
 
 type InternalFitEvaluationInput = Partial<InternalFitEvaluation> | null | undefined;
 
@@ -166,9 +168,13 @@ export function buildFitAnalysisUserPrompt(
   ].join("\n");
 }
 
+export function buildResumeChatScopeRefusal(): string {
+  return resumeChatScopeRefusal;
+}
+
 export function buildFallbackChatAnswer(message: string, evidence: EvidenceChunk[], mode: ChatMode): string {
   if (mode !== "build_process" && looksOffScopeResumeQuestion(message)) {
-    return "I do not have that information. I can only discuss Dmitry's professional history and listed projects.";
+    return buildResumeChatScopeRefusal();
   }
 
   if (mode === "build_process" && looksOffScopeBuildQuestion(message)) {
@@ -215,7 +221,8 @@ export function finalizeChatAnswer(answer: string, mode: ChatMode): string {
 
 function looksOffScopeResumeQuestion(message: string): boolean {
   const normalized = message.toLowerCase();
-  return /\b(age|birthday|born|wife|husband|girlfriend|boyfriend|kids|children|religion|politics|salary|favorite (movie|music|song|food|color|sport)|hobby|hobbies|pets?|dog|cat|home address|address|phone number)\b/.test(normalized);
+  return /\b(age|birthday|born|wife|husband|girlfriend|boyfriend|kids|children|religion|politics|salary|favorite (movie|music|song|food|color|sport)|hobby|hobbies|pets?|dog|cat|home address|address|phone number)\b/.test(normalized)
+    || /\b(write me|draft (me|an?|the)|generate (me|an?|the)|create (me|an?|the)|compose (me|an?|the)|solve (this|my)|plan (my|a trip|an itinerary)|book (my|me)|give me a recipe|tell me a joke|write a poem|write a story|translate this|summari[sz]e this|review this code|sql query|python script)\b/.test(normalized);
 }
 
 function looksOffScopeBuildQuestion(message: string): boolean {

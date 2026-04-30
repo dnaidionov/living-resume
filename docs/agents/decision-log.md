@@ -302,6 +302,14 @@ Use this log for concise, chronological records of meaningful decisions that do 
 - Decision: When a live ATS page exposes a stale or conflicting metadata title, the displayed fit-check title should prefer the recruiter-readable JD title while keeping company identity from the stronger structured/meta/URL source.
 - Scope impact: `types/ai.ts`, `lib/platform/url-intake.ts`, `app/api/fit-analysis/route.ts`, `lib/ai/fit-analysis.ts`, `tests/platform-intake.test.ts`, `tests/url-fit-analysis.eval.test.ts`, `tests/fixtures/url-fit-analysis-cases.json`, `docs/product/prd.md`, `docs/architecture/ai-system.md`, `docs/qa/test-plan.md`, `docs/agents/handoffs.md`, `docs/agents/decision-log.md`.
 
+- Agent role: Application Engineer
+- Decision: Implement the resume-chat scope gate as a two-stage pipeline: deterministic rules allow/block obvious prompts before classifier/retrieval/answer work, ambiguous prompts use a dedicated `classifier` task backed by `qwen/qwen3-next-80b-a3b-instruct:free` by default, and standalone ambiguous classifier decisions are cached in a bounded process-local cache.
+- Rationale: Pure keyword blocking creates false positives for legitimate project/build/resume questions, but sending every prompt to the answer model wastes tokens. The hybrid gate cuts obvious abuse cheaply, uses model judgment only where rules are uncertain, prevents repeated suspicious prompts from paying the classifier cost again, and bounds memory growth from cache pressure.
+- Decision: Treat the scope decision as authoritative for retrieval mode so resume-scoped architecture questions stay in resume retrieval while build-scoped questions use build/process retrieval.
+- Decision: If classifier configuration or execution is unavailable, fall back to resume-mode retrieval/answer generation for ambiguous prompts instead of refusing them; deterministic unrelated-task and prompt-injection blocks remain fail-closed.
+- Rationale: The fallback preserves the existing no-provider answer path for legitimate but ambiguous questions like `Could he handle this kind of work?` while still cutting off high-confidence abuse before model execution.
+- Scope impact: `lib/ai/provider-config.ts`, `lib/ai/chat-service.ts`, `lib/deploy/cloudflare-env.ts`, `.env.example`, `wrangler.jsonc`, `tests/ai-provider-config.test.ts`, `tests/cf-deploy-script.test.ts`, `tests/chat-service.test.ts`, `docs/product/prd.md`, `docs/architecture/ai-system.md`, `docs/qa/test-plan.md`, `docs/agents/handoffs.md`, `docs/agents/decision-log.md`.
+
 ### 2026-03-16
 
 - Agent role: AI Systems Architect
