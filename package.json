@@ -4,8 +4,8 @@
   "private": true,
   "scripts": {
     "dev": "next dev",
-    "build": "npm run embeddings:verify && npm run test:url-evals && next build",
-    "cf:build": "npm run embeddings:verify && npm run test:url-evals:deploy && opennextjs-cloudflare build",
+    "build": "npm run embeddings:verify && node --import tsx scripts/run-url-evals.ts && next build",
+    "cf:build": "npm run embeddings:verify && DEPLOY_URL_EVAL_MODE=deploy opennextjs-cloudflare build",
     "cf:preview": "wrangler dev",
     "cf:deploy": "node --import tsx scripts/cf-deploy.ts",
     "start": "next start",

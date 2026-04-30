@@ -111,6 +111,7 @@
 - For Cloudflare, store provider secrets in the project or Worker settings, or use `wrangler secret put <KEY_NAME>`.
 - `npm run cf:deploy` now includes a deployment preflight that prints the exact Cloudflare env configuration it intends to deploy and refuses to continue until rerun with `--confirm-env`.
 - Cloudflare deploy builds use a deploy-only external URL gate: required JD URL cases that drift or break are logged and skipped, but deployment is blocked if all required external URL cases fail.
+- The committed Cloudflare runtime defaults in `wrangler.jsonc` must stay aligned with the active task-routing and model defaults documented in `.env.example`; local benchmarking overrides do not change what Cloudflare will deploy.
 - For Vercel, store provider secrets in the project environment settings or via `vercel env add <KEY_NAME>`.
 
 ## Fit-analysis benchmarking
