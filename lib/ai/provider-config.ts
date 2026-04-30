@@ -1,4 +1,4 @@
-export type ProviderTask = "chat" | "fit" | "requirements" | "embeddings";
+export type ProviderTask = "chat" | "classifier" | "fit" | "requirements" | "embeddings";
 export type AIProviderCompatibility = "openai";
 export type AIProviderConfig = {
   task: ProviderTask;
@@ -66,6 +66,10 @@ function resolveProviderName(task: ProviderTask, readEnv: EnvReader): string {
     return readEnv("AI_FIT_PROVIDER")?.trim() || "openai";
   }
 
+  if (task === "classifier") {
+    return "openrouter";
+  }
+
   return "openai";
 }
 
@@ -73,6 +77,8 @@ function modelEnvKey(task: ProviderTask): string {
   switch (task) {
     case "chat":
       return "AI_CHAT_MODEL";
+    case "classifier":
+      return "AI_CLASSIFIER_MODEL";
     case "fit":
       return "AI_FIT_MODEL";
     case "requirements":
@@ -86,6 +92,8 @@ function providerEnvKey(task: ProviderTask): string {
   switch (task) {
     case "chat":
       return "AI_CHAT_PROVIDER";
+    case "classifier":
+      return "AI_CLASSIFIER_PROVIDER";
     case "fit":
       return "AI_FIT_PROVIDER";
     case "requirements":
@@ -104,6 +112,8 @@ function resolveModel(task: ProviderTask, readEnv: EnvReader): string {
   switch (task) {
     case "chat":
       return readEnv("OPENAI_CHAT_MODEL") ?? "gpt-5-mini";
+    case "classifier":
+      return "qwen/qwen3-next-80b-a3b-instruct:free";
     case "fit":
       return readEnv("OPENAI_FIT_MODEL") ?? readEnv("OPENAI_CHAT_MODEL") ?? "gpt-5-mini";
     case "requirements":

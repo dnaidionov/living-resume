@@ -219,7 +219,7 @@ test("answerChat uses the classifier for ambiguous prompts before retrieval", as
 
   const result = await answerChatWithDependencies(
     {
-      message: "Could he handle this kind of work?",
+      message: "Could he handle this kind of assignment?",
       sessionId: "test-session"
     },
     {
@@ -354,8 +354,9 @@ test("answerChat bounds the classifier decision cache", async () => {
   assert.equal(classifierCalls, 206);
 });
 
-test("answerChat blocks ambiguous prompts when no classifier is available", async () => {
+test("answerChat falls back to resume mode for ambiguous prompts when no classifier is available", async () => {
   let retrievalCalls = 0;
+  let seenMode: string | null = null;
 
   const result = await answerChatWithDependencies(
     {
@@ -367,19 +368,56 @@ test("answerChat blocks ambiguous prompts when no classifier is available", asyn
         retrievalCalls += 1;
         return [];
       },
-      generateAnswer: async () => ({
-        answer: "should not happen",
-        citations: [],
-        confidence: "low"
-      })
+      generateAnswer: async (input) => {
+        seenMode = input.mode;
+        return {
+          answer: "Fallback answer",
+          citations: [],
+          confidence: "low"
+        };
+      }
     }
   );
 
-  assert.equal(retrievalCalls, 0);
-  assert.equal(
-    result.answer,
-    "Nice try. Please go waste your own tokens. I can only answer questions about Dmitry's resume, professional history, listed projects, and how this work was built."
+  assert.equal(retrievalCalls, 1);
+  assert.equal(seenMode, "resume_qa");
+  assert.equal(result.answer, "Fallback answer");
+});
+
+test("answerChat falls back to resume mode when classifier execution fails", async () => {
+  let retrievalCalls = 0;
+  let classifierCalls = 0;
+  let seenMode: string | null = null;
+
+  const result = await answerChatWithDependencies(
+    {
+      message: "Could he handle this kind of work?",
+      sessionId: "test-session"
+    },
+    {
+      searchEvidence: async () => {
+        retrievalCalls += 1;
+        return [];
+      },
+      classifyScope: async () => {
+        classifierCalls += 1;
+        throw new Error("classifier unavailable");
+      },
+      generateAnswer: async (input) => {
+        seenMode = input.mode;
+        return {
+          answer: "Fallback after classifier failure",
+          citations: [],
+          confidence: "low"
+        };
+      }
+    }
   );
+
+  assert.equal(classifierCalls, 1);
+  assert.equal(retrievalCalls, 1);
+  assert.equal(seenMode, "resume_qa");
+  assert.equal(result.answer, "Fallback after classifier failure");
 });
 
 test("answerChat keeps resume-scoped architecture questions in resume mode", async () => {

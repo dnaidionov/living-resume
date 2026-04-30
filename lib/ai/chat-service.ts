@@ -34,7 +34,7 @@ const projectScopeSignals =
 const directBuildSignals =
   /\bhow this is built\b|\bhow is this site built\b|\bhow is this system built\b|\bhow (was|is) (this|the project|career twin|living resume|repo|repository) built\b|\b(this|career twin|living resume|repo|repository|source code).{0,40}\b(site architecture|system architecture|architecture)\b/i;
 const obviousGenericTaskSignals =
-  /\b(write me|draft (me|an?|the)|generate (me|an?|the)|create (me|an?|the)|compose (me|an?|the)|solve (this|my)|plan (my|a trip|an itinerary)|book (my|me)|give me a recipe|tell me a joke|write a poem|write a story|translate this|summari[sz]e this|review this code|sql query|python script)\b/i;
+  /\b(write me|draft (me|an?|the)|generate (me|an?|the)|create (me|an?|the)|compose (me|an?|the)|solve (this|my)|plan (my|a trip|an itinerary)|book (my|me)|give me a recipe|tell me a joke|write a poem|write a story|translate this|summari[sz]e this|review this code|review (my|our) (system |site |technical |software |product )?architecture|my system architecture|sql query|python script)\b/i;
 const promptInjectionSignals =
   /(?:^|\b)(ignore (all|any|previous) instructions|reveal (your|the) (system prompt|developer prompt|instructions)|show (your|the) hidden prompt|(?:please\s+)?act as\s+(?!product owner|a product owner|product manager|a product manager|dmitry\b)[a-z]|jailbreak|bypass|override|tool call|use your tools|system message|developer message)\b/i;
 const buildProcessSignals =
@@ -43,6 +43,7 @@ const followUpSignals =
   /^(what about|how about|tell me more|more on that|and leadership|and strategy|and execution|why|how so|which one|compare them|what else)\b/i;
 const maxScopeDecisionCacheEntries = 200;
 const scopeDecisionCache = new Map<string, ScopeDecision>();
+const classifierFallbackDecision: ScopeDecision = "allow_resume_or_projects";
 
 export function resolveChatMode(request: ChatRequest): "resume_qa" | "build_process" {
   if (request.mode === "build_process") {
@@ -150,15 +151,22 @@ async function decideChatScope(
   }
 
   if (!classifyScope) {
-    return "block";
+    return classifierFallbackDecision;
   }
 
-  const decision = await classifyScope({
-    message: request.message,
-    history: request.history?.slice(-4)
-  });
+  let decision: ScopeDecision;
+  let classifierSucceeded = false;
+  try {
+    decision = await classifyScope({
+      message: request.message,
+      history: request.history?.slice(-4)
+    });
+    classifierSucceeded = true;
+  } catch {
+    decision = classifierFallbackDecision;
+  }
 
-  if (cacheable) {
+  if (cacheable && classifierSucceeded) {
     cacheScopeDecision(normalized, decision);
   }
 
@@ -195,16 +203,12 @@ function buildScopeClassifierUserPrompt(input: ChatScopeClassifierInput): string
 }
 
 async function classifyChatScopeWithModel(input: ChatScopeClassifierInput): Promise<ScopeDecision> {
-  try {
-    const response = await requestJsonCompletion<ChatScopeClassifierResponse>({
-      systemPrompt: "You are a strict scope classifier. Return only valid JSON with one classification field.",
-      userPrompt: buildScopeClassifierUserPrompt(input)
-    }, "chat");
+  const response = await requestJsonCompletion<ChatScopeClassifierResponse>({
+    systemPrompt: "You are a strict scope classifier. Return only valid JSON with one classification field.",
+    userPrompt: buildScopeClassifierUserPrompt(input)
+  }, "classifier");
 
-    return mapClassifierResponse(response);
-  } catch {
-    return "block";
-  }
+  return mapClassifierResponse(response);
 }
 
 export async function answerChatWithDependencies(
