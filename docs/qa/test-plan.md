@@ -31,7 +31,7 @@
 - Live URL eval fixtures may validate parsed JD title/company separately from the structured target-summary label when ATS metadata and visible body copy disagree
 - Fit-analysis route returns structured output from text, URL, and file inputs
 - URL-based fit-analysis tests must verify that fetched JD content, not the literal URL string, is used for requirement extraction and evidence retrieval while `metadata.inputKind` remains `url`
-- Live URL-ingestion regression coverage is fixture-driven from `tests/fixtures/url-fit-analysis-cases.json`; the enabled required build-gate set currently includes Waymo, Sourgum, Motive, and Netflix product-role URLs
+- Live URL-ingestion regression coverage is fixture-driven from `tests/fixtures/url-fit-analysis-cases.json`; the enabled required build-gate set currently includes Waymo, Sourgum, and Motive product-role URLs, while disabled historical cases such as Netflix remain in the fixture with an explicit failure reason
 - Disabled live URL fixtures should be retained for historical coverage context when possible; if a posting no longer resolves, keep the original fixture entry with `enabled: false` and record the current failure mode in fixture metadata instead of deleting it outright
 - Fit-analysis route supports both `recruiter_brief` and `scorecard` presentation modes
 - `TXT`, `PDF`, and `DOCX` uploads parse into readable role text when the document contains extractable text

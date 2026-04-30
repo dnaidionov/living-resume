@@ -126,6 +126,11 @@ Use this log for concise, chronological records of meaningful decisions that do 
 - Rationale: The deploy preflight was reading the current OpenRouter runtime from env while Cloudflare was still shipping stale OpenAI defaults from `wrangler.jsonc`, which created a silent release drift between the intended and actual production runtime.
 - Scope impact: `wrangler.jsonc`, `.env.example`, `tests/cf-deploy-script.test.ts`, `docs/operations/runbook.md`, `docs/agents/handoffs.md`.
 
+- Agent role: Ops / Release Agent
+- Decision: Align the deploy-only live URL verifier to the current 3-case required fixture set after Netflix was disabled from the build gate.
+- Rationale: The strict fixture and disabled-reason metadata already treated Netflix as historical-only, but the deploy verifier still enforced the old 4-case assumption and blocked Cloudflare releases on a stale invariant rather than on actual live-url availability.
+- Scope impact: `scripts/verify-deploy-url-evals.ts`, `docs/qa/test-plan.md`, `docs/agents/handoffs.md`.
+
 - Agent role: Content Strategist
 - Decision: Strengthened EPAM AI Experience AI-context wording to explicitly capture multi-agent orchestration, Anthropic/Claude implementation details, and added `LLM Orchestration` skill while preserving requested wording constraints.
 - Rationale: Improve precision and evidence depth for LLM orchestration claims in hero and role narrative alignment.

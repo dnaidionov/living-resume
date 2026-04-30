@@ -23,7 +23,6 @@ type UrlFitAnalysisCase = {
 
 const requiredBuildCaseIds = [
   "motive-staff-product-manager-telematics",
-  "netflix-product-manager-enterprise-systems",
   "sourgum-director-of-product",
   "waymo-product-manager-driving-behaviors"
 ];
@@ -36,7 +35,7 @@ function loadUrlFitCases(): UrlFitAnalysisCase[] {
 function validateRequiredBuildCases(urlFitCases: UrlFitAnalysisCase[]) {
   const requiredCases = urlFitCases.filter((item) => item.requiredForBuild);
 
-  assert.ok(requiredCases.length >= 4);
+  assert.ok(requiredCases.length >= 3);
   assert.ok(requiredCases.every((item) => item.enabled !== false));
   assert.deepEqual(
     requiredCases.map((item) => item.id).sort(),
