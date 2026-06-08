@@ -398,3 +398,20 @@ Use this log for concise, chronological records of meaningful decisions that do 
 - Decision: Configure the active runtime to route all AI tasks through OpenRouter: chat uses `openai/gpt-5.4-nano`, fit and requirements use `openai/gpt-oss-120b:free`, and embeddings use `openai/text-embedding-3-small`.
 - Rationale: The selected configuration prioritizes one provider path and current OpenRouter balance while keeping the quality-oriented free GPT OSS path for fit/requirements. `qwen/qwen3-next-80b-a3b-instruct:free` remains the fastest benchmarked free fit/requirements option, but stricter review found it more generic than GPT OSS. Direct smoke testing confirmed `openai/text-embedding-3-small` works through OpenRouter embeddings with 1536-dimensional vectors and pricing parity with OpenAI direct.
 - Scope impact: `.env.example`, `tests/cf-deploy-script.test.ts`, `docs/qa/fit-analysis-benchmark-2026-03-17.md`, `docs/architecture/ai-system.md`, `docs/operations/runbook.md`, `docs/qa/test-plan.md`, `docs/agents/decision-log.md`, `docs/agents/handoffs.md`.
+
+### 2026-06-08
+
+- Agent role: Content Strategist / Application Engineer
+- Decision: Add the verified `Claude Certified Architect \u2013 Foundations Certification` as a compact hero credential badge and a structured credential evidence record.
+- Rationale: A standalone certifications section would overstate a single credential, while the hero placement strengthens first-impression AI credibility and the structured credential lets the Career Twin cite verified Claude, Claude Code, Agent SDK, Claude API, and MCP coverage.
+- Scope impact: `components/hero.tsx`, `components/home-page-shell.tsx`, `content/credentials/credentials.json`, `lib/content/store.ts`, `lib/retrieval/store.ts`, `types/content.ts`, `docs/architecture/content-model.md`.
+
+- Agent role: Content Strategist / Experience Designer
+- Decision: Use a local thumbnail of the verified certificate itself as the hero credential visual rather than a generic certificate icon or an unofficial Anthropic or Claude logo.
+- Rationale: The certificate image is the strongest available proof-oriented visual and avoids implying use of a standalone official certification mark. Keeping a local copy also avoids depending on Skilljar's expiring signed image URL while the linked badge still opens the public verification record.
+- Scope impact: `public/claude-certified-architect-foundations.jpg`, `components/hero.tsx`, `app/globals.css`, `tests/click-analytics.test.ts`.
+
+- Agent role: Content Strategist / Experience Designer
+- Decision: Present the certificate as a small, edge-cropped thumbnail without an additional border or white frame.
+- Rationale: The credential title already provides identification, so the image should act as an authentic visual proof point rather than compete with the hero content. Cropping the source image's white outer margin makes the thumbnail feel integrated with the badge, while vertical centering keeps it aligned with the two-line credential text at all breakpoints.
+- Scope impact: `components/hero.tsx`, `app/globals.css`, `tests/click-analytics.test.ts`.

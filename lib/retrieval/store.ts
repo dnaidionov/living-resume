@@ -17,7 +17,7 @@ function modeFilter(mode: "resume_qa" | "fit_analysis" | "build_process", chunk:
     return chunk.sourceType === "build_doc" || chunk.sourceType === "case_study";
   }
   if (mode === "fit_analysis") {
-    return chunk.sourceType === "resume" || chunk.sourceType === "ai_context";
+    return chunk.sourceType === "resume" || chunk.sourceType === "ai_context" || chunk.sourceType === "credential";
   }
   return chunk.sourceType !== "build_doc";
 }

@@ -17,8 +17,17 @@ test("hero tracks linkedin clicks, resume downloads, and ask-ai entry point", ()
   assert.match(heroSource, /onAskAi\("hero_cta"\)/);
 });
 
+test("hero presents the verified credential with the certificate thumbnail", () => {
+  assert.match(heroSource, /src="\/claude-certified-architect-foundations\.jpg"/);
+  assert.match(heroSource, /className="hero-credential__thumbnail-frame"/);
+  assert.match(heroSource, /trackEvent\("credential_clicked", \{ credential: credential\.id, surface: "hero" \}\)/);
+});
+
 test("home page tracks GitHub clicks and passes ask-ai entry points through to the overlay", () => {
   assert.match(homePageSource, /trackEvent\("github_clicked", \{ surface: "how_built" \}\)/);
   assert.match(homePageSource, /<SiteHeader onAskAi=\{\(entryPoint\) => openChat\(entryPoint\)\} \/>/);
-  assert.match(homePageSource, /<Hero onAskAi=\{\(entryPoint\) => openChat\(entryPoint\)\} \/>/);
+  assert.match(
+    homePageSource,
+    /<Hero credential=\{credentials\[0\] \?\? null\} onAskAi=\{\(entryPoint\) => openChat\(entryPoint\)\} \/>/
+  );
 });

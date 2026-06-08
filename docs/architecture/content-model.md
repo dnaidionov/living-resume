@@ -4,6 +4,7 @@
 
 - `content/resume/roles.json`
 - `content/projects/projects.json`
+- `content/credentials/credentials.json`
 - `content/case-studies/case-studies.json`
 - `content/faq/faq.json`
 - `content/ai-context/explainers.json`
@@ -16,6 +17,20 @@
 - Build docs are first-class retrieval content, not only docs.
 - Public UI should derive from the same content artifacts used by the AI.
 - Project entries may use different narrative shapes depending on project type, but the content artifact remains the shared source for both page rendering and retrieval indexing.
+- Credential entries are used for compact public display and as retrievable evidence for resume questions and fit analysis.
+
+## Credential Shape
+
+- Credentials are stored in `content/credentials/credentials.json`.
+- Each credential entry includes:
+  - `id`
+  - `title`
+  - `issuer`
+  - `completedDate`
+  - `verificationUrl`
+  - `summary`
+  - `validatedAreas[]`
+  - `tags`
 
 ## Project Shape
 

@@ -73,6 +73,17 @@ export type BuildDoc = {
   body: string;
 };
 
+export type Credential = {
+  id: string;
+  title: string;
+  issuer: string;
+  completedDate: string;
+  verificationUrl: string;
+  summary: string;
+  validatedAreas: string[];
+  tags: string[];
+};
+
 export type ContentDocument = {
   id: string;
   sourceType:
@@ -81,7 +92,8 @@ export type ContentDocument = {
     | "case_study"
     | "faq"
     | "ai_context"
-    | "build_doc";
+    | "build_doc"
+    | "credential";
   title: string;
   section: string;
   text: string;

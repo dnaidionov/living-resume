@@ -1,10 +1,17 @@
 import { trackEvent } from "@/lib/analytics/events";
 import type { ChatEntryPoint } from "@/lib/analytics/chat";
+import type { Credential } from "@/types/content";
 import Image from "next/image";
 import { ChatIcon } from "@/components/chat-icon";
 import { DownloadIcon } from "@/components/download-icon";
 
-export function Hero({ onAskAi }: { onAskAi: (entryPoint: ChatEntryPoint) => void }) {
+export function Hero({
+  credential,
+  onAskAi
+}: {
+  credential: Credential | null;
+  onAskAi: (entryPoint: ChatEntryPoint) => void;
+}) {
   return (
     <section className="section shell" style={{ paddingTop: 36 }}>
       <div className="grid" style={{ alignItems: "stretch" }}>
@@ -46,6 +53,32 @@ export function Hero({ onAskAi }: { onAskAi: (entryPoint: ChatEntryPoint) => voi
               <Image src="/linkedin-mark.svg" alt="LinkedIn" className="inline-logo-image" width={22} height={22} />
             </a>
           </p>
+          {credential ? (
+            <a
+              href={credential.verificationUrl}
+              target="_blank"
+              rel="noreferrer"
+              className="hero-credential"
+              aria-label={`View verified ${credential.title} credential`}
+              onClick={() => {
+                trackEvent("credential_clicked", { credential: credential.id, surface: "hero" });
+              }}
+            >
+              <span className="hero-credential__thumbnail-frame">
+                <Image
+                  src="/claude-certified-architect-foundations.jpg"
+                  alt="Claude Certified Architect - Foundations certificate"
+                  className="hero-credential__thumbnail"
+                  width={132}
+                  height={102}
+                />
+              </span>
+              <span className="hero-credential__body">
+                <span className="hero-credential__title">{credential.title}</span>
+                <span className="hero-credential__meta">{credential.issuer} verified &middot; June 2026</span>
+              </span>
+            </a>
+          ) : null}
           <div style={{ display: "flex", gap: 12, flexWrap: "wrap", marginTop: 24, alignItems: "stretch" }}>
             <a href="#experience" className="button secondary">
               Review experience

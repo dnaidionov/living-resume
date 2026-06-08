@@ -17,3 +17,13 @@ test("document index is non-empty", async () => {
   const documents = await buildDocuments();
   assert.ok(documents.length > 10);
 });
+
+test("document index includes verified credential evidence", async () => {
+  const documents = await buildDocuments();
+  const credential = documents.find((item) => item.id === "credential-claude-certified-architect-foundations");
+
+  assert.ok(credential);
+  assert.equal(credential.sourceType, "credential");
+  assert.match(credential.title, /Claude Certified Architect/);
+  assert.match(credential.text, /Model Context Protocol \(MCP\)/);
+});

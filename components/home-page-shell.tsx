@@ -4,7 +4,7 @@ import { useRef, useState } from "react";
 import { trackEvent } from "@/lib/analytics/events";
 import type { ChatEntryPoint } from "@/lib/analytics/chat";
 import Image from "next/image";
-import type { AIContextExplainer, BuildDoc, ProjectBrief, ResumeRole } from "@/types/content";
+import type { AIContextExplainer, BuildDoc, Credential, ProjectBrief, ResumeRole } from "@/types/content";
 import { SiteHeader } from "@/components/site-header";
 import { Hero } from "@/components/hero";
 import { RoleCard } from "@/components/role-card";
@@ -17,12 +17,14 @@ export function HomePageShell({
   roles,
   explainers,
   buildDocs,
-  projects
+  projects,
+  credentials
 }: {
   roles: ResumeRole[];
   explainers: AIContextExplainer[];
   buildDocs: BuildDoc[];
   projects: ProjectBrief[];
+  credentials: Credential[];
 }) {
   const [isChatOpen, setIsChatOpen] = useState(false);
   const [chatEntryPoint, setChatEntryPoint] = useState<ChatEntryPoint>("hero_cta");
@@ -46,7 +48,7 @@ export function HomePageShell({
     <main className={`page-shell ${isChatOpen ? "is-blurred" : ""}`}>
       <div className="page-shell__content">
         <SiteHeader onAskAi={(entryPoint) => openChat(entryPoint)} />
-        <Hero onAskAi={(entryPoint) => openChat(entryPoint)} />
+        <Hero credential={credentials[0] ?? null} onAskAi={(entryPoint) => openChat(entryPoint)} />
 
         <section id="experience" className="section shell">
           <span className="eyebrow">Experience</span>
