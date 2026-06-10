@@ -21,6 +21,7 @@ test("hero presents the verified credential with the certificate thumbnail", () 
   assert.match(heroSource, /src="\/claude-certified-architect-foundations\.jpg"/);
   assert.match(heroSource, /className="hero-credential__thumbnail-frame"/);
   assert.match(heroSource, /trackEvent\("credential_clicked", \{ credential: credential\.id, surface: "hero" \}\)/);
+  assert.doesNotMatch(heroSource, /expirationDate|expired|expires/i);
 });
 
 test("home page tracks GitHub clicks and passes ask-ai entry points through to the overlay", () => {

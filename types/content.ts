@@ -78,6 +78,7 @@ export type Credential = {
   title: string;
   issuer: string;
   completedDate: string;
+  expirationDate: string;
   verificationUrl: string;
   summary: string;
   validatedAreas: string[];
@@ -104,6 +105,7 @@ export type ContentDocument = {
     relatedRoleId?: string;
     company?: string;
     roleTitle?: string;
+    expirationDate?: string;
   };
 };
 

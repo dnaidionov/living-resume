@@ -1,6 +1,6 @@
 import test from "node:test";
 import assert from "node:assert/strict";
-import { staticRetrievalStore } from "@/lib/retrieval/store";
+import { isCredentialEvidenceQuery, staticRetrievalStore } from "@/lib/retrieval/store";
 import { buildFitAnalysisQueries } from "@/lib/ai/fit-analysis";
 
 test("staticRetrievalStore returns repo-backed evidence even without a generated semantic artifact", async () => {
@@ -35,4 +35,10 @@ test("staticRetrievalStore batch search preserves single-query retrieval behavio
     batched.map((item) => item.id),
     single.map((item) => item.id)
   );
+});
+
+test("credential evidence is limited to certification and knowledge queries", () => {
+  assert.equal(isCredentialEvidenceQuery("Anthropic certification or equivalent credential required"), true);
+  assert.equal(isCredentialEvidenceQuery("Working knowledge of Claude API and MCP"), true);
+  assert.equal(isCredentialEvidenceQuery("Lead production Claude API and MCP implementations"), false);
 });

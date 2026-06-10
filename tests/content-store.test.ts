@@ -1,6 +1,6 @@
 import test from "node:test";
 import assert from "node:assert/strict";
-import { buildDocuments, fileContentStore, loadRoles } from "@/lib/content/store";
+import { buildDocuments, fileContentStore, loadCredentials, loadRoles } from "@/lib/content/store";
 
 test("every role has an AI context explainer", async () => {
   const roles = await loadRoles();
@@ -19,11 +19,14 @@ test("document index is non-empty", async () => {
 });
 
 test("document index includes verified credential evidence", async () => {
+  const credentials = await loadCredentials();
   const documents = await buildDocuments();
   const credential = documents.find((item) => item.id === "credential-claude-certified-architect-foundations");
 
+  assert.equal(credentials[0]?.expirationDate, "2026-12-05");
   assert.ok(credential);
   assert.equal(credential.sourceType, "credential");
+  assert.equal(credential.metadata?.expirationDate, "2026-12-05");
   assert.match(credential.title, /Claude Certified Architect/);
   assert.match(credential.text, /Model Context Protocol \(MCP\)/);
 });

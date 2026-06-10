@@ -27,10 +27,13 @@
   - `title`
   - `issuer`
   - `completedDate`
+  - `expirationDate`
   - `verificationUrl`
   - `summary`
   - `validatedAreas[]`
   - `tags`
+- Credential expiration is stored as evidence metadata but is not used to hide, relabel, or visually downgrade the public credential.
+- Fit analysis may use credential evidence only for explicit certification, familiarity, or knowledge requirements. It cannot establish hands-on implementation or delivery ownership.
 
 ## Project Shape
 

@@ -22,6 +22,12 @@ function modeFilter(mode: "resume_qa" | "fit_analysis" | "build_process", chunk:
   return chunk.sourceType !== "build_doc";
 }
 
+export function isCredentialEvidenceQuery(query: string): boolean {
+  return /\b(certification|certified|credential|accreditation|exam|working knowledge|knowledge of|familiarity with|understanding of)\b/i.test(
+    query
+  );
+}
+
 export const staticRetrievalStore: RetrievalStore = {
   async searchEvidence(query, mode) {
     const [result] = await this.searchEvidenceBatch([query], mode);
@@ -34,8 +40,14 @@ export const staticRetrievalStore: RetrievalStore = {
     const queryEmbeddings = await embedQueries(queries, usesSemanticEmbeddings(chunks));
     const filteredChunks = chunks.filter((chunk) => modeFilter(mode, chunk));
 
-    return queryEmbeddings.map((queryEmbedding) =>
+    return queryEmbeddings.map((queryEmbedding, queryIndex) =>
       filteredChunks
+        .filter(
+          (chunk) =>
+            chunk.sourceType !== "credential" ||
+            mode !== "fit_analysis" ||
+            isCredentialEvidenceQuery(queries[queryIndex] ?? "")
+        )
         .map((chunk) => ({
           chunk,
           score: cosineSimilarity(queryEmbedding, chunk.embedding)

@@ -415,3 +415,14 @@ Use this log for concise, chronological records of meaningful decisions that do 
 - Decision: Present the certificate as a small, edge-cropped thumbnail without an additional border or white frame.
 - Rationale: The credential title already provides identification, so the image should act as an authentic visual proof point rather than compete with the hero content. Cropping the source image's white outer margin makes the thumbnail feel integrated with the badge, while vertical centering keeps it aligned with the two-line credential text at all breakpoints.
 - Scope impact: `components/hero.tsx`, `app/globals.css`, `tests/click-analytics.test.ts`.
+
+### 2026-06-10
+
+- Agent role: Content Strategist / AI Systems Architect
+- Decision: Store credential expiration as structured evidence metadata without displaying it or automatically hiding, downgrading, or relabeling the credential after that date.
+- Rationale: The source record should remain complete and auditable, while the public credential treatment should not introduce an automated status policy the product has not otherwise defined.
+- Decision: Restrict credential evidence in fit analysis to explicit certification, familiarity, or knowledge requirements and exclude it from hands-on implementation, production leadership, and generic transfer claims.
+- Rationale: Passing an exam supports verified knowledge but does not independently prove delivery ownership. The restriction is enforced in query retrieval, deterministic requirement matching, transfer rendering, and the model prompt.
+- Decision: Include credentials in the resume-chat evidence contract.
+- Rationale: Resume Q&A already retrieves credential records, so the system prompt must explicitly permit the model to use them rather than create a contradictory evidence boundary.
+- Scope impact: `content/credentials/credentials.json`, `types/content.ts`, `lib/content/store.ts`, `lib/retrieval/store.ts`, `lib/ai/prompting.ts`, `tests/content-store.test.ts`, `tests/retrieval.test.ts`, `tests/prompting.test.ts`, `docs/architecture/content-model.md`.

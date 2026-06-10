@@ -77,7 +77,7 @@ export function buildChatSystemPrompt(mode: ChatMode): string {
   const modeInstruction =
     mode === "build_process"
       ? "Answer only from build/process evidence. If the evidence is weak, say that directly."
-      : "Answer only from resume, project, FAQ, and AI-context evidence. If the evidence is weak, say that directly.";
+      : "Answer only from resume, project, FAQ, AI-context, and credential evidence. If the evidence is weak, say that directly.";
 
   return [
     "You are the AI systems architect for Dmitry Naidionov's Career Twin.",
@@ -105,6 +105,7 @@ export function buildFitAnalysisSystemPrompt(): string {
     "Do not treat repeated evidence as separate proof points; repeated bullets should reference the earlier point instead of restating the same evidence.",
     "Do not treat older pre-LLM AI/ML or chatbot work as direct proof of modern LLM orchestration, RAG, evals, or agent workflows.",
     "Technology matches must respect context: integration or product-adjacent exposure is not the same as hands-on engineering ownership unless the evidence proves that depth.",
+    "Credential evidence may support certification, familiarity, or knowledge requirements, but it must never prove hands-on implementation, delivery ownership, or production leadership.",
     "Recruiter-facing output must never mention Dmitry's preferred domains, preferred technologies, absent AI wording, or internal scoring logic.",
     "Use gaps as validation points for interview follow-up, not as premature rejection language.",
     "Return valid JSON only with the requested fields."
@@ -149,6 +150,7 @@ export function buildFitAnalysisUserPrompt(
     "- If the same evidence supports multiple bullets, show the first bullet normally and use 'Same as above.' or 'See previous point.' for later bullets.",
     "- Do not count pre-2023 AI/ML or chatbot work as direct evidence for modern LLM orchestration, RAG, evals, or agent workflows.",
     "- When a requirement names a technology, distinguish product-adjacent exposure from hands-on engineering implementation.",
+    "- Use credential evidence only for certification, familiarity, or knowledge requirements; never use it as proof of hands-on implementation, delivery ownership, or production leadership.",
     "",
     `Primary presentation mode: ${presentationMode}`,
     "Return JSON with these top-level fields:",
@@ -768,7 +770,7 @@ function stripLeadIn(text: string): string {
 function buildTransferBulletsFromEvidence(evidence: EvidenceChunk[]): TransferBullet[] {
   const seen = new Set<string>();
 
-  return rankEvidenceForSupport(evidence)
+  return rankEvidenceForSupport(evidence.filter((item) => item.sourceType !== "credential"))
     .map((item) => ({
       skillOrExperience: buildTransferTitle(item),
       relevance: summarizeSupportEvidence(item) ?? "My prior work includes directly relevant experience that would transfer to this role."
@@ -1145,7 +1147,9 @@ function selectBestEvidenceForRequirement(
   usedEvidenceIds: Set<string>
 ): { chunk: EvidenceChunk; score: number } | undefined {
   const keywords = extractRequirementKeywords(requirement);
-  const candidatePool = leadershipQualifiedEvidencePool(requirement, evidence);
+  const candidatePool = leadershipQualifiedEvidencePool(requirement, evidence).filter(
+    (item) => item.sourceType !== "credential" || isCredentialEvidenceRequirement(requirement)
+  );
 
   const candidates = [...candidatePool]
     .map((item) => ({
@@ -1161,6 +1165,12 @@ function selectBestEvidenceForRequirement(
   }
 
   return bestUnused.score >= minimumEvidenceScore(requirement) ? bestUnused : undefined;
+}
+
+function isCredentialEvidenceRequirement(requirement: string): boolean {
+  return /\b(certification|certified|credential|accreditation|exam|working knowledge|knowledge of|familiarity with|understanding of)\b/i.test(
+    requirement
+  );
 }
 
 function leadershipQualifiedEvidencePool(requirement: string, evidence: EvidenceChunk[]): EvidenceChunk[] {

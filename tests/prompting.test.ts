@@ -134,6 +134,45 @@ test("fit-analysis prompt keeps anti-false-negative logic in the hidden prompt",
   assert.match(prompt, /Do not count pre-2023 AI\/ML or chatbot work as direct evidence/);
 });
 
+test("resume chat prompt permits structured credential evidence", () => {
+  const prompt = buildChatSystemPrompt("resume_qa");
+
+  assert.match(prompt, /credential evidence/i);
+});
+
+test("credential evidence cannot prove hands-on production implementation", () => {
+  const credentialEvidence: EvidenceChunk[] = [
+    {
+      id: "credential-claude",
+      sourceType: "credential",
+      title: "Claude Certified Architect - Foundations Certification",
+      section: "credential",
+      text: "Anthropic credential validating knowledge of Claude API and Model Context Protocol.",
+      tags: ["credential", "anthropic", "claude", "mcp"],
+      embedding: [1, 0, 0]
+    }
+  ];
+  const result = buildFallbackFitAnalysisResponse(
+    "Lead production Claude API and Model Context Protocol implementations.",
+    [
+      {
+        text: "Lead production Claude API and Model Context Protocol implementations.",
+        category: "requirement",
+        priority: "must_have"
+      }
+    ],
+    credentialEvidence,
+    "text",
+    "recruiter_brief"
+  );
+  const matchText = result.presentation.mode === "recruiter_brief"
+    ? (result.presentation.whereIMatch ?? []).flatMap((item) => [item.requirement, item.support]).join(" ")
+    : "";
+
+  assert.equal(result.presentation.mode === "recruiter_brief" ? result.presentation.whereIMatch?.length ?? 0 : 0, 0);
+  assert.doesNotMatch(matchText, /credential|certified architect|anthropic/i);
+});
+
 test("resume chat fallback politely declines off-scope personal questions", () => {
   const answer = buildFallbackChatAnswer("What is Dmitry's favorite movie?", [], "resume_qa");
   assert.equal(answer, buildResumeChatScopeRefusal());
