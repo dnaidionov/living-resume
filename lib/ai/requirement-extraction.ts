@@ -3,6 +3,7 @@ import type { ExtractedRoleRequirement, RoleRequirementCategory, RoleRequirement
 import { extractRoleRequirementsHeuristically } from "@/lib/ai/prompting";
 import { requestJsonCompletion } from "@/lib/ai/openai";
 import { hasProviderConfig, readProviderSummary } from "@/lib/ai/provider-config";
+import { splitCompoundCredentialRequirements } from "@/lib/ai/credential-requirements";
 
 type RequirementExtractionResponse = {
   requirements?: Array<{
@@ -64,6 +65,8 @@ export function createRequirementExtractionService(
         }
       }
 
+      requirements = splitCompoundCredentialRequirements(requirements).slice(0, 8);
+
       cache.set(normalizedRoleText, {
         requirements,
         expiresAt: Date.now() + requirementExtractionCacheTtlMs
@@ -83,7 +86,8 @@ function buildRequirementExtractionSystemPrompt(): string {
     "Ignore titles, locations, compensation, benefits, equal-opportunity statements, privacy text, cookies, navigation, application instructions, and ATS boilerplate.",
     "Keep only requirements, functions, expectations, and mission-alignment items that matter for evaluating candidate fit.",
     "Prefer concrete responsibilities and must-have qualifications over marketing copy.",
-    "Each requirement must be concise, self-contained, and recruiter-readable."
+    "Each requirement must be concise, self-contained, and recruiter-readable.",
+    "Split compound requirements into separate items when one clause describes certification or knowledge and another describes implementation, delivery, ownership, or leadership."
   ].join(" ");
 }
 

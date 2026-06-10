@@ -41,4 +41,8 @@ test("credential evidence is limited to certification and knowledge queries", ()
   assert.equal(isCredentialEvidenceQuery("Anthropic certification or equivalent credential required"), true);
   assert.equal(isCredentialEvidenceQuery("Working knowledge of Claude API and MCP"), true);
   assert.equal(isCredentialEvidenceQuery("Lead production Claude API and MCP implementations"), false);
+  assert.equal(
+    isCredentialEvidenceQuery("Strong understanding of Claude API and MCP, with experience leading production implementations"),
+    false
+  );
 });

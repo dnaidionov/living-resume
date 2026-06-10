@@ -34,6 +34,7 @@
   - `tags`
 - Credential expiration is stored as evidence metadata but is not used to hide, relabel, or visually downgrade the public credential.
 - Fit analysis may use credential evidence only for explicit certification, familiarity, or knowledge requirements. It cannot establish hands-on implementation or delivery ownership.
+- Compound requirements that mix credential or knowledge language with implementation, delivery, ownership, or leadership are split into atomic requirements before retrieval and matching.
 
 ## Project Shape
 

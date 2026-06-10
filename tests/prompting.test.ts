@@ -173,6 +173,39 @@ test("credential evidence cannot prove hands-on production implementation", () =
   assert.doesNotMatch(matchText, /credential|certified architect|anthropic/i);
 });
 
+test("compound credential requirements are split before fit matching", () => {
+  const splitRequirements = extractRoleRequirements(
+    "Strong understanding of Claude API and MCP, with experience leading production implementations."
+  );
+  const credentialEvidence: EvidenceChunk[] = [
+    {
+      id: "credential-claude",
+      sourceType: "credential",
+      title: "Claude Certified Architect - Foundations Certification",
+      section: "credential",
+      text: "Anthropic credential validating knowledge of Claude API and Model Context Protocol.",
+      tags: ["credential", "anthropic", "claude", "mcp"],
+      embedding: [1, 0, 0]
+    }
+  ];
+  const result = buildFallbackFitAnalysisResponse(
+    "Strong understanding of Claude API and MCP, with experience leading production implementations.",
+    splitRequirements,
+    credentialEvidence,
+    "text",
+    "recruiter_brief"
+  );
+  const matchRequirements = result.presentation.mode === "recruiter_brief"
+    ? (result.presentation.whereIMatch ?? []).map((item) => item.requirement).join(" ")
+    : "";
+
+  assert.equal(splitRequirements.length, 2);
+  assert.ok(splitRequirements.some((item) => /understanding of Claude API and MCP/i.test(item.text)));
+  assert.ok(splitRequirements.some((item) => /leading production implementations/i.test(item.text)));
+  assert.match(matchRequirements, /understanding of Claude API and MCP/i);
+  assert.doesNotMatch(matchRequirements, /leading production implementations/i);
+});
+
 test("resume chat fallback politely declines off-scope personal questions", () => {
   const answer = buildFallbackChatAnswer("What is Dmitry's favorite movie?", [], "resume_qa");
   assert.equal(answer, buildResumeChatScopeRefusal());

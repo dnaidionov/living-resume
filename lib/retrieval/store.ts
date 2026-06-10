@@ -4,6 +4,7 @@ import { buildDocuments } from "@/lib/content/store";
 import { computeDeterministicEmbedding, cosineSimilarity } from "@/lib/retrieval/embeddings";
 import { requestEmbeddings } from "@/lib/ai/openai";
 import { hasProviderConfig } from "@/lib/ai/provider-config";
+import { isCredentialOnlyRequirement } from "@/lib/ai/credential-requirements";
 import generatedEmbeddings from "@/content/retrieval/embeddings.generated.json";
 
 type EmbeddedChunk = EvidenceChunk & {
@@ -23,9 +24,7 @@ function modeFilter(mode: "resume_qa" | "fit_analysis" | "build_process", chunk:
 }
 
 export function isCredentialEvidenceQuery(query: string): boolean {
-  return /\b(certification|certified|credential|accreditation|exam|working knowledge|knowledge of|familiarity with|understanding of)\b/i.test(
-    query
-  );
+  return isCredentialOnlyRequirement(query);
 }
 
 export const staticRetrievalStore: RetrievalStore = {

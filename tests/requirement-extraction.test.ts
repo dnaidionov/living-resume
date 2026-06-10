@@ -53,3 +53,26 @@ test("requirement extraction does not reuse cache across different JD text", asy
   assert.equal(calls, 2);
   assert.match(second[0]?.text ?? "", /mobile/i);
 });
+
+test("requirement extraction splits credential knowledge from production delivery", async () => {
+  const service = createRequirementExtractionService(
+    async () => ({
+      requirements: [
+        {
+          text: "Strong understanding of Claude API and MCP, with experience leading production implementations.",
+          category: "requirement",
+          priority: "must_have"
+        }
+      ]
+    }),
+    () => true
+  );
+
+  const requirements = await service.extract("Strong understanding of Claude API and MCP, with experience leading production implementations.");
+
+  assert.equal(requirements.length, 2);
+  assert.match(requirements[0]?.text ?? "", /understanding of Claude API and MCP/i);
+  assert.doesNotMatch(requirements[0]?.text ?? "", /production implementations/i);
+  assert.match(requirements[1]?.text ?? "", /leading production implementations/i);
+  assert.doesNotMatch(requirements[1]?.text ?? "", /understanding of Claude API/i);
+});

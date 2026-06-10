@@ -426,3 +426,8 @@ Use this log for concise, chronological records of meaningful decisions that do 
 - Decision: Include credentials in the resume-chat evidence contract.
 - Rationale: Resume Q&A already retrieves credential records, so the system prompt must explicitly permit the model to use them rather than create a contradictory evidence boundary.
 - Scope impact: `content/credentials/credentials.json`, `types/content.ts`, `lib/content/store.ts`, `lib/retrieval/store.ts`, `lib/ai/prompting.ts`, `tests/content-store.test.ts`, `tests/retrieval.test.ts`, `tests/prompting.test.ts`, `docs/architecture/content-model.md`.
+
+- Agent role: Content Strategist / AI Systems Architect
+- Decision: Split compound requirements when credential or knowledge language is combined with implementation, delivery, ownership, or leadership expectations.
+- Rationale: Rejecting credential evidence for the entire compound statement would discard valid evidence for the knowledge clause. Atomic requirements preserve that valid match while independently evaluating the unsupported execution clause.
+- Scope impact: `lib/ai/credential-requirements.ts`, `lib/ai/requirement-extraction.ts`, `lib/ai/prompting.ts`, `lib/retrieval/store.ts`, `tests/requirement-extraction.test.ts`, `tests/retrieval.test.ts`, `tests/prompting.test.ts`, `docs/architecture/content-model.md`.

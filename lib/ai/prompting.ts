@@ -13,6 +13,10 @@ import type {
   ChatMode
 } from "@/types/ai";
 import type { Citation, EvidenceChunk } from "@/types/content";
+import {
+  isCredentialOnlyRequirement,
+  splitCompoundCredentialRequirements
+} from "@/lib/ai/credential-requirements";
 
 const dimensionOrder: FitDimension["name"][] = [
   "core_match",
@@ -410,11 +414,11 @@ export function extractRoleRequirementsHeuristically(roleText: string): Extracte
     .filter(isLikelyRequirementSegment);
 
   const prioritized = prioritizeRequirements(
-    dedupeRequirements(segments).map((segment) => ({
+    splitCompoundCredentialRequirements(dedupeRequirements(segments).map((segment) => ({
       text: segment,
       category: inferRequirementCategory(segment),
       priority: inferRequirementPriority(segment)
-    }))
+    })))
   ).slice(0, 8);
 
   if (prioritized.length > 0) {
@@ -1168,9 +1172,7 @@ function selectBestEvidenceForRequirement(
 }
 
 function isCredentialEvidenceRequirement(requirement: string): boolean {
-  return /\b(certification|certified|credential|accreditation|exam|working knowledge|knowledge of|familiarity with|understanding of)\b/i.test(
-    requirement
-  );
+  return isCredentialOnlyRequirement(requirement);
 }
 
 function leadershipQualifiedEvidencePool(requirement: string, evidence: EvidenceChunk[]): EvidenceChunk[] {
@@ -1262,8 +1264,13 @@ function requirementEvidenceScore(
   const leadershipSectionAdjustment = leadershipEvidenceSectionAdjustment(requirement, item);
   const strategicExecutionBonus = strategicExecutionEvidenceBonus(requirement, item);
   const strategicExecutionPenalty = strategicExecutionMismatchPenalty(requirement, item);
+  const credentialBonus = credentialEvidenceBonus(requirement, item);
 
-  return evidencePreferenceScore(item) * 10 + keywordHits * 5 + directPhraseBonus + recencyBonus + domainBonus + leadershipBonus + leadershipRoleBonus + leadershipSectionAdjustment + strategicExecutionBonus - reusePenalty - rolePenalty - recencyPenalty - contextPenalty - catchAllRolePenalty - specificityPenalty - leadershipPenalty - leadershipOutcomePenalty - strategicExecutionPenalty;
+  return evidencePreferenceScore(item) * 10 + keywordHits * 5 + directPhraseBonus + recencyBonus + domainBonus + leadershipBonus + leadershipRoleBonus + leadershipSectionAdjustment + strategicExecutionBonus + credentialBonus - reusePenalty - rolePenalty - recencyPenalty - contextPenalty - catchAllRolePenalty - specificityPenalty - leadershipPenalty - leadershipOutcomePenalty - strategicExecutionPenalty;
+}
+
+function credentialEvidenceBonus(requirement: string, item: EvidenceChunk): number {
+  return item.sourceType === "credential" && isCredentialOnlyRequirement(requirement) ? 12 : 0;
 }
 
 function roleSpecificityPenalty(item: EvidenceChunk): number {
