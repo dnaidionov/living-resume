@@ -76,3 +76,29 @@ test("requirement extraction splits credential knowledge from production deliver
   assert.match(requirements[1]?.text ?? "", /leading production implementations/i);
   assert.doesNotMatch(requirements[1]?.text ?? "", /understanding of Claude API/i);
 });
+
+test("requirement extraction keeps knowledge domains with production and build nouns intact", async () => {
+  const service = createRequirementExtractionService(
+    async () => ({
+      requirements: [
+        {
+          text: "Working knowledge of production-grade Claude application architecture.",
+          category: "requirement",
+          priority: "important"
+        },
+        {
+          text: "Understanding of build systems.",
+          category: "requirement",
+          priority: "important"
+        }
+      ]
+    }),
+    () => true
+  );
+
+  const requirements = await service.extract("Knowledge requirements");
+
+  assert.equal(requirements.length, 2);
+  assert.match(requirements[0]?.text ?? "", /production-grade Claude application architecture/i);
+  assert.match(requirements[1]?.text ?? "", /build systems/i);
+});

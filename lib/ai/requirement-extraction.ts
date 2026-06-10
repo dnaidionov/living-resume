@@ -145,7 +145,7 @@ function looksLikeLocationOrTitle(text: string): boolean {
   const wordCount = normalized.split(/\s+/).length;
 
   if (wordCount <= 8 && !/(experience|ability|develop|drive|lead|build|deliver|determine|define|gather|analy|align|strategy|road-?map|requirements|mission|goal|bring|technical|responsible)/i.test(normalized)) {
-    return /(manager|director|lead|engineer|architect|analyst|principal|senior|staff|head|specialist|owner)/i.test(normalized);
+    return /\b(manager|director|lead|engineer|architect|analyst|principal|senior|staff|head|specialist|owner)\b/i.test(normalized);
   }
 
   return /\b(remote|hybrid|onsite|on-site|united states|usa|city|country|region)\b/i.test(normalized);

@@ -2,15 +2,24 @@ import type { ExtractedRoleRequirement } from "@/types/ai";
 
 const credentialKnowledgeSignal =
   /\b(certification|certified|credential|accreditation|exam|working knowledge|knowledge of|familiarity with|understanding of)\b/i;
-const deliverySignal =
-  /\b(hands-on|implement|implementation|implemented|build|built|develop|developed|deliver|delivery|deploy|deployed|production|lead|leading|led|own|owned|ownership|operate|operated)\b/i;
+const explicitDeliveryPhrase =
+  /\b(hands-on|production implementations?|implementation experience|delivery ownership)\b/i;
+const experienceDeliveryPhrase =
+  /\bexperience\s+(?:(?:in|with)\s+)?(?:\w+[\s-]+){0,3}(leading|building|implementing|developing|delivering|deploying|owning|operating)\b/i;
+const deliveryAction =
+  /\b(lead|leading|led|implemented|implementing|built|building|developed|developing|delivered|delivering|deployed|deploying|owned|owning|operated|operating)\b/i;
+const requiredDeliveryAction =
+  /\b(?:ability|required|must|will|responsible)\s+to\s+(build|implement|develop|deliver|deploy|own|operate)\b/i;
 
 export function hasCredentialKnowledgeSignal(text: string): boolean {
   return credentialKnowledgeSignal.test(text);
 }
 
 export function hasDeliverySignal(text: string): boolean {
-  return deliverySignal.test(text);
+  return explicitDeliveryPhrase.test(text) ||
+    experienceDeliveryPhrase.test(text) ||
+    deliveryAction.test(text) ||
+    requiredDeliveryAction.test(text);
 }
 
 export function isCredentialOnlyRequirement(text: string): boolean {

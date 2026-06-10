@@ -431,3 +431,10 @@ Use this log for concise, chronological records of meaningful decisions that do 
 - Decision: Split compound requirements when credential or knowledge language is combined with implementation, delivery, ownership, or leadership expectations.
 - Rationale: Rejecting credential evidence for the entire compound statement would discard valid evidence for the knowledge clause. Atomic requirements preserve that valid match while independently evaluating the unsupported execution clause.
 - Scope impact: `lib/ai/credential-requirements.ts`, `lib/ai/requirement-extraction.ts`, `lib/ai/prompting.ts`, `lib/retrieval/store.ts`, `tests/requirement-extraction.test.ts`, `tests/retrieval.test.ts`, `tests/prompting.test.ts`, `docs/architecture/content-model.md`.
+
+- Agent role: Content Strategist / AI Systems Architect
+- Decision: Detect delivery expectations through action and experience phrases, not bare domain nouns such as `production` or `build`.
+- Rationale: Terms such as `production-grade architecture` and `build systems` can describe knowledge domains covered by a credential. Treating those nouns as execution evidence created false negatives and prevented the credential from supporting its declared scope.
+- Decision: Match job-title noise using whole role words so domain terms such as `architecture` are not discarded because they contain `architect`.
+- Rationale: Requirement normalization should remove actual title lines without suppressing valid technical knowledge domains.
+- Scope impact: `lib/ai/credential-requirements.ts`, `lib/ai/requirement-extraction.ts`, `tests/requirement-extraction.test.ts`, `tests/retrieval.test.ts`, `docs/architecture/content-model.md`.
