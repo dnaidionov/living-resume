@@ -438,3 +438,8 @@ Use this log for concise, chronological records of meaningful decisions that do 
 - Decision: Match job-title noise using whole role words so domain terms such as `architecture` are not discarded because they contain `architect`.
 - Rationale: Requirement normalization should remove actual title lines without suppressing valid technical knowledge domains.
 - Scope impact: `lib/ai/credential-requirements.ts`, `lib/ai/requirement-extraction.ts`, `tests/requirement-extraction.test.ts`, `tests/retrieval.test.ts`, `docs/architecture/content-model.md`.
+
+- Agent role: Content Strategist / AI Systems Architect
+- Decision: Recognize base-form delivery verbs only when they begin an execution clause or follow an action introducer such as `capability to`.
+- Rationale: This closes execution-overclaim paths such as `and build production agents` and `deploy production integrations` without reclassifying knowledge-domain nouns such as `build systems`.
+- Scope impact: `lib/ai/credential-requirements.ts`, `tests/requirement-extraction.test.ts`, `tests/retrieval.test.ts`, `docs/architecture/content-model.md`.

@@ -10,6 +10,8 @@ const deliveryAction =
   /\b(lead|leading|led|implemented|implementing|built|building|developed|developing|delivered|delivering|deployed|deploying|owned|owning|operated|operating)\b/i;
 const requiredDeliveryAction =
   /\b(?:ability|required|must|will|responsible)\s+to\s+(build|implement|develop|deliver|deploy|own|operate)\b/i;
+const contextualBaseDeliveryAction =
+  /(?:^|[;,:]\s*|\b(?:and|then)\s+|\b(?:ability|capability|responsibility)\s+to\s+)(build|implement|develop|deliver|deploy|own|operate)\b/i;
 
 export function hasCredentialKnowledgeSignal(text: string): boolean {
   return credentialKnowledgeSignal.test(text);
@@ -19,7 +21,8 @@ export function hasDeliverySignal(text: string): boolean {
   return explicitDeliveryPhrase.test(text) ||
     experienceDeliveryPhrase.test(text) ||
     deliveryAction.test(text) ||
-    requiredDeliveryAction.test(text);
+    requiredDeliveryAction.test(text) ||
+    contextualBaseDeliveryAction.test(text);
 }
 
 export function isCredentialOnlyRequirement(text: string): boolean {
@@ -52,7 +55,8 @@ function splitCompoundCredentialRequirementText(text: string): [string, string] 
     /,\s+with\s+/gi,
     /;\s+/g,
     /,\s+and\s+/gi,
-    /\s+and\s+(?=(?:experience|hands-on|lead|leading|build|implement|deliver|deploy|own|operate)\b)/gi
+    /\s+and\s+(?=(?:experience|hands-on|lead|leading|build|implement|deliver|deploy|own|operate)\b)/gi,
+    /\s+with\s+(?=(?:ability|capability|responsibility)\s+to\b)/gi
   ];
 
   for (const boundary of boundaries) {

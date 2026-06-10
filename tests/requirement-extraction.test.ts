@@ -102,3 +102,37 @@ test("requirement extraction keeps knowledge domains with production and build n
   assert.match(requirements[0]?.text ?? "", /production-grade Claude application architecture/i);
   assert.match(requirements[1]?.text ?? "", /build systems/i);
 });
+
+test("requirement extraction splits base-form build and deploy delivery clauses", async () => {
+  const service = createRequirementExtractionService(
+    async () => ({
+      requirements: [
+        {
+          text: "Strong understanding of Claude API and build production agents.",
+          category: "requirement",
+          priority: "must_have"
+        },
+        {
+          text: "Working knowledge of Claude API; deploy production integrations.",
+          category: "requirement",
+          priority: "must_have"
+        },
+        {
+          text: "Working knowledge of Claude API with capability to build production agents.",
+          category: "requirement",
+          priority: "must_have"
+        }
+      ]
+    }),
+    () => true
+  );
+
+  const requirements = await service.extract("Compound credential and delivery requirements");
+  const labels = requirements.map((item) => item.text);
+
+  assert.ok(labels.some((item) => /^Strong understanding of Claude API$/i.test(item)));
+  assert.ok(labels.some((item) => /^build production agents$/i.test(item)));
+  assert.ok(labels.some((item) => /^Working knowledge of Claude API$/i.test(item)));
+  assert.ok(labels.some((item) => /^deploy production integrations$/i.test(item)));
+  assert.ok(labels.some((item) => /^capability to build production agents$/i.test(item)));
+});
