@@ -1,6 +1,7 @@
 import test from "node:test";
 import assert from "node:assert/strict";
 import { createRequirementExtractionService } from "@/lib/ai/requirement-extraction";
+import { extractRoleRequirementsHeuristically } from "@/lib/ai/prompting";
 
 test("requirement extraction caches identical JD input", async () => {
   let calls = 0;
@@ -246,6 +247,61 @@ test("requirement extraction preserves all source requirements after atomic spli
 
   assert.equal(requirements.length, 9);
   assert.ok(requirements.some((item) => /responsibility number 8/i.test(item.text)));
+});
+
+test("heuristic requirement extraction preserves all source requirements after atomic splitting", () => {
+  const roleText = [
+    "Knowledge of Claude API and experience building production agents.",
+    ...Array.from(
+      { length: 7 },
+      (_, index) => `Lead distinct product responsibility number ${index + 2} across the organization.`
+    )
+  ].join("\n");
+
+  const requirements = extractRoleRequirementsHeuristically(roleText);
+
+  assert.equal(requirements.length, 9);
+  assert.ok(requirements.some((item) => /experience building production agents/i.test(item.text)));
+  assert.ok(requirements.some((item) => /responsibility number 8/i.test(item.text)));
+});
+
+test("requirement extraction splits launch, scale, maintain, and configure delivery clauses", async () => {
+  const service = createRequirementExtractionService(
+    async () => ({
+      requirements: [
+        {
+          text: "Knowledge of Claude API and launch production agents.",
+          category: "requirement",
+          priority: "must_have"
+        },
+        {
+          text: "Understanding of MCP plus scale production workflows.",
+          category: "requirement",
+          priority: "must_have"
+        },
+        {
+          text: "Familiarity with Claude Code and maintain agent infrastructure.",
+          category: "requirement",
+          priority: "must_have"
+        },
+        {
+          text: "Expertise in Claude API and configure production integrations.",
+          category: "requirement",
+          priority: "must_have"
+        }
+      ]
+    }),
+    () => true
+  );
+
+  const requirements = await service.extract("Additional delivery verb compounds");
+  const labels = requirements.map((item) => item.text);
+
+  assert.equal(requirements.length, 8);
+  assert.ok(labels.some((item) => /^launch production agents$/i.test(item)));
+  assert.ok(labels.some((item) => /^scale production workflows$/i.test(item)));
+  assert.ok(labels.some((item) => /^maintain agent infrastructure$/i.test(item)));
+  assert.ok(labels.some((item) => /^configure production integrations$/i.test(item)));
 });
 
 test("requirement extraction recognizes broader delivery verbs and knowledge wording", async () => {

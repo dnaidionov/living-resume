@@ -17,6 +17,10 @@ import {
   isCredentialOnlyRequirement,
   splitCompoundCredentialRequirements
 } from "@/lib/ai/credential-requirements";
+import {
+  MAX_ATOMIC_REQUIREMENTS,
+  MAX_SOURCE_REQUIREMENTS
+} from "@/lib/ai/requirement-policy";
 
 const dimensionOrder: FitDimension["name"][] = [
   "core_match",
@@ -413,13 +417,16 @@ export function extractRoleRequirementsHeuristically(roleText: string): Extracte
     .filter((item) => item.length >= 20)
     .filter(isLikelyRequirementSegment);
 
-  const prioritized = prioritizeRequirements(
-    splitCompoundCredentialRequirements(dedupeRequirements(segments).map((segment) => ({
+  const sourceRequirements = dedupeRequirements(segments)
+    .slice(0, MAX_SOURCE_REQUIREMENTS)
+    .map((segment) => ({
       text: segment,
       category: inferRequirementCategory(segment),
       priority: inferRequirementPriority(segment)
-    })))
-  ).slice(0, 8);
+    }));
+  const prioritized = prioritizeRequirements(
+    splitCompoundCredentialRequirements(sourceRequirements)
+  ).slice(0, MAX_ATOMIC_REQUIREMENTS);
 
   if (prioritized.length > 0) {
       return prioritized;

@@ -45,8 +45,9 @@
 - Base-form delivery verbs are treated as execution signals only at clause boundaries or after action introducers such as `ability to` or `capability to`.
 - Modal delivery clauses such as `must build`, `will build`, and `you will deploy` are also split and evaluated independently from credential-supported knowledge.
 - Credential knowledge signals include common recruiter wording such as proficiency, expertise, and knowledgeable-about phrasing.
-- Delivery detection covers common product and technical execution verbs including design, integrate, ship, manage, architect, and create.
+- Delivery detection covers common product and technical execution verbs including design, integrate, ship, manage, architect, create, launch, scale, maintain, and configure.
 - Requirement extraction accepts up to eight source requirements and may retain up to twelve atomic requirements after splitting so normalization does not discard a source item.
+- Source and atomic requirement limits are shared by the LLM and heuristic extraction paths rather than duplicated in each implementation.
 - The hero selects the explicitly featured credential and derives its thumbnail and completion month from credential content.
 
 ## Project Shape

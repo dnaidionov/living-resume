@@ -4,6 +4,10 @@ import { extractRoleRequirementsHeuristically } from "@/lib/ai/prompting";
 import { requestJsonCompletion } from "@/lib/ai/openai";
 import { hasProviderConfig, readProviderSummary } from "@/lib/ai/provider-config";
 import { splitCompoundCredentialRequirements } from "@/lib/ai/credential-requirements";
+import {
+  MAX_ATOMIC_REQUIREMENTS,
+  MAX_SOURCE_REQUIREMENTS
+} from "@/lib/ai/requirement-policy";
 
 type RequirementExtractionResponse = {
   requirements?: Array<{
@@ -20,8 +24,6 @@ type RequirementExtractionRequester = (input: {
 }) => Promise<RequirementExtractionResponse>;
 
 const requirementExtractionCacheTtlMs = 10 * 60 * 1000;
-const maxSourceRequirements = 8;
-const maxAtomicRequirements = 12;
 
 function normalizeRoleTextForCache(roleText: string): string {
   return roleText.trim().replace(/\s+/g, " ");
@@ -67,7 +69,7 @@ export function createRequirementExtractionService(
         }
       }
 
-      requirements = splitCompoundCredentialRequirements(requirements).slice(0, maxAtomicRequirements);
+      requirements = splitCompoundCredentialRequirements(requirements).slice(0, MAX_ATOMIC_REQUIREMENTS);
 
       cache.set(normalizedRoleText, {
         requirements,
@@ -129,7 +131,7 @@ function normalizeExtractedRequirements(
       seen.add(key);
       return true;
     })
-    .slice(0, maxSourceRequirements);
+    .slice(0, MAX_SOURCE_REQUIREMENTS);
 }
 
 function normalizeCategory(value: string | undefined): RoleRequirementCategory {

@@ -472,3 +472,9 @@ Use this log for concise, chronological records of meaningful decisions that do 
 - Decision: Recognize broader knowledge and execution wording, separate the eight-item source limit from a twelve-item atomic limit, and model featured credential display data explicitly.
 - Rationale: Evidence policy should not depend on a narrow verb vocabulary, valid knowledge wording should not create false negatives, splitting should not erase an original source requirement, and hero rendering should not rely on array order or hardcoded date/asset values.
 - Scope impact: `lib/ai/credential-requirements.ts`, `lib/ai/requirement-extraction.ts`, `types/content.ts`, `content/credentials/credentials.json`, `components/hero.tsx`, `components/home-page-shell.tsx`, related tests, `docs/architecture/content-model.md`, `docs/qa/test-plan.md`.
+
+## 2026-06-12 - Close remaining delivery verbs and extraction-cap drift
+
+- Decision: Treat launch, scale, maintain, and configure as delivery actions and centralize the eight-source/twelve-atomic requirement limits across LLM and heuristic extraction.
+- Rationale: Credential evidence must not prove execution merely because a job description uses a previously unlisted verb. The atomic preservation contract also cannot depend on whether the primary LLM extractor or heuristic fallback produced the requirements.
+- Scope impact: `lib/ai/credential-requirements.ts`, `lib/ai/requirement-policy.ts`, `lib/ai/requirement-extraction.ts`, `lib/ai/prompting.ts`, credential extraction/retrieval/prompting tests, `docs/architecture/content-model.md`, `docs/qa/test-plan.md`, `docs/agents/handoffs.md`.
