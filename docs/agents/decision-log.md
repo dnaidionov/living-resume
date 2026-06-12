@@ -460,3 +460,9 @@ Use this log for concise, chronological records of meaningful decisions that do 
 - Decision: Scope knowledge-domain noun exceptions to their clause and recursively split mixed credential/delivery requirements across forward and reverse order plus common connectors.
 - Rationale: A phrase such as `build systems` is valid credential-supported knowledge, but it must not suppress a later `deploy production integrations` clause. Connector-only handling also discarded valid knowledge evidence for common wording such as `as well as`, `plus`, and delivery-first compounds.
 - Scope impact: `lib/ai/credential-requirements.ts`, `tests/requirement-extraction.test.ts`, `tests/retrieval.test.ts`, `docs/architecture/content-model.md`, `docs/qa/test-plan.md`, `docs/agents/handoffs.md`.
+
+## 2026-06-11 - Close credential ownership and expiration evidence gaps
+
+- Decision: Treat noun-form accountability (`ownership of`, `leadership of`, `responsibility for`) as delivery evidence, support unpunctuated `plus` compounds, and remove expiration from retrievable credential text while retaining it in metadata.
+- Rationale: Credentials can validate knowledge but cannot establish execution accountability. Common connector punctuation should not change evidence eligibility. Expiration was explicitly modeled for auditability, not public or conversational display.
+- Scope impact: `lib/ai/credential-requirements.ts`, `lib/ai/prompting.ts`, `lib/content/store.ts`, credential extraction/retrieval/prompting/content tests, generated embeddings, `docs/architecture/content-model.md`, `docs/qa/test-plan.md`, `docs/agents/handoffs.md`.

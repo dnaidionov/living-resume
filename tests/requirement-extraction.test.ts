@@ -190,6 +190,39 @@ test("requirement extraction splits common forward and reverse compound connecto
   assert.ok(labels.some((item) => /^responsible to deploy production integrations$/i.test(item)));
 });
 
+test("requirement extraction splits noun-form ownership and unpunctuated plus compounds", async () => {
+  const service = createRequirementExtractionService(
+    async () => ({
+      requirements: [
+        {
+          text: "Knowledge of Claude API and ownership of production integrations.",
+          category: "requirement",
+          priority: "must_have"
+        },
+        {
+          text: "Knowledge of Claude API plus experience building production agents.",
+          category: "requirement",
+          priority: "must_have"
+        },
+        {
+          text: "Experience building production agents plus knowledge of Claude API.",
+          category: "requirement",
+          priority: "must_have"
+        }
+      ]
+    }),
+    () => true
+  );
+
+  const requirements = await service.extract("Ownership and plus compounds");
+  const labels = requirements.map((item) => item.text);
+
+  assert.equal(requirements.length, 6);
+  assert.equal(labels.filter((item) => /^Knowledge of Claude API$/i.test(item)).length, 3);
+  assert.ok(labels.some((item) => /^ownership of production integrations$/i.test(item)));
+  assert.equal(labels.filter((item) => /^experience building production agents$/i.test(item)).length, 2);
+});
+
 test("requirement extraction splits base-form build and deploy delivery clauses", async () => {
   const service = createRequirementExtractionService(
     async () => ({

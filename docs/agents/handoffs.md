@@ -71,8 +71,9 @@
 - reject credential evidence as proof of hands-on implementation, production delivery, ownership, or leadership
 - split compound knowledge/delivery requirements instead of discarding valid knowledge evidence
 - test forward and reverse clause order, modal and base-form delivery verbs, and common connectors
+- include noun-form accountability clauses such as ownership, leadership, and responsibility
 - preserve knowledge-domain noun phrases such as `build systems` and `deploy tooling` while ensuring they do not mask later delivery clauses
-- treat credential expiration as stored evidence metadata only; do not display, hide, or downgrade the credential based on expiration
+- treat credential expiration as stored evidence metadata only; exclude it from UI and retrievable evidence text, and do not hide or downgrade the credential based on expiration
 
 ## Diagram Artifact
 

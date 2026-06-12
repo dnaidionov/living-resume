@@ -4,6 +4,8 @@ const credentialKnowledgeSignal =
   /\b(certification|certified|credential|accreditation|exam|working knowledge|knowledge of|familiarity with|understanding of)\b/i;
 const explicitDeliveryPhrase =
   /\b(hands-on|production implementations?|implementation experience|delivery ownership)\b/i;
+const nominalDeliveryPhrase =
+  /\b(?:ownership|leadership|responsibility)\s+(?:of|for)\b/i;
 const experienceDeliveryPhrase =
   /\bexperience\s+(?:(?:in|with)\s+)?(?:\w+[\s-]+){0,3}(leading|building|implementing|developing|delivering|deploying|owning|operating)\b/i;
 const deliveryAction =
@@ -28,6 +30,7 @@ export function hasDeliverySignal(text: string): boolean {
   const hasContextualBaseAction = contextualBaseDeliveryAction.test(contextualText);
 
   return explicitDeliveryPhrase.test(text) ||
+    nominalDeliveryPhrase.test(text) ||
     experienceDeliveryPhrase.test(text) ||
     deliveryAction.test(text) ||
     toIntroducedDeliveryAction.test(text) ||
@@ -65,8 +68,8 @@ function splitCompoundCredentialRequirementText(text: string): string[] | null {
     /,\s+with\s+/gi,
     /;\s+/g,
     /,\s+(?:and|plus)\s+/gi,
-    /\s+(?:and|as\s+well\s+as)\s+(?=(?:experience|hands-on|lead|leading|build|implement|deliver|deploy|own|operate|responsible|required|must|will|you\s+will)\b)/gi,
-    /\s+(?:and|as\s+well\s+as)\s+(?=(?:certification|certified|credential|accreditation|exam|working knowledge|knowledge of|familiarity with|understanding of)\b)/gi,
+    /\s+(?:and|as\s+well\s+as|plus)\s+(?=(?:experience|hands-on|lead|leading|build|implement|deliver|deploy|own|operate|ownership|leadership|responsibility|responsible|required|must|will|you\s+will)\b)/gi,
+    /\s+(?:and|as\s+well\s+as|plus)\s+(?=(?:certification|certified|credential|accreditation|exam|working knowledge|knowledge of|familiarity with|understanding of)\b)/gi,
     /\s+with\s+(?=(?:ability|capability|responsibility|responsible|required)\s+to\b)/gi
   ];
 

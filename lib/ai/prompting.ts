@@ -425,13 +425,13 @@ export function extractRoleRequirementsHeuristically(roleText: string): Extracte
       return prioritized;
   }
 
-  return [
+  return splitCompoundCredentialRequirements([
     {
       text: sanitizeRequirementSegment(roleText.slice(0, 180)),
       category: "requirement" as const,
       priority: "important" as const
     }
-  ].filter((item) => item.text.length > 0);
+  ].filter((item) => item.text.length > 0));
 }
 
 export function extractRoleRequirements(roleText: string): ExtractedRoleRequirement[] {
@@ -1029,7 +1029,7 @@ function isLikelyRequirementSegment(segment: string): boolean {
   if (isLikelyTitleSegment(cleanedSegment)) {
     return false;
   }
-  if (!/(experience|ability|develop|drive|lead|build|deliver|determine|define|gather|analy|align|work cross-functionally|vision|strategy|road-?map|requirements|mission|goal|bring|technical|familiarity|preferred|certification|certified|clearance)/i.test(normalized)) {
+  if (!/(experience|ability|develop|drive|lead|leadership|build|deliver|determine|define|gather|analy|align|work cross-functionally|vision|strategy|road-?map|requirements|responsibility|ownership|mission|goal|bring|technical|knowledge|understanding|familiarity|preferred|certification|certified|clearance)/i.test(normalized)) {
     return false;
   }
 

@@ -206,6 +206,36 @@ test("compound credential requirements are split before fit matching", () => {
   assert.doesNotMatch(matchRequirements, /leading production implementations/i);
 });
 
+test("credential evidence cannot prove noun-form ownership in compound requirements", () => {
+  const roleText = "Knowledge of Claude API and ownership of production integrations.";
+  const splitRequirements = extractRoleRequirements(roleText);
+  const credentialEvidence: EvidenceChunk[] = [
+    {
+      id: "credential-claude",
+      sourceType: "credential",
+      title: "Claude Certified Architect - Foundations Certification",
+      section: "credential",
+      text: "Anthropic credential validating knowledge of Claude API and Model Context Protocol.",
+      tags: ["credential", "anthropic", "claude", "mcp"],
+      embedding: [1, 0, 0]
+    }
+  ];
+  const result = buildFallbackFitAnalysisResponse(
+    roleText,
+    splitRequirements,
+    credentialEvidence,
+    "text",
+    "recruiter_brief"
+  );
+  const matchRequirements = result.presentation.mode === "recruiter_brief"
+    ? (result.presentation.whereIMatch ?? []).map((item) => item.requirement).join(" ")
+    : "";
+
+  assert.equal(splitRequirements.length, 2);
+  assert.match(matchRequirements, /Knowledge of Claude API/i);
+  assert.doesNotMatch(matchRequirements, /ownership of production integrations/i);
+});
+
 test("resume chat fallback politely declines off-scope personal questions", () => {
   const answer = buildFallbackChatAnswer("What is Dmitry's favorite movie?", [], "resume_qa");
   assert.equal(answer, buildResumeChatScopeRefusal());

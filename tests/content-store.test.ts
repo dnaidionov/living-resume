@@ -29,4 +29,5 @@ test("document index includes verified credential evidence", async () => {
   assert.equal(credential.metadata?.expirationDate, "2026-12-05");
   assert.match(credential.title, /Claude Certified Architect/);
   assert.match(credential.text, /Model Context Protocol \(MCP\)/);
+  assert.doesNotMatch(credential.text, /2026-12-05|valid through|expir/i);
 });

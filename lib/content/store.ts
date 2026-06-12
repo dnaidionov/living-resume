@@ -332,7 +332,7 @@ export async function buildDocuments(): Promise<ContentDocument[]> {
       sourceType: "credential" as const,
       title: credential.title,
       section: "credential",
-      text: `${credential.issuer} credential completed ${credential.completedDate} and valid through ${credential.expirationDate}. ${credential.summary} Validated areas: ${credential.validatedAreas.join(", ")}. Verification: ${credential.verificationUrl}`,
+      text: `${credential.issuer} credential completed ${credential.completedDate}. ${credential.summary} Validated areas: ${credential.validatedAreas.join(", ")}. Verification: ${credential.verificationUrl}`,
       tags: credential.tags,
       metadata: {
         expirationDate: credential.expirationDate
