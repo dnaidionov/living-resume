@@ -103,6 +103,32 @@ test("requirement extraction keeps knowledge domains with production and build n
   assert.match(requirements[1]?.text ?? "", /build systems/i);
 });
 
+test("requirement extraction keeps coordinated knowledge-domain nouns intact", async () => {
+  const service = createRequirementExtractionService(
+    async () => ({
+      requirements: [
+        {
+          text: "Working knowledge of Claude API and build systems.",
+          category: "requirement",
+          priority: "important"
+        },
+        {
+          text: "Familiarity with CI/CD and deploy tooling.",
+          category: "requirement",
+          priority: "important"
+        }
+      ]
+    }),
+    () => true
+  );
+
+  const requirements = await service.extract("Coordinated knowledge-domain requirements");
+
+  assert.equal(requirements.length, 2);
+  assert.equal(requirements[0]?.text, "Working knowledge of Claude API and build systems.");
+  assert.equal(requirements[1]?.text, "Familiarity with CI/CD and deploy tooling.");
+});
+
 test("requirement extraction splits base-form build and deploy delivery clauses", async () => {
   const service = createRequirementExtractionService(
     async () => ({

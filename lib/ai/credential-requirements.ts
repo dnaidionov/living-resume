@@ -14,18 +14,23 @@ const modalDeliveryAction =
   /\b(?:must|will|you\s+will)\s+(build|implement|develop|deliver|deploy|own|operate)\b/i;
 const contextualBaseDeliveryAction =
   /(?:^|[;,:]\s*|\b(?:and|then)\s+|\b(?:ability|capability|responsibility)\s+to\s+)(build|implement|develop|deliver|deploy|own|operate)\b/i;
+const coordinatedKnowledgeDomain =
+  /\band\s+(?:build|deploy)\s+(?:systems?|tooling|tools?|pipelines?|process(?:es)?|infrastructure|architecture)\b/i;
 
 export function hasCredentialKnowledgeSignal(text: string): boolean {
   return credentialKnowledgeSignal.test(text);
 }
 
 export function hasDeliverySignal(text: string): boolean {
+  const hasContextualBaseAction = contextualBaseDeliveryAction.test(text) &&
+    !(hasCredentialKnowledgeSignal(text) && coordinatedKnowledgeDomain.test(text));
+
   return explicitDeliveryPhrase.test(text) ||
     experienceDeliveryPhrase.test(text) ||
     deliveryAction.test(text) ||
     toIntroducedDeliveryAction.test(text) ||
     modalDeliveryAction.test(text) ||
-    contextualBaseDeliveryAction.test(text);
+    hasContextualBaseAction;
 }
 
 export function isCredentialOnlyRequirement(text: string): boolean {

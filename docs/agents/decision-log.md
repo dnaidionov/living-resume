@@ -448,3 +448,9 @@ Use this log for concise, chronological records of meaningful decisions that do 
 - Decision: Model modal delivery language separately from `to`-introduced action language.
 - Rationale: Natural requirements use `must build`, `will build`, and `you will deploy`, while phrases such as `ability to build` use an infinitive. Treating both through one expression left common modal clauses unprotected.
 - Scope impact: `lib/ai/credential-requirements.ts`, `tests/requirement-extraction.test.ts`, `tests/retrieval.test.ts`, `docs/architecture/content-model.md`.
+
+## 2026-06-11 - Preserve coordinated credential knowledge domains
+
+- Decision: Keep coordinated phrases such as `knowledge of Claude API and build systems` and `familiarity with CI/CD and deploy tooling` as atomic knowledge requirements.
+- Rationale: In an explicit knowledge or familiarity frame, `build` and `deploy` can modify domain nouns rather than express execution responsibility. Splitting those phrases creates a false delivery requirement and rejects valid credential evidence. Explicit delivery markers and base-form actions outside this narrow domain-noun pattern remain protected.
+- Scope impact: `lib/ai/credential-requirements.ts`, `tests/requirement-extraction.test.ts`, `tests/retrieval.test.ts`, `docs/architecture/content-model.md`.
