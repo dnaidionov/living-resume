@@ -75,6 +75,8 @@ export type BuildDoc = {
 
 export type Credential = {
   id: string;
+  featured?: boolean;
+  imagePath: string;
   title: string;
   issuer: string;
   completedDate: string;

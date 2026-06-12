@@ -48,7 +48,10 @@ export function HomePageShell({
     <main className={`page-shell ${isChatOpen ? "is-blurred" : ""}`}>
       <div className="page-shell__content">
         <SiteHeader onAskAi={(entryPoint) => openChat(entryPoint)} />
-        <Hero credential={credentials[0] ?? null} onAskAi={(entryPoint) => openChat(entryPoint)} />
+        <Hero
+          credential={credentials.find((credential) => credential.featured) ?? null}
+          onAskAi={(entryPoint) => openChat(entryPoint)}
+        />
 
         <section id="experience" className="section shell">
           <span className="eyebrow">Experience</span>

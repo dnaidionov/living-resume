@@ -24,6 +24,8 @@ test("document index includes verified credential evidence", async () => {
   const credential = documents.find((item) => item.id === "credential-claude-certified-architect-foundations");
 
   assert.equal(credentials[0]?.expirationDate, "2026-12-05");
+  assert.equal(credentials[0]?.featured, true);
+  assert.equal(credentials[0]?.imagePath, "/claude-certified-architect-foundations.jpg");
   assert.ok(credential);
   assert.equal(credential.sourceType, "credential");
   assert.equal(credential.metadata?.expirationDate, "2026-12-05");

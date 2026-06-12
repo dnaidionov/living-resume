@@ -24,6 +24,8 @@
 - Credentials are stored in `content/credentials/credentials.json`.
 - Each credential entry includes:
   - `id`
+  - `featured`
+  - `imagePath`
   - `title`
   - `issuer`
   - `completedDate`
@@ -42,6 +44,10 @@
 - Delivery detection includes noun-form responsibility signals such as `ownership of`, `leadership of`, and `responsibility for`, preventing credential evidence from supporting execution accountability.
 - Base-form delivery verbs are treated as execution signals only at clause boundaries or after action introducers such as `ability to` or `capability to`.
 - Modal delivery clauses such as `must build`, `will build`, and `you will deploy` are also split and evaluated independently from credential-supported knowledge.
+- Credential knowledge signals include common recruiter wording such as proficiency, expertise, and knowledgeable-about phrasing.
+- Delivery detection covers common product and technical execution verbs including design, integrate, ship, manage, architect, and create.
+- Requirement extraction accepts up to eight source requirements and may retain up to twelve atomic requirements after splitting so normalization does not discard a source item.
+- The hero selects the explicitly featured credential and derives its thumbnail and completion month from credential content.
 
 ## Project Shape
 

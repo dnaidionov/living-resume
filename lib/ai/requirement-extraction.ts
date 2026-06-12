@@ -20,6 +20,8 @@ type RequirementExtractionRequester = (input: {
 }) => Promise<RequirementExtractionResponse>;
 
 const requirementExtractionCacheTtlMs = 10 * 60 * 1000;
+const maxSourceRequirements = 8;
+const maxAtomicRequirements = 12;
 
 function normalizeRoleTextForCache(roleText: string): string {
   return roleText.trim().replace(/\s+/g, " ");
@@ -65,7 +67,7 @@ export function createRequirementExtractionService(
         }
       }
 
-      requirements = splitCompoundCredentialRequirements(requirements).slice(0, 8);
+      requirements = splitCompoundCredentialRequirements(requirements).slice(0, maxAtomicRequirements);
 
       cache.set(normalizedRoleText, {
         requirements,
@@ -127,7 +129,7 @@ function normalizeExtractedRequirements(
       seen.add(key);
       return true;
     })
-    .slice(0, 8);
+    .slice(0, maxSourceRequirements);
 }
 
 function normalizeCategory(value: string | undefined): RoleRequirementCategory {

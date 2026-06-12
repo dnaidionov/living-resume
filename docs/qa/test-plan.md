@@ -55,7 +55,10 @@
 - Credential evidence may support explicit certification and knowledge requirements but must not support implementation, delivery, ownership, or leadership claims.
 - Compound credential requirements must be split into atomic knowledge and delivery clauses, including forward/reverse order, modal and base-form actions, and common connectors such as `and`, `as well as`, and `plus`.
 - Delivery-clause coverage must include noun forms such as `ownership of`, `leadership of`, and `responsibility for`.
+- Delivery-clause coverage must include common execution verbs such as design, integrate, ship, manage, architect, and create.
+- Credential knowledge coverage must include proficiency, expertise, and knowledgeable-about wording.
 - Knowledge-domain nouns such as `build systems` and `deploy tooling` must remain credential-eligible without masking later delivery clauses in the same requirement.
+- Atomic splitting must not discard the eighth source requirement; post-split output may exceed the eight-item source limit within the documented atomic cap.
 - Credential expiration must remain in structured metadata and must not appear in public UI or retrievable credential evidence text.
 - Benchmark-tooling regressions must verify that `npm run bench:fit` exists and that the benchmark script reports the active provider/model configuration plus the expected stage timings
 - Provider-config regressions must verify backward-compatible OpenAI defaults, OpenRouter routing, and custom OpenAI-compatible provider resolution from namespaced env vars

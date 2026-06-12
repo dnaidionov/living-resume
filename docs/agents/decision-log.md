@@ -466,3 +466,9 @@ Use this log for concise, chronological records of meaningful decisions that do 
 - Decision: Treat noun-form accountability (`ownership of`, `leadership of`, `responsibility for`) as delivery evidence, support unpunctuated `plus` compounds, and remove expiration from retrievable credential text while retaining it in metadata.
 - Rationale: Credentials can validate knowledge but cannot establish execution accountability. Common connector punctuation should not change evidence eligibility. Expiration was explicitly modeled for auditability, not public or conversational display.
 - Scope impact: `lib/ai/credential-requirements.ts`, `lib/ai/prompting.ts`, `lib/content/store.ts`, credential extraction/retrieval/prompting/content tests, generated embeddings, `docs/architecture/content-model.md`, `docs/qa/test-plan.md`, `docs/agents/handoffs.md`.
+
+## 2026-06-11 - Broaden credential language and make featured display explicit
+
+- Decision: Recognize broader knowledge and execution wording, separate the eight-item source limit from a twelve-item atomic limit, and model featured credential display data explicitly.
+- Rationale: Evidence policy should not depend on a narrow verb vocabulary, valid knowledge wording should not create false negatives, splitting should not erase an original source requirement, and hero rendering should not rely on array order or hardcoded date/asset values.
+- Scope impact: `lib/ai/credential-requirements.ts`, `lib/ai/requirement-extraction.ts`, `types/content.ts`, `content/credentials/credentials.json`, `components/hero.tsx`, `components/home-page-shell.tsx`, related tests, `docs/architecture/content-model.md`, `docs/qa/test-plan.md`.

@@ -5,6 +5,15 @@ import Image from "next/image";
 import { ChatIcon } from "@/components/chat-icon";
 import { DownloadIcon } from "@/components/download-icon";
 
+function formatCredentialDate(value: string): string {
+  const [year, month] = value.split("-").map(Number);
+  return new Intl.DateTimeFormat("en-US", {
+    month: "long",
+    year: "numeric",
+    timeZone: "UTC"
+  }).format(new Date(Date.UTC(year, month - 1, 1)));
+}
+
 export function Hero({
   credential,
   onAskAi
@@ -66,8 +75,8 @@ export function Hero({
             >
               <span className="hero-credential__thumbnail-frame">
                 <Image
-                  src="/claude-certified-architect-foundations.jpg"
-                  alt="Claude Certified Architect - Foundations certificate"
+                  src={credential.imagePath}
+                  alt={`${credential.title} certificate`}
                   className="hero-credential__thumbnail"
                   width={132}
                   height={102}
@@ -75,7 +84,9 @@ export function Hero({
               </span>
               <span className="hero-credential__body">
                 <span className="hero-credential__title">{credential.title}</span>
-                <span className="hero-credential__meta">{credential.issuer} verified &middot; June 2026</span>
+                <span className="hero-credential__meta">
+                  {credential.issuer} verified &middot; {formatCredentialDate(credential.completedDate)}
+                </span>
               </span>
             </a>
           ) : null}

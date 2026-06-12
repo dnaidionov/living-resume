@@ -18,7 +18,8 @@ test("hero tracks linkedin clicks, resume downloads, and ask-ai entry point", ()
 });
 
 test("hero presents the verified credential with the certificate thumbnail", () => {
-  assert.match(heroSource, /src="\/claude-certified-architect-foundations\.jpg"/);
+  assert.match(heroSource, /src=\{credential\.imagePath\}/);
+  assert.match(heroSource, /formatCredentialDate\(credential\.completedDate\)/);
   assert.match(heroSource, /className="hero-credential__thumbnail-frame"/);
   assert.match(heroSource, /trackEvent\("credential_clicked", \{ credential: credential\.id, surface: "hero" \}\)/);
   assert.doesNotMatch(heroSource, /expirationDate|expired|expires/i);
@@ -29,6 +30,6 @@ test("home page tracks GitHub clicks and passes ask-ai entry points through to t
   assert.match(homePageSource, /<SiteHeader onAskAi=\{\(entryPoint\) => openChat\(entryPoint\)\} \/>/);
   assert.match(
     homePageSource,
-    /<Hero credential=\{credentials\[0\] \?\? null\} onAskAi=\{\(entryPoint\) => openChat\(entryPoint\)\} \/>/
+    /credential=\{credentials\.find\(\(credential\) => credential\.featured\) \?\? null\}/
   );
 });
