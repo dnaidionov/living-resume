@@ -266,6 +266,36 @@ test("credential evidence cannot prove launch delivery in compound requirements"
   assert.doesNotMatch(matchRequirements, /launch production agents/i);
 });
 
+test("credential evidence cannot prove oversight delivery in compound requirements", () => {
+  const roleText = "Knowledge of Claude API and oversee production deployments.";
+  const splitRequirements = extractRoleRequirements(roleText);
+  const credentialEvidence: EvidenceChunk[] = [
+    {
+      id: "credential-claude",
+      sourceType: "credential",
+      title: "Claude Certified Architect - Foundations Certification",
+      section: "credential",
+      text: "Anthropic credential validating knowledge of Claude API and Model Context Protocol.",
+      tags: ["credential", "anthropic", "claude", "mcp"],
+      embedding: [1, 0, 0]
+    }
+  ];
+  const result = buildFallbackFitAnalysisResponse(
+    roleText,
+    splitRequirements,
+    credentialEvidence,
+    "text",
+    "recruiter_brief"
+  );
+  const matchRequirements = result.presentation.mode === "recruiter_brief"
+    ? (result.presentation.whereIMatch ?? []).map((item) => item.requirement).join(" ")
+    : "";
+
+  assert.equal(splitRequirements.length, 2);
+  assert.match(matchRequirements, /Knowledge of Claude API/i);
+  assert.doesNotMatch(matchRequirements, /oversee production deployments/i);
+});
+
 test("resume chat fallback politely declines off-scope personal questions", () => {
   const answer = buildFallbackChatAnswer("What is Dmitry's favorite movie?", [], "resume_qa");
   assert.equal(answer, buildResumeChatScopeRefusal());

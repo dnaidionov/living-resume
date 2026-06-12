@@ -101,7 +101,7 @@ function buildRequirementExtractionUserPrompt(roleText: string): string {
     roleText,
     "",
     "Return JSON with one top-level field: requirements.",
-    "requirements must be an array of up to 8 objects.",
+    `Extract up to ${MAX_SOURCE_REQUIREMENTS} source requirements. Split mixed knowledge and delivery clauses into separate objects, returning up to ${MAX_ATOMIC_REQUIREMENTS} atomic objects after splitting.`,
     "Each object must contain:",
     '- text: the extracted requirement text',
     '- category: one of "requirement", "function", "expectation", "mission"',
@@ -131,7 +131,7 @@ function normalizeExtractedRequirements(
       seen.add(key);
       return true;
     })
-    .slice(0, MAX_SOURCE_REQUIREMENTS);
+    .slice(0, MAX_ATOMIC_REQUIREMENTS);
 }
 
 function normalizeCategory(value: string | undefined): RoleRequirementCategory {

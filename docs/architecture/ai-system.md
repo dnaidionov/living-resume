@@ -85,7 +85,7 @@ This keeps the app deployable on both Cloudflare and Vercel without requiring a 
 - Broad senior-product qualification requirements should use a cross-role leadership summary rather than a narrow one-off explainer when the JD is asking for tenure plus generic PM leadership depth.
 - Strategic-execution requirements should prefer explicit strategy/discovery/roadmap evidence over outcome-heavy delivery examples when both are available.
 - When multiple evidence candidates are comparably relevant, newer experience should be preferred over older experience, using structured role/project dates as a secondary ranking signal rather than overriding stronger relevance.
-- Recruiter-facing fit evidence should come from actual experience-bearing sources only. In this repo, that means `resume` and `ai_context`; portfolio/meta project artifacts should not appear as proof of prior role fit.
+- Recruiter-facing fit evidence should normally come from experience-bearing `resume` and `ai_context` sources. The narrow exception is structured `credential` evidence, which may support explicit certification or knowledge requirements but never implementation, delivery, ownership, or leadership. Portfolio/meta project artifacts should not appear as proof of prior role fit.
 
 ## Session model
 

@@ -478,3 +478,9 @@ Use this log for concise, chronological records of meaningful decisions that do 
 - Decision: Treat launch, scale, maintain, and configure as delivery actions and centralize the eight-source/twelve-atomic requirement limits across LLM and heuristic extraction.
 - Rationale: Credential evidence must not prove execution merely because a job description uses a previously unlisted verb. The atomic preservation contract also cannot depend on whether the primary LLM extractor or heuristic fallback produced the requirements.
 - Scope impact: `lib/ai/credential-requirements.ts`, `lib/ai/requirement-policy.ts`, `lib/ai/requirement-extraction.ts`, `lib/ai/prompting.ts`, credential extraction/retrieval/prompting tests, `docs/architecture/content-model.md`, `docs/qa/test-plan.md`, `docs/agents/handoffs.md`.
+
+## 2026-06-12 - Align atomic LLM output and credential retrieval architecture
+
+- Decision: Let the LLM return up to twelve already-split atomic requirements, recognize oversight/execution verbs and limited adverbial action introducers, and document credentials as a narrow exception to experience-only fit evidence.
+- Rationale: Once the extraction prompt asks the model to split compounds, its output count is atomic rather than source-level. Evidence protection must also cover normal recruiter wording such as oversee, drive, execute, run, and `ability to successfully build`. The architecture and ADRs must describe the implemented credential boundary explicitly.
+- Scope impact: `lib/ai/credential-requirements.ts`, `lib/ai/requirement-extraction.ts`, credential extraction/retrieval/prompting tests, `docs/architecture/ai-system.md`, `docs/architecture/content-model.md`, `docs/decisions/0002-static-retrieval-v1.md`, `docs/decisions/0007-fit-analysis-upgrade-plan.md`, `docs/qa/test-plan.md`, `docs/agents/handoffs.md`.

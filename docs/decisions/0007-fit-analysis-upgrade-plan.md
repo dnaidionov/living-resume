@@ -37,6 +37,8 @@ The product still needs to remain:
 - Preserve the public fit-analysis API while improving internal evaluator stages.
 - Keep recruiter-facing bullets deterministic so requirement-to-evidence mapping stays grounded and testable.
 - Limit the LLM to internal fit synthesis, verdict calibration, and recommendation text rather than freeform recruiter-bullet generation.
+- Allow up to eight source requirements and up to twelve atomic requirements after compound splitting in both primary and fallback extraction paths.
+- Permit structured credential evidence only for explicit certification or knowledge requirements; split mixed clauses so execution expectations are evaluated independently.
 
 ## Consequences
 

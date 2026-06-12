@@ -249,6 +249,36 @@ test("requirement extraction preserves all source requirements after atomic spli
   assert.ok(requirements.some((item) => /responsibility number 8/i.test(item.text)));
 });
 
+test("requirement extraction preserves LLM responses that are already split into atomic requirements", async () => {
+  const service = createRequirementExtractionService(
+    async () => ({
+      requirements: [
+        {
+          text: "Knowledge of Claude API.",
+          category: "requirement",
+          priority: "must_have"
+        },
+        {
+          text: "Experience building production agents.",
+          category: "function",
+          priority: "must_have"
+        },
+        ...Array.from({ length: 7 }, (_, index) => ({
+          text: `Lead distinct product responsibility number ${index + 2} across the organization.`,
+          category: "function" as const,
+          priority: "important" as const
+        }))
+      ]
+    }),
+    () => true
+  );
+
+  const requirements = await service.extract("Nine atomic requirements from eight source requirements");
+
+  assert.equal(requirements.length, 9);
+  assert.ok(requirements.some((item) => /responsibility number 8/i.test(item.text)));
+});
+
 test("heuristic requirement extraction preserves all source requirements after atomic splitting", () => {
   const roleText = [
     "Knowledge of Claude API and experience building production agents.",
@@ -302,6 +332,51 @@ test("requirement extraction splits launch, scale, maintain, and configure deliv
   assert.ok(labels.some((item) => /^scale production workflows$/i.test(item)));
   assert.ok(labels.some((item) => /^maintain agent infrastructure$/i.test(item)));
   assert.ok(labels.some((item) => /^configure production integrations$/i.test(item)));
+});
+
+test("requirement extraction splits oversight, execution, drive, run, and adverbial delivery clauses", async () => {
+  const service = createRequirementExtractionService(
+    async () => ({
+      requirements: [
+        {
+          text: "Knowledge of Claude API and oversee production deployments.",
+          category: "requirement",
+          priority: "must_have"
+        },
+        {
+          text: "Understanding of MCP plus drive production rollout.",
+          category: "requirement",
+          priority: "must_have"
+        },
+        {
+          text: "Familiarity with Claude Code and execute production integrations.",
+          category: "requirement",
+          priority: "must_have"
+        },
+        {
+          text: "Expertise in Claude API and run production agent operations.",
+          category: "requirement",
+          priority: "must_have"
+        },
+        {
+          text: "Knowledge of MCP and ability to successfully build production agents.",
+          category: "requirement",
+          priority: "must_have"
+        }
+      ]
+    }),
+    () => true
+  );
+
+  const requirements = await service.extract("Additional execution wording");
+  const labels = requirements.map((item) => item.text);
+
+  assert.equal(requirements.length, 10);
+  assert.ok(labels.some((item) => /^oversee production deployments$/i.test(item)));
+  assert.ok(labels.some((item) => /^drive production rollout$/i.test(item)));
+  assert.ok(labels.some((item) => /^execute production integrations$/i.test(item)));
+  assert.ok(labels.some((item) => /^run production agent operations$/i.test(item)));
+  assert.ok(labels.some((item) => /^ability to successfully build production agents$/i.test(item)));
 });
 
 test("requirement extraction recognizes broader delivery verbs and knowledge wording", async () => {

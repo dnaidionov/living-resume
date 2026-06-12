@@ -73,8 +73,10 @@
 - test forward and reverse clause order, modal and base-form delivery verbs, and common connectors
 - include noun-form accountability clauses such as ownership, leadership, and responsibility
 - include launch, scale, maintain, and configure in delivery-clause adversarial coverage
+- include oversee, execute, drive, run, and adverbial introducers such as `ability to successfully build`
 - preserve knowledge-domain noun phrases such as `build systems` and `deploy tooling` while ensuring they do not mask later delivery clauses
 - verify both LLM and heuristic extraction preserve all eight source requirements after atomic splitting, up to the shared twelve-item cap
+- verify an LLM response that is already split into nine or more atomic requirements is not truncated to the eight-source limit
 - treat credential expiration as stored evidence metadata only; exclude it from UI and retrievable evidence text, and do not hide or downgrade the credential based on expiration
 
 ## Diagram Artifact

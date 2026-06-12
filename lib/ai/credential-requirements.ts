@@ -9,13 +9,13 @@ const nominalDeliveryPhrase =
 const experienceDeliveryPhrase =
   /\bexperience\s+(?:(?:in|with)\s+)?(?:\w+[\s-]+){0,3}(leading|building|implementing|developing|delivering|deploying|owning|operating)\b/i;
 const deliveryAction =
-  /\b(lead|leading|led|implemented|implementing|built|building|developed|developing|delivered|delivering|deployed|deploying|owned|owning|operated|operating|designed|designing|integrated|integrating|shipped|shipping|managed|managing|architected|architecting|created|creating|launched|launching|scaled|scaling|maintained|maintaining|configured|configuring)\b/i;
+  /\b(lead|leading|led|implemented|implementing|built|building|developed|developing|delivered|delivering|deployed|deploying|owned|owning|operated|operating|designed|designing|integrated|integrating|shipped|shipping|managed|managing|architected|architecting|created|creating|launched|launching|scaled|scaling|maintained|maintaining|configured|configuring|oversaw|overseen|overseeing|executed|executing|drove|driving|ran|running)\b/i;
 const toIntroducedDeliveryAction =
-  /\b(?:ability|capability|responsibility|required|responsible)\s+to\s+(build|implement|develop|deliver|deploy|own|operate|design|integrate|ship|manage|architect|create|launch|scale|maintain|configure)\b/i;
+  /\b(?:ability|capability|responsibility|required|responsible)\s+to\s+(?:\w+ly\s+){0,2}(build|implement|develop|deliver|deploy|own|operate|design|integrate|ship|manage|architect|create|launch|scale|maintain|configure|oversee|execute|drive|run)\b/i;
 const modalDeliveryAction =
-  /\b(?:must|will|you\s+will)\s+(build|implement|develop|deliver|deploy|own|operate|design|integrate|ship|manage|architect|create|launch|scale|maintain|configure)\b/i;
+  /\b(?:must|will|you\s+will)\s+(?:\w+ly\s+){0,2}(build|implement|develop|deliver|deploy|own|operate|design|integrate|ship|manage|architect|create|launch|scale|maintain|configure|oversee|execute|drive|run)\b/i;
 const contextualBaseDeliveryAction =
-  /(?:^|[;,:]\s*|\b(?:and|then|plus|as\s+well\s+as)\s+|\b(?:ability|capability|responsibility)\s+to\s+)(build|implement|develop|deliver|deploy|own|operate|design|integrate|ship|manage|architect|create|launch|scale|maintain|configure)\b/i;
+  /(?:^|[;,:]\s*|\b(?:and|then|plus|as\s+well\s+as)\s+|\b(?:ability|capability|responsibility)\s+to\s+(?:\w+ly\s+){0,2})(build|implement|develop|deliver|deploy|own|operate|design|integrate|ship|manage|architect|create|launch|scale|maintain|configure|oversee|execute|drive|run)\b/i;
 const coordinatedKnowledgeDomain =
   /\band\s+(?:build|deploy)\s+(?:systems?|tooling|tools?|pipelines?|process(?:es)?|infrastructure|architecture)\b/gi;
 
@@ -68,7 +68,7 @@ function splitCompoundCredentialRequirementText(text: string): string[] | null {
     /,\s+with\s+/gi,
     /;\s+/g,
     /,\s+(?:and|plus)\s+/gi,
-    /\s+(?:and|as\s+well\s+as|plus)\s+(?=(?:experience|hands-on|lead|leading|build|implement|deliver|deploy|own|operate|design|integrate|ship|manage|architect|create|launch|scale|maintain|configure|ownership|leadership|responsibility|responsible|required|must|will|you\s+will)\b)/gi,
+    /\s+(?:and|as\s+well\s+as|plus)\s+(?=(?:experience|hands-on|lead|leading|build|implement|deliver|deploy|own|operate|design|integrate|ship|manage|architect|create|launch|scale|maintain|configure|oversee|execute|drive|run|ability|capability|ownership|leadership|responsibility|responsible|required|must|will|you\s+will)\b)/gi,
     /\s+(?:and|as\s+well\s+as|plus)\s+(?=(?:certification|certified|credential|accreditation|exam|working knowledge|knowledge of|knowledgeable about|familiarity with|understanding of|proficiency with|expertise in)\b)/gi,
     /\s+with\s+(?=(?:ability|capability|responsibility|responsible|required)\s+to\b)/gi
   ];
