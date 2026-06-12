@@ -15,15 +15,17 @@ const modalDeliveryAction =
 const contextualBaseDeliveryAction =
   /(?:^|[;,:]\s*|\b(?:and|then)\s+|\b(?:ability|capability|responsibility)\s+to\s+)(build|implement|develop|deliver|deploy|own|operate)\b/i;
 const coordinatedKnowledgeDomain =
-  /\band\s+(?:build|deploy)\s+(?:systems?|tooling|tools?|pipelines?|process(?:es)?|infrastructure|architecture)\b/i;
+  /\band\s+(?:build|deploy)\s+(?:systems?|tooling|tools?|pipelines?|process(?:es)?|infrastructure|architecture)\b/gi;
 
 export function hasCredentialKnowledgeSignal(text: string): boolean {
   return credentialKnowledgeSignal.test(text);
 }
 
 export function hasDeliverySignal(text: string): boolean {
-  const hasContextualBaseAction = contextualBaseDeliveryAction.test(text) &&
-    !(hasCredentialKnowledgeSignal(text) && coordinatedKnowledgeDomain.test(text));
+  const contextualText = hasCredentialKnowledgeSignal(text)
+    ? text.replace(coordinatedKnowledgeDomain, " and knowledge-domain tooling")
+    : text;
+  const hasContextualBaseAction = contextualBaseDeliveryAction.test(contextualText);
 
   return explicitDeliveryPhrase.test(text) ||
     experienceDeliveryPhrase.test(text) ||
@@ -54,7 +56,7 @@ export function splitCompoundCredentialRequirements(
   });
 }
 
-function splitCompoundCredentialRequirementText(text: string): [string, string] | null {
+function splitCompoundCredentialRequirementText(text: string): string[] | null {
   if (!hasCredentialKnowledgeSignal(text) || !hasDeliverySignal(text)) {
     return null;
   }
@@ -62,9 +64,10 @@ function splitCompoundCredentialRequirementText(text: string): [string, string] 
   const boundaries = [
     /,\s+with\s+/gi,
     /;\s+/g,
-    /,\s+and\s+/gi,
-    /\s+and\s+(?=(?:experience|hands-on|lead|leading|build|implement|deliver|deploy|own|operate|must|will|you\s+will)\b)/gi,
-    /\s+with\s+(?=(?:ability|capability|responsibility)\s+to\b)/gi
+    /,\s+(?:and|plus)\s+/gi,
+    /\s+(?:and|as\s+well\s+as)\s+(?=(?:experience|hands-on|lead|leading|build|implement|deliver|deploy|own|operate|responsible|required|must|will|you\s+will)\b)/gi,
+    /\s+(?:and|as\s+well\s+as)\s+(?=(?:certification|certified|credential|accreditation|exam|working knowledge|knowledge of|familiarity with|understanding of)\b)/gi,
+    /\s+with\s+(?=(?:ability|capability|responsibility|responsible|required)\s+to\b)/gi
   ];
 
   for (const boundary of boundaries) {
@@ -83,7 +86,10 @@ function splitCompoundCredentialRequirementText(text: string): [string, string] 
           (hasDeliverySignal(left) && hasCredentialKnowledgeSignal(right))
         )
       ) {
-        return [left, right];
+        return [
+          ...(splitCompoundCredentialRequirementText(left) ?? [left]),
+          ...(splitCompoundCredentialRequirementText(right) ?? [right])
+        ];
       }
     }
   }

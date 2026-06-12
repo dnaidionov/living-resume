@@ -454,3 +454,9 @@ Use this log for concise, chronological records of meaningful decisions that do 
 - Decision: Keep coordinated phrases such as `knowledge of Claude API and build systems` and `familiarity with CI/CD and deploy tooling` as atomic knowledge requirements.
 - Rationale: In an explicit knowledge or familiarity frame, `build` and `deploy` can modify domain nouns rather than express execution responsibility. Splitting those phrases creates a false delivery requirement and rejects valid credential evidence. Explicit delivery markers and base-form actions outside this narrow domain-noun pattern remain protected.
 - Scope impact: `lib/ai/credential-requirements.ts`, `tests/requirement-extraction.test.ts`, `tests/retrieval.test.ts`, `docs/architecture/content-model.md`.
+
+## 2026-06-11 - Normalize compound credential requirements by clause
+
+- Decision: Scope knowledge-domain noun exceptions to their clause and recursively split mixed credential/delivery requirements across forward and reverse order plus common connectors.
+- Rationale: A phrase such as `build systems` is valid credential-supported knowledge, but it must not suppress a later `deploy production integrations` clause. Connector-only handling also discarded valid knowledge evidence for common wording such as `as well as`, `plus`, and delivery-first compounds.
+- Scope impact: `lib/ai/credential-requirements.ts`, `tests/requirement-extraction.test.ts`, `tests/retrieval.test.ts`, `docs/architecture/content-model.md`, `docs/qa/test-plan.md`, `docs/agents/handoffs.md`.

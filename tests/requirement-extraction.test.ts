@@ -129,6 +129,67 @@ test("requirement extraction keeps coordinated knowledge-domain nouns intact", a
   assert.equal(requirements[1]?.text, "Familiarity with CI/CD and deploy tooling.");
 });
 
+test("requirement extraction does not let knowledge-domain nouns mask later delivery clauses", async () => {
+  const service = createRequirementExtractionService(
+    async () => ({
+      requirements: [
+        {
+          text: "Working knowledge of Claude API and build systems; deploy production integrations.",
+          category: "requirement",
+          priority: "must_have"
+        }
+      ]
+    }),
+    () => true
+  );
+
+  const requirements = await service.extract("Knowledge domain followed by delivery");
+
+  assert.equal(requirements.length, 2);
+  assert.equal(requirements[0]?.text, "Working knowledge of Claude API and build systems");
+  assert.equal(requirements[1]?.text, "deploy production integrations");
+});
+
+test("requirement extraction splits common forward and reverse compound connectors", async () => {
+  const service = createRequirementExtractionService(
+    async () => ({
+      requirements: [
+        {
+          text: "Knowledge of Claude API as well as experience building production agents.",
+          category: "requirement",
+          priority: "must_have"
+        },
+        {
+          text: "Knowledge of Claude API, plus experience building production agents.",
+          category: "requirement",
+          priority: "must_have"
+        },
+        {
+          text: "Lead production implementations and knowledge of Claude API.",
+          category: "requirement",
+          priority: "must_have"
+        },
+        {
+          text: "Certified in Claude API and responsible to deploy production integrations.",
+          category: "requirement",
+          priority: "must_have"
+        }
+      ]
+    }),
+    () => true
+  );
+
+  const requirements = await service.extract("Common compound connectors");
+  const labels = requirements.map((item) => item.text);
+
+  assert.equal(requirements.length, 8);
+  assert.equal(labels.filter((item) => /^Knowledge of Claude API$/i.test(item)).length, 3);
+  assert.equal(labels.filter((item) => /^experience building production agents$/i.test(item)).length, 2);
+  assert.ok(labels.some((item) => /^Lead production implementations$/i.test(item)));
+  assert.ok(labels.some((item) => /^Certified in Claude API$/i.test(item)));
+  assert.ok(labels.some((item) => /^responsible to deploy production integrations$/i.test(item)));
+});
+
 test("requirement extraction splits base-form build and deploy delivery clauses", async () => {
   const service = createRequirementExtractionService(
     async () => ({

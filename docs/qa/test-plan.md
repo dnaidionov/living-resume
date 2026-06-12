@@ -52,6 +52,9 @@
 - Retrieval regressions must verify that batch query search preserves the single-query result shape for fit-analysis retrieval
 - Fit-analysis retrieval should merge a broad role-text query with prioritized per-requirement queries so downstream requirement matching can choose distinct, role-appropriate evidence instead of overfitting to the top few broad-query chunks
 - Requirement-extraction regressions must verify that identical JD text reuses cached extracted requirements while distinct JD text does not
+- Credential evidence may support explicit certification and knowledge requirements but must not support implementation, delivery, ownership, or leadership claims.
+- Compound credential requirements must be split into atomic knowledge and delivery clauses, including forward/reverse order, modal and base-form actions, and common connectors such as `and`, `as well as`, and `plus`.
+- Knowledge-domain nouns such as `build systems` and `deploy tooling` must remain credential-eligible without masking later delivery clauses in the same requirement.
 - Benchmark-tooling regressions must verify that `npm run bench:fit` exists and that the benchmark script reports the active provider/model configuration plus the expected stage timings
 - Provider-config regressions must verify backward-compatible OpenAI defaults, OpenRouter routing, and custom OpenAI-compatible provider resolution from namespaced env vars
 - Provider-adapter regressions must verify that OpenAI-compatible providers use the configured base URL and provider-specific headers for both completions and embeddings

@@ -65,6 +65,15 @@
 - unresolved risks
 - release gates
 
+## Content Strategist / AI Systems Architect -> QA / Evaluations Agent (Credential Evidence 2026-06-11)
+
+- verify the structured Anthropic credential is available to resume chat and explicit certification/knowledge fit requirements
+- reject credential evidence as proof of hands-on implementation, production delivery, ownership, or leadership
+- split compound knowledge/delivery requirements instead of discarding valid knowledge evidence
+- test forward and reverse clause order, modal and base-form delivery verbs, and common connectors
+- preserve knowledge-domain noun phrases such as `build systems` and `deploy tooling` while ensuring they do not mask later delivery clauses
+- treat credential expiration as stored evidence metadata only; do not display, hide, or downgrade the credential based on expiration
+
 ## Diagram Artifact
 
 - Mermaid source: `docs/agents/handoffs.mmd`

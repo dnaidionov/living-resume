@@ -37,6 +37,8 @@
 - Compound requirements that mix credential or knowledge language with implementation, delivery, ownership, or leadership are split into atomic requirements before retrieval and matching.
 - Delivery classification uses action and experience phrases rather than bare domain nouns, so knowledge of `production-grade` architecture or `build systems` remains eligible for credential support.
 - Coordinated knowledge-domain phrases such as `knowledge of Claude API and build systems` or `familiarity with CI/CD and deploy tooling` remain a single knowledge requirement; verb-shaped domain modifiers are not split into unsupported delivery claims.
+- Knowledge-domain exceptions are clause-local: they do not mask a later delivery clause such as `; deploy production integrations`.
+- Compound normalization handles forward and reverse knowledge/delivery order and common connectors including `and`, `as well as`, and `plus`; recursively separable clauses are normalized into atomic requirements.
 - Base-form delivery verbs are treated as execution signals only at clause boundaries or after action introducers such as `ability to` or `capability to`.
 - Modal delivery clauses such as `must build`, `will build`, and `you will deploy` are also split and evaluated independently from credential-supported knowledge.
 
