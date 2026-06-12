@@ -37,6 +37,7 @@
 - Compound requirements that mix credential or knowledge language with implementation, delivery, ownership, or leadership are split into atomic requirements before retrieval and matching.
 - Delivery classification uses action and experience phrases rather than bare domain nouns, so knowledge of `production-grade` architecture or `build systems` remains eligible for credential support.
 - Base-form delivery verbs are treated as execution signals only at clause boundaries or after action introducers such as `ability to` or `capability to`.
+- Modal delivery clauses such as `must build`, `will build`, and `you will deploy` are also split and evaluated independently from credential-supported knowledge.
 
 ## Project Shape
 

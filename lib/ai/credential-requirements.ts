@@ -8,8 +8,10 @@ const experienceDeliveryPhrase =
   /\bexperience\s+(?:(?:in|with)\s+)?(?:\w+[\s-]+){0,3}(leading|building|implementing|developing|delivering|deploying|owning|operating)\b/i;
 const deliveryAction =
   /\b(lead|leading|led|implemented|implementing|built|building|developed|developing|delivered|delivering|deployed|deploying|owned|owning|operated|operating)\b/i;
-const requiredDeliveryAction =
-  /\b(?:ability|required|must|will|responsible)\s+to\s+(build|implement|develop|deliver|deploy|own|operate)\b/i;
+const toIntroducedDeliveryAction =
+  /\b(?:ability|capability|responsibility|required|responsible)\s+to\s+(build|implement|develop|deliver|deploy|own|operate)\b/i;
+const modalDeliveryAction =
+  /\b(?:must|will|you\s+will)\s+(build|implement|develop|deliver|deploy|own|operate)\b/i;
 const contextualBaseDeliveryAction =
   /(?:^|[;,:]\s*|\b(?:and|then)\s+|\b(?:ability|capability|responsibility)\s+to\s+)(build|implement|develop|deliver|deploy|own|operate)\b/i;
 
@@ -21,7 +23,8 @@ export function hasDeliverySignal(text: string): boolean {
   return explicitDeliveryPhrase.test(text) ||
     experienceDeliveryPhrase.test(text) ||
     deliveryAction.test(text) ||
-    requiredDeliveryAction.test(text) ||
+    toIntroducedDeliveryAction.test(text) ||
+    modalDeliveryAction.test(text) ||
     contextualBaseDeliveryAction.test(text);
 }
 
@@ -55,7 +58,7 @@ function splitCompoundCredentialRequirementText(text: string): [string, string] 
     /,\s+with\s+/gi,
     /;\s+/g,
     /,\s+and\s+/gi,
-    /\s+and\s+(?=(?:experience|hands-on|lead|leading|build|implement|deliver|deploy|own|operate)\b)/gi,
+    /\s+and\s+(?=(?:experience|hands-on|lead|leading|build|implement|deliver|deploy|own|operate|must|will|you\s+will)\b)/gi,
     /\s+with\s+(?=(?:ability|capability|responsibility)\s+to\b)/gi
   ];
 

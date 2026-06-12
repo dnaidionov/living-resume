@@ -443,3 +443,8 @@ Use this log for concise, chronological records of meaningful decisions that do 
 - Decision: Recognize base-form delivery verbs only when they begin an execution clause or follow an action introducer such as `capability to`.
 - Rationale: This closes execution-overclaim paths such as `and build production agents` and `deploy production integrations` without reclassifying knowledge-domain nouns such as `build systems`.
 - Scope impact: `lib/ai/credential-requirements.ts`, `tests/requirement-extraction.test.ts`, `tests/retrieval.test.ts`, `docs/architecture/content-model.md`.
+
+- Agent role: Content Strategist / AI Systems Architect
+- Decision: Model modal delivery language separately from `to`-introduced action language.
+- Rationale: Natural requirements use `must build`, `will build`, and `you will deploy`, while phrases such as `ability to build` use an infinitive. Treating both through one expression left common modal clauses unprotected.
+- Scope impact: `lib/ai/credential-requirements.ts`, `tests/requirement-extraction.test.ts`, `tests/retrieval.test.ts`, `docs/architecture/content-model.md`.

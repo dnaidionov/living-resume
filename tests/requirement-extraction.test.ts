@@ -136,3 +136,37 @@ test("requirement extraction splits base-form build and deploy delivery clauses"
   assert.ok(labels.some((item) => /^deploy production integrations$/i.test(item)));
   assert.ok(labels.some((item) => /^capability to build production agents$/i.test(item)));
 });
+
+test("requirement extraction splits modal build and deploy delivery clauses", async () => {
+  const service = createRequirementExtractionService(
+    async () => ({
+      requirements: [
+        {
+          text: "Strong understanding of Claude API; must build production agents.",
+          category: "requirement",
+          priority: "must_have"
+        },
+        {
+          text: "Working knowledge of Claude API and will build production agents.",
+          category: "requirement",
+          priority: "must_have"
+        },
+        {
+          text: "Working knowledge of Claude API and you will deploy production integrations.",
+          category: "requirement",
+          priority: "must_have"
+        }
+      ]
+    }),
+    () => true
+  );
+
+  const requirements = await service.extract("Modal credential and delivery requirements");
+  const labels = requirements.map((item) => item.text);
+
+  assert.ok(labels.some((item) => /^Strong understanding of Claude API$/i.test(item)));
+  assert.ok(labels.some((item) => /^must build production agents$/i.test(item)));
+  assert.ok(labels.some((item) => /^Working knowledge of Claude API$/i.test(item)));
+  assert.ok(labels.some((item) => /^will build production agents$/i.test(item)));
+  assert.ok(labels.some((item) => /^you will deploy production integrations$/i.test(item)));
+});
