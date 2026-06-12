@@ -57,6 +57,7 @@
 - Delivery-clause coverage must include noun forms such as `ownership of`, `leadership of`, and `responsibility for`.
 - Delivery-clause coverage must include common execution verbs such as design, integrate, ship, manage, architect, create, launch, scale, maintain, configure, oversee, execute, drive, and run.
 - Delivery-clause coverage must recognize limited adverbs between an action introducer and verb, such as `ability to successfully build`.
+- Compound splitting must cover coordinated adverbs, gerunds, passive delivery voice, `responsible for`, `while`/`whereas`, and defensible dash/slash clause separators without splitting coordinated knowledge-domain nouns.
 - Credential knowledge coverage must include proficiency, expertise, and knowledgeable-about wording.
 - Knowledge-domain nouns such as `build systems` and `deploy tooling` must remain credential-eligible without masking later delivery clauses in the same requirement.
 - Atomic splitting must not discard the eighth source requirement in either LLM or heuristic extraction; post-split output may exceed the eight-item source limit within the shared twelve-item atomic cap.

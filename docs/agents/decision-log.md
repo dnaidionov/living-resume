@@ -484,3 +484,9 @@ Use this log for concise, chronological records of meaningful decisions that do 
 - Decision: Let the LLM return up to twelve already-split atomic requirements, recognize oversight/execution verbs and limited adverbial action introducers, and document credentials as a narrow exception to experience-only fit evidence.
 - Rationale: Once the extraction prompt asks the model to split compounds, its output count is atomic rather than source-level. Evidence protection must also cover normal recruiter wording such as oversee, drive, execute, run, and `ability to successfully build`. The architecture and ADRs must describe the implemented credential boundary explicitly.
 - Scope impact: `lib/ai/credential-requirements.ts`, `lib/ai/requirement-extraction.ts`, credential extraction/retrieval/prompting tests, `docs/architecture/ai-system.md`, `docs/architecture/content-model.md`, `docs/decisions/0002-static-retrieval-v1.md`, `docs/decisions/0007-fit-analysis-upgrade-plan.md`, `docs/qa/test-plan.md`, `docs/agents/handoffs.md`.
+
+## 2026-06-12 - Expand compound grammar without weakening knowledge domains
+
+- Decision: Recognize coordinated adverbs, gerunds, passive delivery clauses, `responsible for`, `while`/`whereas`, and dash/slash separators while retaining targeted connector boundaries.
+- Rationale: A generic `and` splitter would incorrectly separate knowledge-domain phrases such as `Claude API and build systems`. Targeted grammar closes normal delivery variants while preserving the existing domain-noun exception and split-not-reject policy.
+- Scope impact: `lib/ai/credential-requirements.ts`, credential extraction/retrieval/prompting tests, `docs/architecture/content-model.md`, `docs/qa/test-plan.md`, `docs/agents/handoffs.md`.

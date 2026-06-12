@@ -379,6 +379,84 @@ test("requirement extraction splits oversight, execution, drive, run, and adverb
   assert.ok(labels.some((item) => /^ability to successfully build production agents$/i.test(item)));
 });
 
+test("requirement extraction splits coordinated adverbs, responsibility, gerunds, and passive delivery", async () => {
+  const service = createRequirementExtractionService(
+    async () => ({
+      requirements: [
+        {
+          text: "Knowledge of Claude API and successfully build production agents.",
+          category: "requirement",
+          priority: "must_have"
+        },
+        {
+          text: "Knowledge of Claude API and rapidly deploy production integrations.",
+          category: "requirement",
+          priority: "must_have"
+        },
+        {
+          text: "Knowledge of Claude API, while responsible for production delivery.",
+          category: "requirement",
+          priority: "must_have"
+        },
+        {
+          text: "Knowledge of Claude API while building production agents.",
+          category: "requirement",
+          priority: "must_have"
+        },
+        {
+          text: "Knowledge of Claude API and integrating Claude into production workflows.",
+          category: "requirement",
+          priority: "must_have"
+        },
+        {
+          text: "Knowledge of Claude API and production agents were built at scale.",
+          category: "requirement",
+          priority: "must_have"
+        }
+      ]
+    }),
+    () => true
+  );
+
+  const requirements = await service.extract("Coordinated and passive delivery wording");
+  const labels = requirements.map((item) => item.text);
+
+  assert.equal(requirements.length, 12);
+  assert.ok(labels.some((item) => /^successfully build production agents$/i.test(item)));
+  assert.ok(labels.some((item) => /^rapidly deploy production integrations$/i.test(item)));
+  assert.ok(labels.some((item) => /^responsible for production delivery$/i.test(item)));
+  assert.ok(labels.some((item) => /^building production agents$/i.test(item)));
+  assert.ok(labels.some((item) => /^integrating Claude into production workflows$/i.test(item)));
+  assert.ok(labels.some((item) => /^production agents were built at scale$/i.test(item)));
+});
+
+test("requirement extraction splits dash and slash delivery separators", async () => {
+  const service = createRequirementExtractionService(
+    async () => ({
+      requirements: [
+        {
+          text: "Knowledge of Claude API - deploy production integrations.",
+          category: "requirement",
+          priority: "must_have"
+        },
+        {
+          text: "Familiarity with MCP / build production agents.",
+          category: "requirement",
+          priority: "must_have"
+        }
+      ]
+    }),
+    () => true
+  );
+
+  const requirements = await service.extract("Punctuation-separated delivery wording");
+  const labels = requirements.map((item) => item.text);
+
+  assert.equal(requirements.length, 4);
+  assert.ok(labels.some((item) => /^deploy production integrations$/i.test(item)));
+  assert.ok(labels.some((item) => /^build production agents$/i.test(item)));
+});
+
 test("requirement extraction recognizes broader delivery verbs and knowledge wording", async () => {
   const service = createRequirementExtractionService(
     async () => ({

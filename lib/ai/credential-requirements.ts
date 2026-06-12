@@ -6,6 +6,8 @@ const explicitDeliveryPhrase =
   /\b(hands-on|production implementations?|implementation experience|delivery ownership)\b/i;
 const nominalDeliveryPhrase =
   /\b(?:ownership|leadership|responsibility)\s+(?:of|for)\b/i;
+const responsibleDeliveryPhrase =
+  /\bresponsible\s+for\b/i;
 const experienceDeliveryPhrase =
   /\bexperience\s+(?:(?:in|with)\s+)?(?:\w+[\s-]+){0,3}(leading|building|implementing|developing|delivering|deploying|owning|operating)\b/i;
 const deliveryAction =
@@ -15,7 +17,7 @@ const toIntroducedDeliveryAction =
 const modalDeliveryAction =
   /\b(?:must|will|you\s+will)\s+(?:\w+ly\s+){0,2}(build|implement|develop|deliver|deploy|own|operate|design|integrate|ship|manage|architect|create|launch|scale|maintain|configure|oversee|execute|drive|run)\b/i;
 const contextualBaseDeliveryAction =
-  /(?:^|[;,:]\s*|\b(?:and|then|plus|as\s+well\s+as)\s+|\b(?:ability|capability|responsibility)\s+to\s+(?:\w+ly\s+){0,2})(build|implement|develop|deliver|deploy|own|operate|design|integrate|ship|manage|architect|create|launch|scale|maintain|configure|oversee|execute|drive|run)\b/i;
+  /(?:^|[;,:]\s*|\s(?:and|then|plus|as\s+well\s+as|while|whereas)\s+|\s[-/]\s+|\b(?:ability|capability|responsibility)\s+to\s+)(?:\w+ly\s+){0,2}(build|implement|develop|deliver|deploy|own|operate|design|integrate|ship|manage|architect|create|launch|scale|maintain|configure|oversee|execute|drive|run)\b/i;
 const coordinatedKnowledgeDomain =
   /\band\s+(?:build|deploy)\s+(?:systems?|tooling|tools?|pipelines?|process(?:es)?|infrastructure|architecture)\b/gi;
 
@@ -31,6 +33,7 @@ export function hasDeliverySignal(text: string): boolean {
 
   return explicitDeliveryPhrase.test(text) ||
     nominalDeliveryPhrase.test(text) ||
+    responsibleDeliveryPhrase.test(text) ||
     experienceDeliveryPhrase.test(text) ||
     deliveryAction.test(text) ||
     toIntroducedDeliveryAction.test(text) ||
@@ -68,7 +71,10 @@ function splitCompoundCredentialRequirementText(text: string): string[] | null {
     /,\s+with\s+/gi,
     /;\s+/g,
     /,\s+(?:and|plus)\s+/gi,
-    /\s+(?:and|as\s+well\s+as|plus)\s+(?=(?:experience|hands-on|lead|leading|build|implement|deliver|deploy|own|operate|design|integrate|ship|manage|architect|create|launch|scale|maintain|configure|oversee|execute|drive|run|ability|capability|ownership|leadership|responsibility|responsible|required|must|will|you\s+will)\b)/gi,
+    /,?\s+(?:while|whereas)\s+/gi,
+    /\s+[-/]\s+/g,
+    /\s+(?:and|as\s+well\s+as|plus)\s+(?=(?:(?:\w+ly)\s+){0,2}(?:experience|hands-on|lead|leading|build|implement|deliver|deploy|own|operate|design|integrate|ship|manage|architect|create|launch|scale|maintain|configure|oversee|execute|drive|run|building|implementing|delivering|deploying|owning|operating|designing|integrating|shipping|managing|architecting|creating|launching|scaling|maintaining|configuring|overseeing|executing|driving|running|ability|capability|ownership|leadership|responsibility|responsible|required|must|will|you\s+will)\b)/gi,
+    /\s+(?:and|as\s+well\s+as|plus)\s+(?=(?:\w+\s+){1,5}(?:was|were|is|are|be|been)\s+(?:built|implemented|developed|delivered|deployed|designed|integrated|shipped|managed|architected|created|launched|scaled|maintained|configured|executed)\b)/gi,
     /\s+(?:and|as\s+well\s+as|plus)\s+(?=(?:certification|certified|credential|accreditation|exam|working knowledge|knowledge of|knowledgeable about|familiarity with|understanding of|proficiency with|expertise in)\b)/gi,
     /\s+with\s+(?=(?:ability|capability|responsibility|responsible|required)\s+to\b)/gi
   ];

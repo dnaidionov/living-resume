@@ -47,6 +47,7 @@
 - Credential knowledge signals include common recruiter wording such as proficiency, expertise, and knowledgeable-about phrasing.
 - Delivery detection covers common product and technical execution verbs including design, integrate, ship, manage, architect, create, launch, scale, maintain, configure, oversee, execute, drive, and run.
 - Delivery introducers may contain limited adverbs, such as `ability to successfully build`, without bypassing compound splitting.
+- Coordinated clauses may also begin with limited adverbs, gerunds, passive delivery wording, or `while`/`whereas`; dash and slash separators are treated as clause boundaries when the two sides independently validate as knowledge and delivery.
 - Requirement extraction accepts up to eight source requirements and may retain up to twelve atomic requirements after splitting so normalization does not discard a source item.
 - Source and atomic requirement limits are shared by the LLM and heuristic extraction paths rather than duplicated in each implementation.
 - The hero selects the explicitly featured credential and derives its thumbnail and completion month from credential content.
