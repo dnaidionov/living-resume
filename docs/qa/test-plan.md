@@ -60,8 +60,10 @@
 - Compound splitting must cover coordinated adverbs, gerunds, passive delivery voice, `responsible for`, `while`/`whereas`, and defensible dash/slash clause separators without splitting coordinated knowledge-domain nouns.
 - Credential knowledge coverage must include proficiency, expertise, and knowledgeable-about wording.
 - Knowledge-domain nouns such as `build systems` and `deploy tooling` must remain credential-eligible without masking later delivery clauses in the same requirement.
+- Knowledge-domain noun protection must apply consistently across `and`, `plus`, and `as well as`.
 - Atomic splitting must not discard the eighth source requirement in either LLM or heuristic extraction; post-split output may exceed the eight-item source limit within the shared twelve-item atomic cap.
 - LLM responses that already contain split atomic requirements must be normalized against the twelve-item atomic cap rather than truncated to the eight-source limit.
+- Heuristic extraction must rank all source requirements before applying the eight-source limit so later must-haves are not dropped due to document order.
 - Credential expiration must remain in structured metadata and must not appear in public UI or retrievable credential evidence text.
 - Benchmark-tooling regressions must verify that `npm run bench:fit` exists and that the benchmark script reports the active provider/model configuration plus the expected stage timings
 - Provider-config regressions must verify backward-compatible OpenAI defaults, OpenRouter routing, and custom OpenAI-compatible provider resolution from namespaced env vars

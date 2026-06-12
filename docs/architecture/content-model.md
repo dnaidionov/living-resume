@@ -38,7 +38,7 @@
 - Fit analysis may use credential evidence only for explicit certification, familiarity, or knowledge requirements. It cannot establish hands-on implementation or delivery ownership.
 - Compound requirements that mix credential or knowledge language with implementation, delivery, ownership, or leadership are split into atomic requirements before retrieval and matching.
 - Delivery classification uses action and experience phrases rather than bare domain nouns, so knowledge of `production-grade` architecture or `build systems` remains eligible for credential support.
-- Coordinated knowledge-domain phrases such as `knowledge of Claude API and build systems` or `familiarity with CI/CD and deploy tooling` remain a single knowledge requirement; verb-shaped domain modifiers are not split into unsupported delivery claims.
+- Coordinated knowledge-domain phrases using `and`, `plus`, or `as well as`, such as `knowledge of Claude API plus build systems`, remain a single knowledge requirement; verb-shaped domain modifiers are not split into unsupported delivery claims.
 - Knowledge-domain exceptions are clause-local: they do not mask a later delivery clause such as `; deploy production integrations`.
 - Compound normalization handles forward and reverse knowledge/delivery order and common connectors including `and`, `as well as`, and `plus`; recursively separable clauses are normalized into atomic requirements.
 - Delivery detection includes noun-form responsibility signals such as `ownership of`, `leadership of`, and `responsibility for`, preventing credential evidence from supporting execution accountability.
@@ -50,6 +50,7 @@
 - Coordinated clauses may also begin with limited adverbs, gerunds, passive delivery wording, or `while`/`whereas`; dash and slash separators are treated as clause boundaries when the two sides independently validate as knowledge and delivery.
 - Requirement extraction accepts up to eight source requirements and may retain up to twelve atomic requirements after splitting so normalization does not discard a source item.
 - Source and atomic requirement limits are shared by the LLM and heuristic extraction paths rather than duplicated in each implementation.
+- Heuristic extraction ranks all defensible source requirements before applying the eight-source cap, then splits retained compounds within the twelve-atomic cap.
 - The hero selects the explicitly featured credential and derives its thumbnail and completion month from credential content.
 
 ## Project Shape

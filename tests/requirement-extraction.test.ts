@@ -130,6 +130,32 @@ test("requirement extraction keeps coordinated knowledge-domain nouns intact", a
   assert.equal(requirements[1]?.text, "Familiarity with CI/CD and deploy tooling.");
 });
 
+test("requirement extraction keeps coordinated knowledge domains intact across equivalent connectors", async () => {
+  const service = createRequirementExtractionService(
+    async () => ({
+      requirements: [
+        {
+          text: "Knowledge of Claude API plus build systems.",
+          category: "requirement",
+          priority: "important"
+        },
+        {
+          text: "Expertise in Claude API as well as deploy tooling.",
+          category: "requirement",
+          priority: "important"
+        }
+      ]
+    }),
+    () => true
+  );
+
+  const requirements = await service.extract("Equivalent knowledge-domain connectors");
+
+  assert.equal(requirements.length, 2);
+  assert.equal(requirements[0]?.text, "Knowledge of Claude API plus build systems.");
+  assert.equal(requirements[1]?.text, "Expertise in Claude API as well as deploy tooling.");
+});
+
 test("requirement extraction does not let knowledge-domain nouns mask later delivery clauses", async () => {
   const service = createRequirementExtractionService(
     async () => ({
@@ -295,6 +321,21 @@ test("heuristic requirement extraction preserves all source requirements after a
   assert.ok(requirements.some((item) => /responsibility number 8/i.test(item.text)));
 });
 
+test("heuristic requirement extraction ranks all source requirements before applying the source cap", () => {
+  const roleText = [
+    ...Array.from(
+      { length: 8 },
+      (_, index) => `Support ordinary product responsibility number ${index + 1} across the organization.`
+    ),
+    "Must have Anthropic certification and experience building production Claude agents."
+  ].join("\n");
+
+  const requirements = extractRoleRequirementsHeuristically(roleText);
+
+  assert.ok(requirements.some((item) => /Anthropic certification/i.test(item.text)));
+  assert.ok(requirements.some((item) => /experience building production Claude agents/i.test(item.text)));
+});
+
 test("requirement extraction splits launch, scale, maintain, and configure delivery clauses", async () => {
   const service = createRequirementExtractionService(
     async () => ({
@@ -455,6 +496,46 @@ test("requirement extraction splits dash and slash delivery separators", async (
   assert.equal(requirements.length, 4);
   assert.ok(labels.some((item) => /^deploy production integrations$/i.test(item)));
   assert.ok(labels.some((item) => /^build production agents$/i.test(item)));
+});
+
+test("requirement extraction splits punctuation, explicit modal subjects, and adverbial passive delivery", async () => {
+  const service = createRequirementExtractionService(
+    async () => ({
+      requirements: [
+        {
+          text: "Knowledge of Claude API, deploy production integrations.",
+          category: "requirement",
+          priority: "must_have"
+        },
+        {
+          text: "Knowledge of Claude API: configure production integrations.",
+          category: "requirement",
+          priority: "must_have"
+        },
+        {
+          text: "Knowledge of Claude API and the team will deploy production integrations.",
+          category: "requirement",
+          priority: "must_have"
+        },
+        {
+          text: "Knowledge of Claude API and production integrations were successfully deployed.",
+          category: "requirement",
+          priority: "must_have"
+        }
+      ]
+    }),
+    () => true
+  );
+
+  const requirements = await service.extract("Punctuation and delivery voice variants");
+  const labels = requirements.map((item) => item.text);
+
+  assert.equal(requirements.length, 8);
+  assert.equal(labels.filter((item) => /^Knowledge of Claude API$/i.test(item)).length, 4);
+  assert.ok(labels.some((item) => /^deploy production integrations$/i.test(item)));
+  assert.ok(labels.some((item) => /^configure production integrations$/i.test(item)));
+  assert.ok(labels.some((item) => /^the team will deploy production integrations$/i.test(item)));
+  assert.ok(labels.some((item) => /^production integrations were successfully deployed$/i.test(item)));
 });
 
 test("requirement extraction recognizes broader delivery verbs and knowledge wording", async () => {

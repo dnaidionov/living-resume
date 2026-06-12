@@ -417,13 +417,13 @@ export function extractRoleRequirementsHeuristically(roleText: string): Extracte
     .filter((item) => item.length >= 20)
     .filter(isLikelyRequirementSegment);
 
-  const sourceRequirements = dedupeRequirements(segments)
-    .slice(0, MAX_SOURCE_REQUIREMENTS)
-    .map((segment) => ({
+  const sourceRequirements = prioritizeRequirements(
+    dedupeRequirements(segments).map((segment) => ({
       text: segment,
       category: inferRequirementCategory(segment),
       priority: inferRequirementPriority(segment)
-    }));
+    }))
+  ).slice(0, MAX_SOURCE_REQUIREMENTS);
   const prioritized = prioritizeRequirements(
     splitCompoundCredentialRequirements(sourceRequirements)
   ).slice(0, MAX_ATOMIC_REQUIREMENTS);

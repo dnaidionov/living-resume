@@ -490,3 +490,9 @@ Use this log for concise, chronological records of meaningful decisions that do 
 - Decision: Recognize coordinated adverbs, gerunds, passive delivery clauses, `responsible for`, `while`/`whereas`, and dash/slash separators while retaining targeted connector boundaries.
 - Rationale: A generic `and` splitter would incorrectly separate knowledge-domain phrases such as `Claude API and build systems`. Targeted grammar closes normal delivery variants while preserving the existing domain-noun exception and split-not-reject policy.
 - Scope impact: `lib/ai/credential-requirements.ts`, credential extraction/retrieval/prompting tests, `docs/architecture/content-model.md`, `docs/qa/test-plan.md`, `docs/agents/handoffs.md`.
+
+## 2026-06-12 - Rank before capping and normalize equivalent connectors
+
+- Decision: Rank heuristic source requirements before the eight-item cap, protect coordinated knowledge nouns across `and`, `plus`, and `as well as`, and add validated comma/colon, explicit-subject modal, and adverbial-passive split boundaries.
+- Rationale: Source order should not suppress a later must-have. Equivalent knowledge connectors should not change evidence eligibility, while common punctuation and voice variants should preserve valid knowledge evidence through atomic splitting.
+- Scope impact: `lib/ai/prompting.ts`, `lib/ai/credential-requirements.ts`, extraction/retrieval tests, `docs/architecture/content-model.md`, `docs/qa/test-plan.md`.
