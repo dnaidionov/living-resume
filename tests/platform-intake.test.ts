@@ -541,6 +541,7 @@ test("fetchJobDescriptionFromUrl rejects Waymo reader challenge and bot-denial b
       "Checking your browser before accessing careers.withwaymo.com. Please complete the security verification to prove you are human.",
       "Automated requests from this client have been denied. Access is restricted to human visitors.",
       "Access denied. This request was blocked by our security service.",
+      "Access to this website has been denied by the security service.",
       "403 Forbidden. You do not have permission to access this resource.",
       "Upstream service returned an internal server error while processing this request."
     ]) {

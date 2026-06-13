@@ -1374,7 +1374,8 @@ test("requirement extraction recognizes embedded execution qualifiers", async ()
         "Knowledge of Claude API developed through deploying production integrations.",
         "Knowledge of Claude API acquired by implementing production workflows.",
         "Knowledge of Claude API from building production agents.",
-        "Knowledge of Claude API based on building production agents."
+        "Knowledge of Claude API based on building production agents.",
+        "Knowledge of Claude API demonstrated by building production agents."
       ].map((text) => ({
         text,
         category: "requirement" as const,
@@ -1386,7 +1387,7 @@ test("requirement extraction recognizes embedded execution qualifiers", async ()
 
   const requirements = await service.extract("Embedded execution qualifiers");
 
-  assert.equal(requirements.length, 5);
+  assert.equal(requirements.length, 6);
   assert.ok(requirements.every((item) => item.category === "function"));
   assert.ok(requirements.every((item) => !/^Knowledge of Claude API (?:gained|developed|acquired)$/i.test(item.text)));
 });

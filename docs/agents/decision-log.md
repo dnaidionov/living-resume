@@ -548,3 +548,5 @@ Use this log for concise, chronological records of meaningful decisions that do 
 - Resolution: Added bounded body detection for automated-request denial/blocking and human-only access messages before scoring or caching.
 - Final closure finding: `knowledge ... based on building` still overclaimed execution, while explicit access-denied/403/security-service/upstream-error reader bodies could pass under a generic title.
 - Resolution: Added `based on <delivery action>` to execution-origin grammar and reject explicit denial, forbidden, security-block, and upstream-error body semantics before scoring or caching.
+- Verification review finding: `demonstrated by <delivery action>` and access-denial sentences with an intervening target phrase remained outside the generalized rules.
+- Resolution: Extended execution-origin participles to `demonstrated by` and made access-denial body matching tolerate bounded intervening target text.
