@@ -127,7 +127,7 @@ function isTransientOrWafResponse(response: Response): boolean {
 function isReaderErrorResponse(readerText: string, title: string): boolean {
   return /^Warning:\s+Target URL returned error\b/im.test(readerText) ||
     /\b(?:404|410|not found|page unavailable|access denied|internal server error|upstream timeout|gateway timeout|service unavailable|just a moment|verify (?:that )?you are human|security check|captcha|checking your browser|robot challenge|attention required)\b/i.test(title) ||
-    /\b(?:checking your browser|security verification|prove you are human|verify (?:that )?you are human|robot challenge|captcha|attention required|automated requests?[^.\n]{0,80}(?:denied|blocked|restricted)|access (?:is )?restricted to human visitors)\b/i.test(readerText);
+    /\b(?:checking your browser|security verification|prove you are human|verify (?:that )?you are human|robot challenge|captcha|attention required|automated requests?[^.\n]{0,80}(?:denied|blocked|restricted)|access (?:is )?(?:denied|restricted to human visitors)|403 forbidden|request was blocked by (?:our|the) security service|upstream (?:service )?(?:returned|reported)[^.\n]{0,80}(?:error|unavailable)|internal server error)\b/i.test(readerText);
 }
 
 function normalizeReaderContent(value: string): string {

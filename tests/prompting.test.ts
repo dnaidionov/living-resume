@@ -518,7 +518,8 @@ test("credential evidence cannot prove embedded execution qualifiers", () => {
     "Knowledge of Claude API gained through building production agents.",
     "Knowledge of Claude API developed through deploying production integrations.",
     "Knowledge of Claude API acquired by implementing production workflows.",
-    "Knowledge of Claude API from building production agents."
+    "Knowledge of Claude API from building production agents.",
+    "Knowledge of Claude API based on building production agents."
   ]) {
     const result = buildFallbackFitAnalysisResponse(
       roleText,
@@ -531,7 +532,7 @@ test("credential evidence cannot prove embedded execution qualifiers", () => {
       ? (result.presentation.whereIMatch ?? []).flatMap((item) => [item.requirement, item.support]).join(" ")
       : "";
 
-    assert.doesNotMatch(matchText, /gained through|developed through|acquired by|from building/i);
+    assert.doesNotMatch(matchText, /gained through|developed through|acquired by|from building|based on building/i);
   }
 });
 

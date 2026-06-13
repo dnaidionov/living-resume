@@ -539,7 +539,10 @@ test("fetchJobDescriptionFromUrl rejects Waymo reader challenge and bot-denial b
   try {
     for (const denialText of [
       "Checking your browser before accessing careers.withwaymo.com. Please complete the security verification to prove you are human.",
-      "Automated requests from this client have been denied. Access is restricted to human visitors."
+      "Automated requests from this client have been denied. Access is restricted to human visitors.",
+      "Access denied. This request was blocked by our security service.",
+      "403 Forbidden. You do not have permission to access this resource.",
+      "Upstream service returned an internal server error while processing this request."
     ]) {
       let calls = 0;
       globalThis.fetch = async () => {

@@ -546,3 +546,5 @@ Use this log for concise, chronological records of meaningful decisions that do 
 - Resolution: Extended embedded execution-origin grammar to `from <delivery action>` and reject challenge semantics in both reader titles and bodies before scoring or caching.
 - Closure review finding: A generic reader title plus explicit automated-request denial text could still pass when padded with job-like headings.
 - Resolution: Added bounded body detection for automated-request denial/blocking and human-only access messages before scoring or caching.
+- Final closure finding: `knowledge ... based on building` still overclaimed execution, while explicit access-denied/403/security-service/upstream-error reader bodies could pass under a generic title.
+- Resolution: Added `based on <delivery action>` to execution-origin grammar and reject explicit denial, forbidden, security-block, and upstream-error body semantics before scoring or caching.

@@ -44,7 +44,7 @@ const assignedDelivery = new RegExp(
   "i"
 );
 const embeddedExecutionQualifier = new RegExp(
-  `\\b(?:(?:gained|developed|acquired)\\s+(?:through|by)|from)\\s+(?:\\w+[\\s-]+){0,2}${deliveryVerbForms}\\b`,
+  `\\b(?:(?:gained|developed|acquired)\\s+(?:through|by)|from|based\\s+on)\\s+(?:\\w+[\\s-]+){0,2}${deliveryVerbForms}\\b`,
   "i"
 );
 const nominalDeliveryHistory =
