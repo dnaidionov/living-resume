@@ -67,7 +67,7 @@
 - Broader accountability and delivery-history framing, including accountability for, ownership over, proven success, history of delivery, and assigned/charged work, is execution evidence.
 - `with` is a clause boundary only for validated action introducers; generic `with` inside phrases such as `experience with building` remains part of the delivery atom.
 - Operational gerunds followed by domain nouns, such as monitoring tools and testing methodologies, remain knowledge domains when coordinated under an explicit knowledge frame.
-- Knowledge claims qualified by execution history, such as knowledge gained or developed through building, deploying, or implementing, are delivery-bearing requirements; unsplit clauses are recategorized from model-provided `requirement` to `function` when delivery classification applies.
+- Knowledge claims qualified by execution history, such as knowledge gained, developed, acquired, or derived from building, deploying, or implementing, are delivery-bearing requirements; unsplit clauses are recategorized from model-provided `requirement` to `function` when delivery classification applies.
 - Reverse recursive slash compounds split at the knowledge boundary so valid credential-supported knowledge is retained.
 - Recruiter-facing credential support identifies Anthropic as issuer and is phrased as certification validation, never as employment or prior-role experience.
 - Credential issuer attribution is derived from structured credential metadata rather than display text or topical tags.

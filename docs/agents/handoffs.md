@@ -88,6 +88,7 @@
 - keep operational execution verbs and deployment accountability outside credential evidence; never forward source query parameters to the Waymo reader
 - preserve complete `with`-framed delivery atoms, protect coordinated operational knowledge nouns, and reject reader infrastructure/challenge titles before scoring
 - treat embedded execution qualifiers as delivery and recategorize unsplit delivery clauses instead of preserving an upstream `requirement` category
+- detect execution origin introduced by `from`, and reject reader challenge semantics from both metadata and body content
 
 ## Diagram Artifact
 

@@ -82,7 +82,7 @@
 - Operational execution and accountability coverage must include optimize, monitor, troubleshoot, test, and deployment ownership at extraction, retrieval, and visible-output layers.
 - Broader accountability/history and assignment framing must cover accountability for, ownership over, proven success, history of delivery, tasked with, and charged with.
 - Generic `with` must not split complete delivery phrases, and coordinated monitoring/testing domain nouns must remain credential-eligible knowledge.
-- Embedded execution qualifiers (`gained through`, `developed through`, `acquired by`) must block credential evidence and must be normalized as delivery even when no atomic boundary split is available.
+- Embedded execution qualifiers (`gained through`, `developed through`, `acquired by`, `from building`) must block credential evidence and must be normalized as delivery even when no atomic boundary split is available.
 - Recruiter-facing credential support must identify Anthropic as issuer, use certification-validation language, and must not render the credential as prior employment.
 - Credential issuer tests must derive attribution from credential provenance rather than tags.
 - Waymo URL intake must fall back to the public text reader only after a direct WAF-blocked or unreadable response; non-Waymo JavaScript-rendered pages must retain the existing explicit failure behavior.
@@ -90,6 +90,7 @@
 - Waymo WAF detection must use the response header independently of body length, including non-empty challenge shells.
 - Reader fallback requests must omit all source URL query parameters to avoid disclosing referral, session, candidate, or signed tokens to a third party.
 - Reader error-title rejection must include infrastructure and challenge titles such as internal server errors, upstream timeouts, service unavailability, human-verification prompts, security checks, CAPTCHA, and browser-challenge pages.
+- Reader challenge rejection must inspect both title and body semantics so browser checks, robot challenges, Cloudflare attention pages, and human-verification content cannot pass by adding job-like headings.
 - Atomic splitting must not discard the eighth source requirement in either LLM or heuristic extraction; post-split output may exceed the eight-item source limit within the shared twelve-item atomic cap.
 - LLM responses that already contain split atomic requirements must be normalized against the twelve-item atomic cap rather than truncated to the eight-source limit.
 - Heuristic extraction must rank all source requirements before applying the eight-source limit so later must-haves are not dropped due to document order.
