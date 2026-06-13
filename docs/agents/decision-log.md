@@ -544,3 +544,5 @@ Use this log for concise, chronological records of meaningful decisions that do 
 - Resolution: Expanded reader title rejection to explicit human-verification, security-check, and CAPTCHA titles before content scoring or caching.
 - Material-only re-review finding: Execution history phrased as `knowledge ... from building` and challenge pages with alternate browser/robot/Cloudflare wording still reached visible analysis.
 - Resolution: Extended embedded execution-origin grammar to `from <delivery action>` and reject challenge semantics in both reader titles and bodies before scoring or caching.
+- Closure review finding: A generic reader title plus explicit automated-request denial text could still pass when padded with job-like headings.
+- Resolution: Added bounded body detection for automated-request denial/blocking and human-only access messages before scoring or caching.

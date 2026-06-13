@@ -533,39 +533,44 @@ test("fetchJobDescriptionFromUrl rejects broader Waymo reader error and challeng
   }
 });
 
-test("fetchJobDescriptionFromUrl rejects Waymo reader challenge body content", async () => {
+test("fetchJobDescriptionFromUrl rejects Waymo reader challenge and bot-denial body content", async () => {
   const originalFetch = globalThis.fetch;
-  let calls = 0;
-  globalThis.fetch = async () => {
-    calls += 1;
-    if (calls === 1) {
-      return new Response("", {
-        status: 202,
-        headers: { "x-amzn-waf-action": "challenge" }
-      });
-    }
-    return new Response(
-      [
-        "Title: Waymo Careers",
-        "Markdown Content:",
-        "Checking your browser before accessing careers.withwaymo.com.",
-        "Please complete the security verification to prove you are human.",
-        "Responsibilities",
-        "Qualifications",
-        "About the role and requirements"
-      ].join("\n"),
-      { status: 200 }
-    );
-  };
 
   try {
-    await assert.rejects(
-      () => fetchJobDescriptionFromUrl(
-        "https://careers.withwaymo.com/jobs/unavailable-role",
-        { useCache: false }
-      ),
-      /Failed to fetch job description/i
-    );
+    for (const denialText of [
+      "Checking your browser before accessing careers.withwaymo.com. Please complete the security verification to prove you are human.",
+      "Automated requests from this client have been denied. Access is restricted to human visitors."
+    ]) {
+      let calls = 0;
+      globalThis.fetch = async () => {
+        calls += 1;
+        if (calls === 1) {
+          return new Response("", {
+            status: 202,
+            headers: { "x-amzn-waf-action": "challenge" }
+          });
+        }
+        return new Response(
+          [
+            "Title: Waymo Careers",
+            "Markdown Content:",
+            denialText,
+            "Responsibilities",
+            "Qualifications",
+            "About the role and requirements"
+          ].join("\n"),
+          { status: 200 }
+        );
+      };
+
+      await assert.rejects(
+        () => fetchJobDescriptionFromUrl(
+          "https://careers.withwaymo.com/jobs/unavailable-role",
+          { useCache: false }
+        ),
+        /Failed to fetch job description/i
+      );
+    }
   } finally {
     globalThis.fetch = originalFetch;
   }
