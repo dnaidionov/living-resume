@@ -532,3 +532,7 @@ Use this log for concise, chronological records of meaningful decisions that do 
 - Independent review finding: The Waymo reader fallback ran for definitive missing responses and could accept a reader-generated error page if its generic text happened to score like a JD.
 - Resolution: Restricted non-success fallback to WAF/transient statuses and reject missing or error reader titles plus upstream error warnings before content scoring.
 - Documentation correction: Updated the PRD required live URL gate from the historical Waymo/Sourgum/Motive/Netflix set to the current Waymo/Sourgum/Motive set.
+- Independent re-review finding: Operational verbs outside the original delivery vocabulary and `deployment ownership` remained credential-eligible.
+- Resolution: Extended shared execution grammar to optimize, monitor, troubleshoot, and test, and extended accountability nouns to deployments, with extraction, retrieval, and visible-output regressions.
+- Independent re-review finding: Non-empty Waymo WAF responses could bypass fallback, and source query parameters were forwarded to the public reader.
+- Resolution: Trigger fallback directly from the Waymo WAF header regardless of body length and strip the complete query string before constructing the reader request.

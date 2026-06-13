@@ -32,6 +32,10 @@ export async function fetchJobPostingFromUrl(
     throw error;
   }
 
+  if (isWaymoJobUrl(url) && response.headers.get("x-amzn-waf-action") === "challenge") {
+    return cacheJobPostingResult(url, await fetchWaymoJobThroughReader(url), useCache);
+  }
+
   if (!response.ok) {
     if (isWaymoJobUrl(url) && isTransientOrWafResponse(response)) {
       return cacheJobPostingResult(url, await fetchWaymoJobThroughReader(url), useCache);
@@ -81,7 +85,7 @@ async function fetchWaymoJobThroughReader(
   url: string
 ): Promise<{ content: string; targetSummary?: FitTargetSummary }> {
   const sourceUrl = new URL(url);
-  const readerUrl = `https://r.jina.ai/http://${sourceUrl.host}${sourceUrl.pathname}${sourceUrl.search}`;
+  const readerUrl = `https://r.jina.ai/http://${sourceUrl.host}${sourceUrl.pathname}`;
   const response = await fetch(readerUrl, {
     headers: {
       accept: "text/plain",

@@ -17,9 +17,9 @@ const knowledgeSignal =
   /\b(certification|certified|credential|accreditation|exam|working knowledge|knowledge of|knowledgeable about|familiarity with|understanding of|proficiency (?:with|in)|proficient (?:with|in)|expertise in)\b/i;
 
 const deliveryVerb =
-  "(?:lead|implement|develop|deliver|deploy|own|operate|design|integrate|ship|manage|architect|create|launch|scale|maintain|configure|oversee|execute|drive|run|build)";
+  "(?:lead|implement|develop|deliver|deploy|own|operate|design|integrate|ship|manage|architect|create|launch|scale|maintain|configure|oversee|execute|drive|run|build|optimize|monitor|troubleshoot|test)";
 const deliveryVerbForms =
-  "(?:lead|leading|led|implement(?:ed|ing)?|develop(?:ed|ing)?|deliver(?:ed|ing)?|deploy(?:ed|ing)?|own(?:ed|ing)?|operate|operated|operating|design(?:ed|ing)?|integrate|integrated|integrating|ship|shipped|shipping|manage|managed|managing|architect(?:ed|ing)?|create|created|creating|launch(?:ed|ing)?|scale|scaled|scaling|maintain(?:ed|ing)?|configure|configured|configuring|oversee|oversaw|overseen|overseeing|execute|executed|executing|drive|drove|driving|run|ran|running|build|built|building)";
+  "(?:lead|leading|led|implement(?:ed|ing)?|develop(?:ed|ing)?|deliver(?:ed|ing)?|deploy(?:ed|ing)?|own(?:ed|ing)?|operate|operated|operating|design(?:ed|ing)?|integrate|integrated|integrating|ship|shipped|shipping|manage|managed|managing|architect(?:ed|ing)?|create|created|creating|launch(?:ed|ing)?|scale|scaled|scaling|maintain(?:ed|ing)?|configure|configured|configuring|oversee|oversaw|overseen|overseeing|execute|executed|executing|drive|drove|driving|run|ran|running|build|built|building|optimize|optimized|optimizing|monitor(?:ed|ing)?|troubleshoot(?:ed|ing)?|test(?:ed|ing)?)";
 const actor =
   "(?:(?:(?:the|a|an)\\s+)?(?:(?:successful|ideal|selected|qualified|chosen|new|prospective)\\s+){0,2}(?:candidates?|applicants?)|(?:the\\s+)?(?:person|employee|hire)(?:\\s+in\\s+this\\s+role)?|(?:the\\s+)?(?:role\\s+holder|incumbent)|(?:the\\s+)?teams?|you|they|he|she|we)";
 const obligation =
@@ -54,7 +54,7 @@ const conceptualAccountability =
 const directAccountability =
   /\b(?:ownership|leadership|responsibility)\s+(?:of|for)\b/i;
 const suffixAccountability =
-  /\b(?:design\s+systems?|systems?|platforms?|products?|workflows?|integrations?|architecture)\s+(?:ownership|leadership|responsibility)\b/i;
+  /\b(?:design\s+systems?|systems?|platforms?|products?|workflows?|integrations?|deployments?|architecture)\s+(?:ownership|leadership|responsibility)\b/i;
 
 const actionShapedKnowledgeDomain =
   /^(?:build|deploy)\s+(?:systems?|tooling|tools?|pipelines?|process(?:es)?|infrastructure|architecture)\b|^design\s+(?:systems?|patterns?|and\s+architecture\s+patterns?)\b|^build-vs-buy\s+tradeoffs?\b|^operating\s+systems?\b|^managed\s+services?\b|^integrated\s+development\s+environments?\b/i;

@@ -339,6 +339,89 @@ test("fetchJobDescriptionFromUrl uses the public reader for a Waymo WAF challeng
   }
 });
 
+test("fetchJobDescriptionFromUrl uses the Waymo reader for a non-empty WAF challenge", async () => {
+  const originalFetch = globalThis.fetch;
+  const requests: string[] = [];
+  globalThis.fetch = async (input) => {
+    const url = String(input);
+    requests.push(url);
+    if (url.startsWith("https://r.jina.ai/")) {
+      return new Response(
+        [
+          "Title: Group Product Manager, Fleet & Event Response",
+          "Markdown Content:",
+          "Group Product Manager, Fleet & Event Response",
+          "About the role",
+          "Lead product strategy, roadmap planning, and cross-functional delivery.",
+          "Responsibilities",
+          "Manage product managers and coordinate engineering, design, and operations.",
+          "Qualifications",
+          "10+ years of product management experience."
+        ].join("\n"),
+        { status: 200 }
+      );
+    }
+    return new Response(
+      "<html><body>Checking your browser before accessing this public job posting. This security challenge requires additional validation.</body></html>",
+      {
+        status: 202,
+        headers: { "x-amzn-waf-action": "challenge" }
+      }
+    );
+  };
+
+  try {
+    const text = await fetchJobDescriptionFromUrl(
+      "https://careers.withwaymo.com/jobs/group-product-manager-fleet-event-response",
+      { useCache: false }
+    );
+    assert.equal(requests.length, 2);
+    assert.match(text, /Lead product strategy/);
+  } finally {
+    globalThis.fetch = originalFetch;
+  }
+});
+
+test("fetchJobDescriptionFromUrl strips query parameters from the Waymo reader request", async () => {
+  const originalFetch = globalThis.fetch;
+  const requests: string[] = [];
+  globalThis.fetch = async (input) => {
+    const url = String(input);
+    requests.push(url);
+    if (url.startsWith("https://r.jina.ai/")) {
+      return new Response(
+        [
+          "Title: Group Product Manager, Fleet & Event Response",
+          "Markdown Content:",
+          "Group Product Manager, Fleet & Event Response",
+          "About the role",
+          "Lead product strategy, roadmap planning, and cross-functional delivery.",
+          "Responsibilities",
+          "Manage product managers and coordinate engineering, design, and operations.",
+          "Qualifications",
+          "10+ years of product management experience."
+        ].join("\n"),
+        { status: 200 }
+      );
+    }
+    return new Response("", {
+      status: 202,
+      headers: { "x-amzn-waf-action": "challenge" }
+    });
+  };
+
+  try {
+    await fetchJobDescriptionFromUrl(
+      "https://careers.withwaymo.com/jobs/group-product-manager-fleet-event-response?candidate_token=secret-123&utm_source=test",
+      { useCache: false }
+    );
+    assert.equal(requests.length, 2);
+    assert.doesNotMatch(requests[1] ?? "", /candidate_token|secret-123|utm_source/i);
+  } finally {
+    globalThis.fetch = originalFetch;
+  }
+});
+
 test("fetchJobDescriptionFromUrl does not use the Waymo reader for definitive missing responses", async () => {
   const originalFetch = globalThis.fetch;
   const requests: string[] = [];

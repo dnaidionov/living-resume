@@ -1260,6 +1260,34 @@ test("requirement extraction recognizes delivery evidence and accountability fra
   assert.ok(delivery.every((item) => item.category === "function"));
 });
 
+test("requirement extraction recognizes operational execution and deployment ownership", async () => {
+  const service = createRequirementExtractionService(
+    async () => ({
+      requirements: [
+        "Knowledge of Claude API and optimize production agents.",
+        "Knowledge of Claude API and monitor production agents.",
+        "Knowledge of Claude API and troubleshoot production agents.",
+        "Knowledge of Claude API and test production agents.",
+        "Knowledge of Claude API and production deployment ownership."
+      ].map((text) => ({
+        text,
+        category: "requirement" as const,
+        priority: "must_have" as const
+      }))
+    }),
+    () => true
+  );
+
+  const requirements = await service.extract("Operational execution and deployment ownership");
+  const delivery = requirements.filter((item) =>
+    /optimize|monitor|troubleshoot|test production|deployment ownership/i.test(item.text)
+  );
+
+  assert.equal(requirements.length, 10);
+  assert.equal(delivery.length, 5);
+  assert.ok(delivery.every((item) => item.category === "function"));
+});
+
 test("requirement extraction recognizes broader delivery verbs and knowledge wording", async () => {
   const service = createRequirementExtractionService(
     async () => ({

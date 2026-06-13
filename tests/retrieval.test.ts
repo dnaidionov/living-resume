@@ -111,6 +111,11 @@ test("credential evidence is limited to certification and knowledge queries", ()
   assert.equal(isCredentialEvidenceQuery("Knowledge of Claude API and 5+ years building production agents"), false);
   assert.equal(isCredentialEvidenceQuery("Knowledge of Claude API and accountable for deploying production integrations"), false);
   assert.equal(isCredentialEvidenceQuery("Knowledge of Claude API and oversaw production deployments"), false);
+  assert.equal(isCredentialEvidenceQuery("Knowledge of Claude API and optimize production agents"), false);
+  assert.equal(isCredentialEvidenceQuery("Knowledge of Claude API and monitor production agents"), false);
+  assert.equal(isCredentialEvidenceQuery("Knowledge of Claude API and troubleshoot production agents"), false);
+  assert.equal(isCredentialEvidenceQuery("Knowledge of Claude API and test production agents"), false);
+  assert.equal(isCredentialEvidenceQuery("Knowledge of Claude API and production deployment ownership"), false);
   assert.equal(isCredentialEvidenceQuery("Knowledge of Claude API and can deploy production integrations"), false);
   assert.equal(isCredentialEvidenceQuery("Knowledge of Claude API and expected to deploy production integrations"), false);
   assert.equal(isCredentialEvidenceQuery("Knowledge of Claude API and needs to deploy production integrations"), false);
