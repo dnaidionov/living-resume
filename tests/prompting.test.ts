@@ -147,8 +147,9 @@ test("credential evidence cannot prove hands-on production implementation", () =
       sourceType: "credential",
       title: "Claude Certified Architect - Foundations Certification",
       section: "credential",
-      text: "Anthropic credential validating knowledge of Claude API and Model Context Protocol.",
-      tags: ["credential", "anthropic", "claude", "mcp"],
+      text: "Verified credential issued by Anthropic validating knowledge of Claude API and Model Context Protocol.",
+      tags: ["credential", "claude", "mcp"],
+      metadata: { issuer: "Anthropic" },
       embedding: [1, 0, 0]
     }
   ];
@@ -185,6 +186,7 @@ test("compound credential requirements are split before fit matching", () => {
       section: "credential",
       text: "Anthropic credential validating knowledge of Claude API and Model Context Protocol.",
       tags: ["credential", "anthropic", "claude", "mcp"],
+      metadata: { issuer: "Anthropic" },
       embedding: [1, 0, 0]
     }
   ];
@@ -204,6 +206,35 @@ test("compound credential requirements are split before fit matching", () => {
   assert.ok(splitRequirements.some((item) => /leading production implementations/i.test(item.text)));
   assert.match(matchRequirements, /understanding of Claude API and MCP/i);
   assert.doesNotMatch(matchRequirements, /leading production implementations/i);
+});
+
+test("credential support is rendered as validation, not prior employment", () => {
+  const roleText = "Proficiency in Claude API and MCP.";
+  const credentialEvidence: EvidenceChunk[] = [
+    {
+      id: "credential-claude",
+      sourceType: "credential",
+      title: "Claude Certified Architect - Foundations Certification",
+      section: "credential",
+      text: "Anthropic credential validating knowledge of Claude API and Model Context Protocol.",
+      tags: ["credential", "anthropic", "claude", "mcp"],
+      metadata: { issuer: "Anthropic" },
+      embedding: [1, 0, 0]
+    }
+  ];
+  const result = buildFallbackFitAnalysisResponse(
+    roleText,
+    extractRoleRequirements(roleText),
+    credentialEvidence,
+    "text",
+    "recruiter_brief"
+  );
+  const support = result.presentation.mode === "recruiter_brief"
+    ? result.presentation.whereIMatch?.[0]?.support ?? ""
+    : "";
+
+  assert.match(support, /Anthropic-issued .* certification validates/i);
+  assert.doesNotMatch(support, /\b(?:At|prior role|worked on)\b/i);
 });
 
 test("credential evidence cannot prove noun-form ownership in compound requirements", () => {
@@ -324,6 +355,36 @@ test("credential evidence cannot prove adverbial delivery in compound requiremen
   assert.equal(splitRequirements.length, 2);
   assert.match(matchRequirements, /Knowledge of Claude API/i);
   assert.doesNotMatch(matchRequirements, /successfully build production agents/i);
+});
+
+test("credential evidence cannot prove contracted or multiword-subject delivery", () => {
+  const roleText = "Knowledge of Claude API and the successful candidate will deploy production integrations.";
+  const credentialEvidence: EvidenceChunk[] = [
+    {
+      id: "credential-claude",
+      sourceType: "credential",
+      title: "Claude Certified Architect - Foundations Certification",
+      section: "credential",
+      text: "Anthropic credential validating knowledge of Claude API and Model Context Protocol.",
+      tags: ["credential", "claude", "mcp"],
+      embedding: [1, 0, 0]
+    }
+  ];
+  const splitRequirements = extractRoleRequirements(roleText);
+  const result = buildFallbackFitAnalysisResponse(
+    roleText,
+    splitRequirements,
+    credentialEvidence,
+    "text",
+    "recruiter_brief"
+  );
+  const matchRequirements = result.presentation.mode === "recruiter_brief"
+    ? (result.presentation.whereIMatch ?? []).map((item) => item.requirement).join(" ")
+    : "";
+
+  assert.equal(splitRequirements.length, 2);
+  assert.match(matchRequirements, /Knowledge of Claude API/i);
+  assert.doesNotMatch(matchRequirements, /successful candidate will deploy/i);
 });
 
 test("resume chat fallback politely declines off-scope personal questions", () => {

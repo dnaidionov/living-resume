@@ -108,6 +108,7 @@ export type ContentDocument = {
     company?: string;
     roleTitle?: string;
     expirationDate?: string;
+    issuer?: string;
   };
 };
 

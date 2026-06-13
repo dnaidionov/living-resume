@@ -79,6 +79,11 @@
 - verify both LLM and heuristic extraction preserve all eight source requirements after atomic splitting, up to the shared twelve-item cap
 - verify an LLM response that is already split into nine or more atomic requirements is not truncated to the eight-source limit
 - treat credential expiration as stored evidence metadata only; exclude it from UI and retrievable evidence text, and do not hide or downgrade the credential based on expiration
+- preserve slash-separated and recursive knowledge domains while splitting later delivery clauses; recognize `be able to` and progressive-passive delivery wording
+- render credential-supported recruiter evidence as certification validation, never as prior-role or employer experience
+- maintain the mixed-requirement gate as a clause-classification pipeline: add syntax boundaries and clause signals with paired positive/negative tests rather than restoring ordered phrase patches
+- read credential issuer from structured evidence metadata; do not infer provenance from display text or tags
+- preserve embedded delivery in alternating knowledge/delivery clauses, prioritize explicit accountability over conceptual suffixes, and keep shared-object coordinated verbs in one delivery atom
 
 ## Diagram Artifact
 

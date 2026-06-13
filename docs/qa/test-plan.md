@@ -59,8 +59,28 @@
 - Delivery-clause coverage must recognize limited adverbs between an action introducer and verb, such as `ability to successfully build`.
 - Compound splitting must cover coordinated adverbs, gerunds, passive delivery voice, `responsible for`, `while`/`whereas`, and defensible dash/slash clause separators without splitting coordinated knowledge-domain nouns.
 - Credential knowledge coverage must include proficiency, expertise, and knowledgeable-about wording.
+- Credential knowledge coverage must include `proficiency with`, `proficiency in`, and adjective-form `proficient with` / `proficient in` wording.
 - Knowledge-domain nouns such as `build systems` and `deploy tooling` must remain credential-eligible without masking later delivery clauses in the same requirement.
-- Knowledge-domain noun protection must apply consistently across `and`, `plus`, and `as well as`.
+- Knowledge-domain noun protection must apply consistently across `and`, `plus`, `as well as`, and slash-separated knowledge lists.
+- Recursive knowledge/delivery compounds must preserve all valid knowledge domains before splitting the later execution clause.
+- Delivery-clause coverage must include `be able to` and `able to` phrasing plus progressive-passive forms such as `are actively being deployed`.
+- Delivery-clause coverage must include modal and expectation variants such as `should`, `can`, `expected to`, and `needs to`, including reverse-order compounds.
+- Modal coverage must include bounded multiword actor subjects, actor-specific expectation wording, and straight/curly apostrophe contractions.
+- Actor coverage must include plurals, direct pronouns, person-in-role language, and recruiter expectations while preserving actor words embedded inside relative knowledge clauses.
+- Actor coverage must include role-holder/incumbent expectations and actor-prefixed `must be able to`.
+- Compound splitting must support pipe, ampersand, Unicode dash, and unspaced slash separators while preserving earlier knowledge-list items.
+- Separator regressions must preserve technology names such as `CI/CD`, `R&D`, and hyphenated knowledge terms, including reverse-order delivery compounds.
+- Modal regressions must distinguish candidate obligations from knowledge descriptions such as platforms that can deploy models.
+- Knowledge-domain regressions must preserve action-shaped nouns such as `design systems`, `design patterns`, `build-vs-buy tradeoffs`, and `design and architecture patterns` across conjunction, slash, ampersand, pipe, and dash forms.
+- Accountability suffixes such as `design systems ownership` must remain delivery evidence rather than inheriting knowledge-domain protection.
+- Accountability coverage must include architecture ownership while preserving conceptual knowledge phrases such as ownership models, leadership principles, and responsibility matrices.
+- Reverse recursive slash compounds must retain the valid knowledge atom.
+- Alternating knowledge/delivery/knowledge clauses must retain and classify the embedded delivery expectation rather than allowing a trailing knowledge signal to make the whole requirement credential-eligible.
+- Explicit accountability phrases such as `ownership of`, `leadership of`, and `responsibility for` must override conceptual nouns such as frameworks or models.
+- Coordinated delivery verbs with a shared object, such as `build and deploy production agents`, must remain a self-contained delivery atom and must not produce standalone verb fragments.
+- Recruiter-facing credential support must identify Anthropic as issuer, use certification-validation language, and must not render the credential as prior employment.
+- Credential issuer tests must derive attribution from credential provenance rather than tags.
+- Waymo URL intake must fall back to the public text reader only after a direct WAF-blocked or unreadable response; non-Waymo JavaScript-rendered pages must retain the existing explicit failure behavior.
 - Atomic splitting must not discard the eighth source requirement in either LLM or heuristic extraction; post-split output may exceed the eight-item source limit within the shared twelve-item atomic cap.
 - LLM responses that already contain split atomic requirements must be normalized against the twelve-item atomic cap rather than truncated to the eight-source limit.
 - Heuristic extraction must rank all source requirements before applying the eight-source limit so later must-haves are not dropped due to document order.

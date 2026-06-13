@@ -86,6 +86,8 @@ This keeps the app deployable on both Cloudflare and Vercel without requiring a 
 - Strategic-execution requirements should prefer explicit strategy/discovery/roadmap evidence over outcome-heavy delivery examples when both are available.
 - When multiple evidence candidates are comparably relevant, newer experience should be preferred over older experience, using structured role/project dates as a secondary ranking signal rather than overriding stronger relevance.
 - Recruiter-facing fit evidence should normally come from experience-bearing `resume` and `ai_context` sources. The narrow exception is structured `credential` evidence, which may support explicit certification or knowledge requirements but never implementation, delivery, ownership, or leadership. Portfolio/meta project artifacts should not appear as proof of prior role fit.
+- When credential evidence supports a knowledge requirement, recruiter-facing prose must describe what the certification validates and must not imply that the credential was an employer, engagement, or prior role.
+- URL intake remains direct-fetch first. Waymo job pages may use a domain-bounded `r.jina.ai` text-reader fallback when Waymo's WAF blocks server-side retrieval or yields insufficient readable content.
 
 ## Session model
 

@@ -289,6 +289,56 @@ test("fetchJobDescriptionFromUrl reports JS-rendered pages explicitly when conte
   }
 });
 
+test("fetchJobDescriptionFromUrl uses the public reader for a Waymo WAF challenge", async () => {
+  const originalFetch = globalThis.fetch;
+  const requests: string[] = [];
+  globalThis.fetch = async (input) => {
+    const url = String(input);
+    requests.push(url);
+    if (url.startsWith("https://r.jina.ai/http://careers.withwaymo.com/")) {
+      return new Response(
+        [
+          "Title: Group Product Manager, Fleet & Event Response - Mountain View, California, United States",
+          "",
+          "URL Source: http://careers.withwaymo.com/jobs/group-product-manager-fleet-event-response",
+          "",
+          "Markdown Content:",
+          "# Group Product Manager, Fleet & Event Response",
+          "Waymo is an autonomous driving technology company.",
+          "About the role",
+          "Develop the product roadmap and lead cross-functional delivery across product, engineering, data science, and operations.",
+          "Responsibilities",
+          "Manage a team of product managers and connect roadmap priorities to long-term commercial and cost goals.",
+          "Qualifications",
+          "10+ years of product management experience and a demonstrated track record of delivering transformational product impact."
+        ].join("\n"),
+        { status: 200, headers: { "content-type": "text/plain" } }
+      );
+    }
+    return new Response("", {
+      status: 202,
+      headers: {
+        "content-type": "text/html",
+        "x-amzn-waf-action": "challenge"
+      }
+    });
+  };
+
+  try {
+    const text = await fetchJobDescriptionFromUrl(
+      "https://careers.withwaymo.com/jobs/group-product-manager-fleet-event-response",
+      { useCache: false }
+    );
+
+    assert.equal(requests.length, 2);
+    assert.match(requests[1] ?? "", /^https:\/\/r\.jina\.ai\/http:\/\/careers\.withwaymo\.com\//);
+    assert.match(text, /Group Product Manager, Fleet & Event Response/);
+    assert.match(text, /Develop the product roadmap/);
+  } finally {
+    globalThis.fetch = originalFetch;
+  }
+});
+
 test("fetchJobPostingFromUrl caches repeated URL fetches for the same posting", async () => {
   const originalFetch = globalThis.fetch;
   let calls = 0;

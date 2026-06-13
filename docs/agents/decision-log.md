@@ -496,3 +496,34 @@ Use this log for concise, chronological records of meaningful decisions that do 
 - Decision: Rank heuristic source requirements before the eight-item cap, protect coordinated knowledge nouns across `and`, `plus`, and `as well as`, and add validated comma/colon, explicit-subject modal, and adverbial-passive split boundaries.
 - Rationale: Source order should not suppress a later must-have. Equivalent knowledge connectors should not change evidence eligibility, while common punctuation and voice variants should preserve valid knowledge evidence through atomic splitting.
 - Scope impact: `lib/ai/prompting.ts`, `lib/ai/credential-requirements.ts`, extraction/retrieval tests, `docs/architecture/content-model.md`, `docs/qa/test-plan.md`.
+
+## 2026-06-12 - Preserve recursive knowledge and credential provenance
+
+- Agent role: Content Strategist / AI Systems Architect / QA Evaluations Agent
+- Decision: Treat `proficiency in` as credential knowledge, preserve slash-separated and recursive knowledge-domain phrases, and recognize `be able to` plus progressive-passive clauses as delivery expectations.
+- Rationale: Recruiter wording varies without changing the evidence standard. The parser must retain legitimate knowledge evidence while separating any execution requirement instead of either rejecting the whole compound or allowing a credential to overclaim delivery.
+- Decision: Render credential-supported fit evidence as certification validation rather than generic prior-role prose.
+- Rationale: A certification is evidence of validated knowledge, not an employer or work engagement. Reusing employment-oriented templates misstates provenance even when the underlying requirement match is valid.
+- Scope impact: `lib/ai/credential-requirements.ts`, `lib/ai/prompting.ts`, credential extraction/retrieval/prompting tests, `docs/architecture/content-model.md`, `docs/architecture/ai-system.md`, `docs/qa/test-plan.md`, `docs/agents/handoffs.md`.
+- Follow-up: Extend the same policy to adjective-form `proficient in` and both `be able to` / `able to` delivery phrasing so ordinary recruiter grammar does not change evidence eligibility.
+- Follow-up: Treat modal/expectation wording and common visual separators as clause syntax, preserve the complete knowledge side of recursive slash lists, support `proficient with`, and identify Anthropic in recruiter-facing credential attribution.
+- Follow-up: Narrow separator handling to real clause boundaries so `CI/CD`, `R&D`, and hyphenated domains remain intact; constrain subjectless modals to clause starts; derive credential issuer from evidence provenance rather than tags.
+- Follow-up: Recognize multiword actor subjects and `you'll` contractions as explicit delivery clauses while protecting action-shaped knowledge domains such as design systems and build-vs-buy tradeoffs.
+- Follow-up: Generalize actor delivery grammar to applicant/candidate phrases, `you are expected to`, and `you'd`, while applying design-domain protection consistently across all supported separators.
+- Follow-up: Add plural/pronoun/person-in-role/recruiter actor forms, restrict candidate modifiers to recruiting adjectives so relative clauses remain knowledge, and let accountability suffixes override design-domain protection.
+- Follow-up: Add role-holder/incumbent expectation and `must be able to` forms, include architecture ownership, exempt conceptual accountability terminology, and split reverse recursive slash compounds at the knowledge boundary.
+
+## 2026-06-12 - Replace ordered credential regex patches with clause classification
+
+- Agent role: Content Strategist / AI Systems Architect / Application Engineer
+- Decision: Refactor mixed credential requirements into a normalization pipeline that enumerates syntax boundaries, classifies clauses independently as knowledge, delivery, or ambiguous, and selects the split that preserves the complete framed clause.
+- Rationale: The prior ordered regex stack fixed one wording family at a time and repeatedly shifted failures into adjacent phrasing. Independent clause classification makes the evidence policy explicit, supports global boundary selection, and defaults ambiguous compounds away from credential overclaim.
+- Decision: Carry credential issuer as structured document metadata and use it for recruiter-facing attribution.
+- Rationale: Issuer provenance is content data, not something presentation code should infer from prose or tags.
+- Counterargument considered: A full natural-language parser or an additional LLM classification call would handle more syntax. It was rejected for this bounded gate because it would add latency, nondeterminism, and deployment cost while weakening regression-level auditability.
+- Scope impact: `lib/ai/credential-requirements.ts`, `lib/ai/prompting.ts`, `lib/content/store.ts`, `types/content.ts`, parser/retrieval/prompting/content-store tests, ADR 0007, architecture and QA documentation.
+- Independent review finding: Knowledge signals could mask delivery elsewhere in the same clause, conceptual-accountability exemptions could override explicit accountability, and longest-left boundary scoring could isolate a standalone verb.
+- Resolution: Detect delivery within mixed clauses before granting knowledge-only status, give explicit accountability grammar precedence, and invalidate boundaries whose framed side already contains embedded delivery. Added positive and negative regressions for all three structures.
+- Live-evaluation maintenance: Replaced the removed Waymo `Product Manager, Driving Behaviors` posting with the current `Group Product Manager, Fleet & Event Response` posting while preserving Waymo as a required product-role URL intake regression.
+- Live-evaluation maintenance: Replaced the expired Motive `Staff Product Manager, Telematics` posting with the current US `Principal Product Manager, AI Cameras & Video Safety` posting.
+- URL intake decision: For `careers.withwaymo.com` only, fall back to the public Jina reader when direct server-side retrieval is blocked or returns insufficient content. The fallback is domain-bounded because Waymo's WAF challenges server fetches even when the public posting remains available; other domains retain the existing direct-fetch and explicit-failure behavior.

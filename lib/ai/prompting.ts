@@ -936,6 +936,11 @@ function summarizeSupportEvidence(
     return undefined;
   }
 
+  if (item.sourceType === "credential") {
+    const issuer = item.metadata?.issuer;
+    return `The ${issuer ? `${issuer}-issued ` : ""}${item.title} validates knowledge relevant to this requirement.`;
+  }
+
   const text = item.text.trim().replace(/\s+/g, " ");
   const company = item.metadata?.company ?? inferCompanyFromTitle(item);
   const portfolioSummary = summarizePortfolioEvidence(item, evidencePool);
