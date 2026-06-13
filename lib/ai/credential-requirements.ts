@@ -43,6 +43,10 @@ const assignedDelivery = new RegExp(
   `\\b(?:tasked|charged)\\s+with\\s+(?:\\w+[\\s-]+){0,2}${deliveryVerbForms}\\b`,
   "i"
 );
+const embeddedExecutionQualifier = new RegExp(
+  `\\b(?:gained|developed|acquired)\\s+(?:through|by)\\s+(?:\\w+[\\s-]+){0,2}${deliveryVerbForms}\\b`,
+  "i"
+);
 const nominalDeliveryHistory =
   /\b(?:proven|demonstrated)\s+(?:success|track record)\s+in\s+(?:\w+\s+){0,3}(?:deployments?|implementations?|delivery|operations?)\b/i;
 const actorObligation = new RegExp(
@@ -104,7 +108,12 @@ export function splitCompoundCredentialRequirements(
   return requirements.flatMap((requirement) => {
     const split = splitCompoundCredentialRequirementText(requirement.text);
     if (!split) {
-      return [requirement];
+      return [{
+        ...requirement,
+        category: analyzeClause(requirement.text).hasDelivery
+          ? "function" as const
+          : requirement.category
+      }];
     }
 
     return split.map((text) => ({
@@ -201,6 +210,7 @@ function isDeliveryClause(text: string, hasKnowledge: boolean): boolean {
     introducedDelivery.test(text) ||
     deliveryEvidence.test(text) ||
     assignedDelivery.test(text) ||
+    embeddedExecutionQualifier.test(text) ||
     nominalDeliveryHistory.test(text)
   ) {
     return true;

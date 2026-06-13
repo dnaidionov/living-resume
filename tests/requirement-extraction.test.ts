@@ -1366,6 +1366,29 @@ test("requirement extraction preserves coordinated operational knowledge domains
   assert.ok(requirements.every((item) => item.category === "requirement"));
 });
 
+test("requirement extraction recognizes embedded execution qualifiers", async () => {
+  const service = createRequirementExtractionService(
+    async () => ({
+      requirements: [
+        "Knowledge of Claude API gained through building production agents.",
+        "Knowledge of Claude API developed through deploying production integrations.",
+        "Knowledge of Claude API acquired by implementing production workflows."
+      ].map((text) => ({
+        text,
+        category: "requirement" as const,
+        priority: "must_have" as const
+      }))
+    }),
+    () => true
+  );
+
+  const requirements = await service.extract("Embedded execution qualifiers");
+
+  assert.equal(requirements.length, 3);
+  assert.ok(requirements.every((item) => item.category === "function"));
+  assert.ok(requirements.every((item) => !/^Knowledge of Claude API (?:gained|developed|acquired)$/i.test(item.text)));
+});
+
 test("requirement extraction recognizes broader delivery verbs and knowledge wording", async () => {
   const service = createRequirementExtractionService(
     async () => ({

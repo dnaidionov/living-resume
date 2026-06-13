@@ -82,6 +82,7 @@
 - Operational execution and accountability coverage must include optimize, monitor, troubleshoot, test, and deployment ownership at extraction, retrieval, and visible-output layers.
 - Broader accountability/history and assignment framing must cover accountability for, ownership over, proven success, history of delivery, tasked with, and charged with.
 - Generic `with` must not split complete delivery phrases, and coordinated monitoring/testing domain nouns must remain credential-eligible knowledge.
+- Embedded execution qualifiers (`gained through`, `developed through`, `acquired by`) must block credential evidence and must be normalized as delivery even when no atomic boundary split is available.
 - Recruiter-facing credential support must identify Anthropic as issuer, use certification-validation language, and must not render the credential as prior employment.
 - Credential issuer tests must derive attribution from credential provenance rather than tags.
 - Waymo URL intake must fall back to the public text reader only after a direct WAF-blocked or unreadable response; non-Waymo JavaScript-rendered pages must retain the existing explicit failure behavior.

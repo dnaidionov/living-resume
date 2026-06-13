@@ -538,3 +538,5 @@ Use this log for concise, chronological records of meaningful decisions that do 
 - Resolution: Trigger fallback directly from the Waymo WAF header regardless of body length and strip the complete query string before constructing the reader request.
 - Final review finding: Broader accountability/history and assigned-work phrases remained credential-eligible; generic `with` could create malformed atoms; coordinated monitoring/testing nouns became false delivery; and additional reader error titles could pass content scoring.
 - Resolution: Expanded nominal accountability/history and assignment grammar, constrained `with` boundaries to validated action introducers, protected operational knowledge-domain nouns, and broadened infrastructure/challenge title rejection.
+- Material-only review finding: Knowledge claims qualified by embedded execution history remained credential-eligible because delivery detection did not recognize `gained/developed through` or `acquired by` action framing.
+- Resolution: Added embedded-execution qualifier detection and recategorize unsplit clauses as `function` whenever independent delivery classification applies.

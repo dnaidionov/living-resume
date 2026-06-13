@@ -87,6 +87,7 @@
 - classify delivery-evidence framing independently from knowledge, and keep Waymo reader fallback limited to WAF/transient failures with upstream error-page rejection
 - keep operational execution verbs and deployment accountability outside credential evidence; never forward source query parameters to the Waymo reader
 - preserve complete `with`-framed delivery atoms, protect coordinated operational knowledge nouns, and reject reader infrastructure/challenge titles before scoring
+- treat embedded execution qualifiers as delivery and recategorize unsplit delivery clauses instead of preserving an upstream `requirement` category
 
 ## Diagram Artifact
 
