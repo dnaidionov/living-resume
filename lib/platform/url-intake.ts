@@ -126,7 +126,7 @@ function isTransientOrWafResponse(response: Response): boolean {
 
 function isReaderErrorResponse(readerText: string, title: string): boolean {
   return /^Warning:\s+Target URL returned error\b/im.test(readerText) ||
-    /\b(?:404|410|not found|page unavailable|access denied|internal server error|upstream timeout|gateway timeout|service unavailable|just a moment)\b/i.test(title);
+    /\b(?:404|410|not found|page unavailable|access denied|internal server error|upstream timeout|gateway timeout|service unavailable|just a moment|verify (?:that )?you are human|security check|captcha)\b/i.test(title);
 }
 
 function normalizeReaderContent(value: string): string {

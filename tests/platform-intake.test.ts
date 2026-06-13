@@ -481,11 +481,18 @@ test("fetchJobDescriptionFromUrl rejects Waymo reader error pages", async () => 
   }
 });
 
-test("fetchJobDescriptionFromUrl rejects broader Waymo reader error titles", async () => {
+test("fetchJobDescriptionFromUrl rejects broader Waymo reader error and challenge titles", async () => {
   const originalFetch = globalThis.fetch;
 
   try {
-    for (const title of ["Internal Server Error", "Upstream Timeout", "Just a moment..."]) {
+    for (const title of [
+      "Internal Server Error",
+      "Upstream Timeout",
+      "Just a moment...",
+      "Verify you are human",
+      "Security Check",
+      "CAPTCHA"
+    ]) {
       let calls = 0;
       globalThis.fetch = async () => {
         calls += 1;

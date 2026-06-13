@@ -89,7 +89,7 @@
 - Definitive Waymo `404`/`410` responses must not invoke the reader, and reader responses containing upstream error metadata or missing/error titles must be rejected before job-content scoring.
 - Waymo WAF detection must use the response header independently of body length, including non-empty challenge shells.
 - Reader fallback requests must omit all source URL query parameters to avoid disclosing referral, session, candidate, or signed tokens to a third party.
-- Reader error-title rejection must include infrastructure and challenge titles such as internal server errors, upstream timeouts, service unavailability, and browser-challenge pages.
+- Reader error-title rejection must include infrastructure and challenge titles such as internal server errors, upstream timeouts, service unavailability, human-verification prompts, security checks, CAPTCHA, and browser-challenge pages.
 - Atomic splitting must not discard the eighth source requirement in either LLM or heuristic extraction; post-split output may exceed the eight-item source limit within the shared twelve-item atomic cap.
 - LLM responses that already contain split atomic requirements must be normalized against the twelve-item atomic cap rather than truncated to the eight-source limit.
 - Heuristic extraction must rank all source requirements before applying the eight-source limit so later must-haves are not dropped due to document order.

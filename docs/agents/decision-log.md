@@ -540,3 +540,5 @@ Use this log for concise, chronological records of meaningful decisions that do 
 - Resolution: Expanded nominal accountability/history and assignment grammar, constrained `with` boundaries to validated action introducers, protected operational knowledge-domain nouns, and broadened infrastructure/challenge title rejection.
 - Material-only review finding: Knowledge claims qualified by embedded execution history remained credential-eligible because delivery detection did not recognize `gained/developed through` or `acquired by` action framing.
 - Resolution: Added embedded-execution qualifier detection and recategorize unsplit clauses as `function` whenever independent delivery classification applies.
+- Material-only review finding: Waymo reader pages titled as human-verification or CAPTCHA challenges could still pass generic job-content scoring.
+- Resolution: Expanded reader title rejection to explicit human-verification, security-check, and CAPTCHA titles before content scoring or caching.
