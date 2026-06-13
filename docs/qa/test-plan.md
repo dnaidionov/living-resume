@@ -78,9 +78,11 @@
 - Alternating knowledge/delivery/knowledge clauses must retain and classify the embedded delivery expectation rather than allowing a trailing knowledge signal to make the whole requirement credential-eligible.
 - Explicit accountability phrases such as `ownership of`, `leadership of`, and `responsibility for` must override conceptual nouns such as frameworks or models.
 - Coordinated delivery verbs with a shared object, such as `build and deploy production agents`, must remain a self-contained delivery atom and must not produce standalone verb fragments.
+- Delivery-evidence framing must be covered at extraction, retrieval, and recruiter-output layers, including track-record, demonstrated-success, years-of-experience, accountability, and past-tense oversight wording.
 - Recruiter-facing credential support must identify Anthropic as issuer, use certification-validation language, and must not render the credential as prior employment.
 - Credential issuer tests must derive attribution from credential provenance rather than tags.
 - Waymo URL intake must fall back to the public text reader only after a direct WAF-blocked or unreadable response; non-Waymo JavaScript-rendered pages must retain the existing explicit failure behavior.
+- Definitive Waymo `404`/`410` responses must not invoke the reader, and reader responses containing upstream error metadata or missing/error titles must be rejected before job-content scoring.
 - Atomic splitting must not discard the eighth source requirement in either LLM or heuristic extraction; post-split output may exceed the eight-item source limit within the shared twelve-item atomic cap.
 - LLM responses that already contain split atomic requirements must be normalized against the twelve-item atomic cap rather than truncated to the eight-source limit.
 - Heuristic extraction must rank all source requirements before applying the eight-source limit so later must-haves are not dropped due to document order.

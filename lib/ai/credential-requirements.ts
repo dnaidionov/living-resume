@@ -19,7 +19,7 @@ const knowledgeSignal =
 const deliveryVerb =
   "(?:lead|implement|develop|deliver|deploy|own|operate|design|integrate|ship|manage|architect|create|launch|scale|maintain|configure|oversee|execute|drive|run|build)";
 const deliveryVerbForms =
-  "(?:lead|leading|led|implement(?:ed|ing)?|develop(?:ed|ing)?|deliver(?:ed|ing)?|deploy(?:ed|ing)?|own(?:ed|ing)?|operate|operated|operating|design(?:ed|ing)?|integrate|integrated|integrating|ship|shipped|shipping|manage|managed|managing|architect(?:ed|ing)?|create|created|creating|launch(?:ed|ing)?|scale|scaled|scaling|maintain(?:ed|ing)?|configure|configured|configuring|oversee|overseen|overseeing|execute|executed|executing|drive|drove|driving|run|ran|running|build|built|building)";
+  "(?:lead|leading|led|implement(?:ed|ing)?|develop(?:ed|ing)?|deliver(?:ed|ing)?|deploy(?:ed|ing)?|own(?:ed|ing)?|operate|operated|operating|design(?:ed|ing)?|integrate|integrated|integrating|ship|shipped|shipping|manage|managed|managing|architect(?:ed|ing)?|create|created|creating|launch(?:ed|ing)?|scale|scaled|scaling|maintain(?:ed|ing)?|configure|configured|configuring|oversee|oversaw|overseen|overseeing|execute|executed|executing|drive|drove|driving|run|ran|running|build|built|building)";
 const actor =
   "(?:(?:(?:the|a|an)\\s+)?(?:(?:successful|ideal|selected|qualified|chosen|new|prospective)\\s+){0,2}(?:candidates?|applicants?)|(?:the\\s+)?(?:person|employee|hire)(?:\\s+in\\s+this\\s+role)?|(?:the\\s+)?(?:role\\s+holder|incumbent)|(?:the\\s+)?teams?|you|they|he|she|we)";
 const obligation =
@@ -33,6 +33,10 @@ const experienceDelivery = new RegExp(
 );
 const introducedDelivery = new RegExp(
   `\\b(?:(?:ability|capability|responsibility|required|responsible)\\s+to|(?:be\\s+)?able\\s+to)\\s+(?:\\w+ly\\s+){0,2}${deliveryVerb}\\b`,
+  "i"
+);
+const deliveryEvidence = new RegExp(
+  `\\b(?:track\\s+record\\s+of|demonstrated\\s+success(?:\\s+in)?|\\d+\\+?\\s+years?(?:\\s+of\\s+experience)?(?:\\s+in)?|accountable\\s+for)\\s+(?:\\w+[\\s-]+){0,2}${deliveryVerbForms}\\b`,
   "i"
 );
 const actorObligation = new RegExp(
@@ -185,7 +189,12 @@ function analyzeClause(text: string): ClauseAnalysis {
 }
 
 function isDeliveryClause(text: string, hasKnowledge: boolean): boolean {
-  if (explicitDelivery.test(text) || experienceDelivery.test(text) || introducedDelivery.test(text)) {
+  if (
+    explicitDelivery.test(text) ||
+    experienceDelivery.test(text) ||
+    introducedDelivery.test(text) ||
+    deliveryEvidence.test(text)
+  ) {
     return true;
   }
   if (hasPersonalAccountability(text)) {

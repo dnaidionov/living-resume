@@ -84,6 +84,7 @@
 - maintain the mixed-requirement gate as a clause-classification pipeline: add syntax boundaries and clause signals with paired positive/negative tests rather than restoring ordered phrase patches
 - read credential issuer from structured evidence metadata; do not infer provenance from display text or tags
 - preserve embedded delivery in alternating knowledge/delivery clauses, prioritize explicit accountability over conceptual suffixes, and keep shared-object coordinated verbs in one delivery atom
+- classify delivery-evidence framing independently from knowledge, and keep Waymo reader fallback limited to WAF/transient failures with upstream error-page rejection
 
 ## Diagram Artifact
 

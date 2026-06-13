@@ -527,3 +527,8 @@ Use this log for concise, chronological records of meaningful decisions that do 
 - Live-evaluation maintenance: Replaced the removed Waymo `Product Manager, Driving Behaviors` posting with the current `Group Product Manager, Fleet & Event Response` posting while preserving Waymo as a required product-role URL intake regression.
 - Live-evaluation maintenance: Replaced the expired Motive `Staff Product Manager, Telematics` posting with the current US `Principal Product Manager, AI Cameras & Video Safety` posting.
 - URL intake decision: For `careers.withwaymo.com` only, fall back to the public Jina reader when direct server-side retrieval is blocked or returns insufficient content. The fallback is domain-bounded because Waymo's WAF challenges server fetches even when the public posting remains available; other domains retain the existing direct-fetch and explicit-failure behavior.
+- Independent review finding: Credential gating missed delivery-evidence framing such as track record, demonstrated success, years of experience, accountability, and `oversaw`.
+- Resolution: Added one generalized delivery-evidence grammar plus past-tense oversight coverage, with extraction, retrieval, and visible recruiter-output regressions.
+- Independent review finding: The Waymo reader fallback ran for definitive missing responses and could accept a reader-generated error page if its generic text happened to score like a JD.
+- Resolution: Restricted non-success fallback to WAF/transient statuses and reject missing or error reader titles plus upstream error warnings before content scoring.
+- Documentation correction: Updated the PRD required live URL gate from the historical Waymo/Sourgum/Motive/Netflix set to the current Waymo/Sourgum/Motive set.

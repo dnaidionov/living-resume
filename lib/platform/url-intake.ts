@@ -33,7 +33,7 @@ export async function fetchJobPostingFromUrl(
   }
 
   if (!response.ok) {
-    if (isWaymoJobUrl(url)) {
+    if (isWaymoJobUrl(url) && isTransientOrWafResponse(response)) {
       return cacheJobPostingResult(url, await fetchWaymoJobThroughReader(url), useCache);
     }
     throw new Error(`Failed to fetch job description from ${url}`);
@@ -95,6 +95,9 @@ async function fetchWaymoJobThroughReader(
 
   const readerText = await response.text();
   const title = readerText.match(/^Title:\s*(.+)$/im)?.[1]?.trim();
+  if (!title || isReaderErrorResponse(readerText, title)) {
+    throw new Error(`Failed to fetch job description from ${url}`);
+  }
   const content = normalizeReaderContent(readerText);
   if (content.length < 60 || scoreDocument(content) < 3) {
     throw new Error("Fetched page did not contain enough readable job description content.");
@@ -107,6 +110,19 @@ async function fetchWaymoJobThroughReader(
       url
     )
   };
+}
+
+function isTransientOrWafResponse(response: Response): boolean {
+  return response.headers.get("x-amzn-waf-action") === "challenge" ||
+    response.status === 408 ||
+    response.status === 425 ||
+    response.status === 429 ||
+    response.status >= 500;
+}
+
+function isReaderErrorResponse(readerText: string, title: string): boolean {
+  return /^Warning:\s+Target URL returned error\b/im.test(readerText) ||
+    /\b(?:404|410|not found|page unavailable|access denied)\b/i.test(title);
 }
 
 function normalizeReaderContent(value: string): string {

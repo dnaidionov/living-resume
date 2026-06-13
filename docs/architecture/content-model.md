@@ -62,6 +62,7 @@
 - Explicit accountability grammar (`ownership of`, `leadership of`, `responsibility for`) takes precedence over conceptual suffix exemptions.
 - Knowledge language does not suppress delivery found elsewhere in the same clause; alternating knowledge/delivery frames are normalized before credential eligibility is evaluated.
 - Coordinated delivery verbs that share an object remain one delivery atom rather than being split into standalone verb fragments.
+- Delivery evidence framing such as `track record of building`, `demonstrated success deploying`, years-of-experience phrasing, `accountable for`, and past-tense oversight is execution evidence and cannot be supported by a credential.
 - Reverse recursive slash compounds split at the knowledge boundary so valid credential-supported knowledge is retained.
 - Recruiter-facing credential support identifies Anthropic as issuer and is phrased as certification validation, never as employment or prior-role experience.
 - Credential issuer attribution is derived from structured credential metadata rather than display text or topical tags.

@@ -387,6 +387,43 @@ test("credential evidence cannot prove contracted or multiword-subject delivery"
   assert.doesNotMatch(matchRequirements, /successful candidate will deploy/i);
 });
 
+test("credential evidence cannot prove delivery evidence or accountability framing", () => {
+  const credentialEvidence: EvidenceChunk[] = [
+    {
+      id: "credential-claude",
+      sourceType: "credential",
+      title: "Claude Certified Architect - Foundations Certification",
+      section: "credential",
+      text: "Anthropic credential validating knowledge of Claude API and Model Context Protocol.",
+      tags: ["credential", "claude", "mcp"],
+      metadata: { issuer: "Anthropic" },
+      embedding: [1, 0, 0]
+    }
+  ];
+
+  for (const deliveryClause of [
+    "track record of building production agents",
+    "demonstrated success deploying production integrations",
+    "5+ years building production agents",
+    "accountable for deploying production integrations",
+    "oversaw production deployments"
+  ]) {
+    const roleText = `Knowledge of Claude API and ${deliveryClause}.`;
+    const result = buildFallbackFitAnalysisResponse(
+      roleText,
+      extractRoleRequirements(roleText),
+      credentialEvidence,
+      "text",
+      "recruiter_brief"
+    );
+    const matchText = result.presentation.mode === "recruiter_brief"
+      ? (result.presentation.whereIMatch ?? []).flatMap((item) => [item.requirement, item.support]).join(" ")
+      : "";
+
+    assert.doesNotMatch(matchText, new RegExp(deliveryClause.replace(/[+]/g, "\\+"), "i"));
+  }
+});
+
 test("resume chat fallback politely declines off-scope personal questions", () => {
   const answer = buildFallbackChatAnswer("What is Dmitry's favorite movie?", [], "resume_qa");
   assert.equal(answer, buildResumeChatScopeRefusal());

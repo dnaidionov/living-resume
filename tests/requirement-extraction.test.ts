@@ -1232,6 +1232,34 @@ test("requirement extraction keeps coordinated delivery verbs self-contained", a
   assert.ok(requirements.every((item) => !/^(?:build|deploy)$/i.test(item.text)));
 });
 
+test("requirement extraction recognizes delivery evidence and accountability framing", async () => {
+  const service = createRequirementExtractionService(
+    async () => ({
+      requirements: [
+        "Knowledge of Claude API and track record of building production agents.",
+        "Knowledge of Claude API and demonstrated success deploying production integrations.",
+        "Knowledge of Claude API and 5+ years building production agents.",
+        "Knowledge of Claude API and accountable for deploying production integrations.",
+        "Knowledge of Claude API and oversaw production deployments."
+      ].map((text) => ({
+        text,
+        category: "requirement" as const,
+        priority: "must_have" as const
+      }))
+    }),
+    () => true
+  );
+
+  const requirements = await service.extract("Delivery evidence and accountability framing");
+  const delivery = requirements.filter((item) =>
+    /track record|demonstrated success|years building|accountable for|oversaw/i.test(item.text)
+  );
+
+  assert.equal(requirements.length, 10);
+  assert.equal(delivery.length, 5);
+  assert.ok(delivery.every((item) => item.category === "function"));
+});
+
 test("requirement extraction recognizes broader delivery verbs and knowledge wording", async () => {
   const service = createRequirementExtractionService(
     async () => ({

@@ -339,6 +339,65 @@ test("fetchJobDescriptionFromUrl uses the public reader for a Waymo WAF challeng
   }
 });
 
+test("fetchJobDescriptionFromUrl does not use the Waymo reader for definitive missing responses", async () => {
+  const originalFetch = globalThis.fetch;
+  const requests: string[] = [];
+  globalThis.fetch = async (input) => {
+    requests.push(String(input));
+    return new Response("Not found", { status: 404 });
+  };
+
+  try {
+    await assert.rejects(
+      () => fetchJobDescriptionFromUrl(
+        "https://careers.withwaymo.com/jobs/removed-role",
+        { useCache: false }
+      ),
+      /Failed to fetch job description/i
+    );
+    assert.equal(requests.length, 1);
+  } finally {
+    globalThis.fetch = originalFetch;
+  }
+});
+
+test("fetchJobDescriptionFromUrl rejects Waymo reader error pages", async () => {
+  const originalFetch = globalThis.fetch;
+  let calls = 0;
+  globalThis.fetch = async () => {
+    calls += 1;
+    if (calls === 1) {
+      return new Response("", {
+        status: 202,
+        headers: { "x-amzn-waf-action": "challenge" }
+      });
+    }
+    return new Response(
+      [
+        "Title: Page Not Found",
+        "Warning: Target URL returned error 404: Not Found",
+        "Markdown Content:",
+        "Responsibilities and qualifications could not be found.",
+        "Build and deploy production systems while owning delivery."
+      ].join("\n"),
+      { status: 200 }
+    );
+  };
+
+  try {
+    await assert.rejects(
+      () => fetchJobDescriptionFromUrl(
+        "https://careers.withwaymo.com/jobs/removed-role",
+        { useCache: false }
+      ),
+      /Failed to fetch job description/i
+    );
+    assert.equal(calls, 2);
+  } finally {
+    globalThis.fetch = originalFetch;
+  }
+});
+
 test("fetchJobPostingFromUrl caches repeated URL fetches for the same posting", async () => {
   const originalFetch = globalThis.fetch;
   let calls = 0;
