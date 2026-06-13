@@ -116,6 +116,15 @@ test("credential evidence is limited to certification and knowledge queries", ()
   assert.equal(isCredentialEvidenceQuery("Knowledge of Claude API and troubleshoot production agents"), false);
   assert.equal(isCredentialEvidenceQuery("Knowledge of Claude API and test production agents"), false);
   assert.equal(isCredentialEvidenceQuery("Knowledge of Claude API and production deployment ownership"), false);
+  assert.equal(isCredentialEvidenceQuery("Knowledge of Claude API and accountability for production integrations"), false);
+  assert.equal(isCredentialEvidenceQuery("Knowledge of Claude API and ownership over production integrations"), false);
+  assert.equal(isCredentialEvidenceQuery("Knowledge of Claude API and proven success in production deployments"), false);
+  assert.equal(isCredentialEvidenceQuery("Knowledge of Claude API and a history of deploying production integrations"), false);
+  assert.equal(isCredentialEvidenceQuery("Knowledge of Claude API and experience with building production agents"), false);
+  assert.equal(isCredentialEvidenceQuery("Knowledge of Claude API and tasked with deploying production integrations"), false);
+  assert.equal(isCredentialEvidenceQuery("Knowledge of Claude API and charged with operating production agents"), false);
+  assert.equal(isCredentialEvidenceQuery("Knowledge of Claude API and monitoring tools"), true);
+  assert.equal(isCredentialEvidenceQuery("Knowledge of Claude API and testing methodologies"), true);
   assert.equal(isCredentialEvidenceQuery("Knowledge of Claude API and can deploy production integrations"), false);
   assert.equal(isCredentialEvidenceQuery("Knowledge of Claude API and expected to deploy production integrations"), false);
   assert.equal(isCredentialEvidenceQuery("Knowledge of Claude API and needs to deploy production integrations"), false);

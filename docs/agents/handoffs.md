@@ -86,6 +86,7 @@
 - preserve embedded delivery in alternating knowledge/delivery clauses, prioritize explicit accountability over conceptual suffixes, and keep shared-object coordinated verbs in one delivery atom
 - classify delivery-evidence framing independently from knowledge, and keep Waymo reader fallback limited to WAF/transient failures with upstream error-page rejection
 - keep operational execution verbs and deployment accountability outside credential evidence; never forward source query parameters to the Waymo reader
+- preserve complete `with`-framed delivery atoms, protect coordinated operational knowledge nouns, and reject reader infrastructure/challenge titles before scoring
 
 ## Diagram Artifact
 

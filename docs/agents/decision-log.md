@@ -536,3 +536,5 @@ Use this log for concise, chronological records of meaningful decisions that do 
 - Resolution: Extended shared execution grammar to optimize, monitor, troubleshoot, and test, and extended accountability nouns to deployments, with extraction, retrieval, and visible-output regressions.
 - Independent re-review finding: Non-empty Waymo WAF responses could bypass fallback, and source query parameters were forwarded to the public reader.
 - Resolution: Trigger fallback directly from the Waymo WAF header regardless of body length and strip the complete query string before constructing the reader request.
+- Final review finding: Broader accountability/history and assigned-work phrases remained credential-eligible; generic `with` could create malformed atoms; coordinated monitoring/testing nouns became false delivery; and additional reader error titles could pass content scoring.
+- Resolution: Expanded nominal accountability/history and assignment grammar, constrained `with` boundaries to validated action introducers, protected operational knowledge-domain nouns, and broadened infrastructure/challenge title rejection.

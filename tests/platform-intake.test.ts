@@ -481,6 +481,48 @@ test("fetchJobDescriptionFromUrl rejects Waymo reader error pages", async () => 
   }
 });
 
+test("fetchJobDescriptionFromUrl rejects broader Waymo reader error titles", async () => {
+  const originalFetch = globalThis.fetch;
+
+  try {
+    for (const title of ["Internal Server Error", "Upstream Timeout", "Just a moment..."]) {
+      let calls = 0;
+      globalThis.fetch = async () => {
+        calls += 1;
+        if (calls === 1) {
+          return new Response("", {
+            status: 202,
+            headers: { "x-amzn-waf-action": "challenge" }
+          });
+        }
+        return new Response(
+          [
+            `Title: ${title}`,
+            "Markdown Content:",
+            "About the role",
+            "Lead product strategy and roadmap planning.",
+            "Responsibilities",
+            "Build and deploy production systems.",
+            "Qualifications",
+            "10+ years of product management experience."
+          ].join("\n"),
+          { status: 200 }
+        );
+      };
+
+      await assert.rejects(
+        () => fetchJobDescriptionFromUrl(
+          "https://careers.withwaymo.com/jobs/unavailable-role",
+          { useCache: false }
+        ),
+        /Failed to fetch job description/i
+      );
+    }
+  } finally {
+    globalThis.fetch = originalFetch;
+  }
+});
+
 test("fetchJobPostingFromUrl caches repeated URL fetches for the same posting", async () => {
   const originalFetch = globalThis.fetch;
   let calls = 0;

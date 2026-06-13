@@ -36,9 +36,15 @@ const introducedDelivery = new RegExp(
   "i"
 );
 const deliveryEvidence = new RegExp(
-  `\\b(?:track\\s+record\\s+of|demonstrated\\s+success(?:\\s+in)?|\\d+\\+?\\s+years?(?:\\s+of\\s+experience)?(?:\\s+in)?|accountable\\s+for)\\s+(?:\\w+[\\s-]+){0,2}${deliveryVerbForms}\\b`,
+  `\\b(?:track\\s+record\\s+of|demonstrated\\s+success(?:\\s+in)?|(?:a\\s+)?history\\s+of|\\d+\\+?\\s+years?(?:\\s+of\\s+experience)?(?:\\s+in)?|accountable\\s+for)\\s+(?:\\w+[\\s-]+){0,2}${deliveryVerbForms}\\b`,
   "i"
 );
+const assignedDelivery = new RegExp(
+  `\\b(?:tasked|charged)\\s+with\\s+(?:\\w+[\\s-]+){0,2}${deliveryVerbForms}\\b`,
+  "i"
+);
+const nominalDeliveryHistory =
+  /\b(?:proven|demonstrated)\s+(?:success|track record)\s+in\s+(?:\w+\s+){0,3}(?:deployments?|implementations?|delivery|operations?)\b/i;
 const actorObligation = new RegExp(
   `^(?:(?:you['’](?:ll|d)|you(?:['’]re|\\s+are)?\\s+expected\\s+to|(?:we|(?:the\\s+)?recruiter)\\s+expects?\\s+you\\s+to)|${actor}\\s+${obligation}|${obligation})\\s+(?:\\w+ly\\s+){0,2}${deliveryVerb}\\b`,
   "i"
@@ -52,12 +58,12 @@ const passiveDelivery = new RegExp(
 const conceptualAccountability =
   /\b(?:ownership|leadership|responsibility)(?:\s+\w+){0,3}\s+(?:models?|principles?|matrices?|frameworks?|concepts?|patterns?)\b/i;
 const directAccountability =
-  /\b(?:ownership|leadership|responsibility)\s+(?:of|for)\b/i;
+  /\b(?:ownership|leadership|responsibility|accountability)\s+(?:of|for|over)\b/i;
 const suffixAccountability =
   /\b(?:design\s+systems?|systems?|platforms?|products?|workflows?|integrations?|deployments?|architecture)\s+(?:ownership|leadership|responsibility)\b/i;
 
 const actionShapedKnowledgeDomain =
-  /^(?:build|deploy)\s+(?:systems?|tooling|tools?|pipelines?|process(?:es)?|infrastructure|architecture)\b|^design\s+(?:systems?|patterns?|and\s+architecture\s+patterns?)\b|^build-vs-buy\s+tradeoffs?\b|^operating\s+systems?\b|^managed\s+services?\b|^integrated\s+development\s+environments?\b/i;
+  /^(?:build|deploy)\s+(?:systems?|tooling|tools?|pipelines?|process(?:es)?|infrastructure|architecture)\b|^design\s+(?:systems?|patterns?|and\s+architecture\s+patterns?)\b|^build-vs-buy\s+tradeoffs?\b|^operating\s+systems?\b|^managed\s+services?\b|^integrated\s+development\s+environments?\b|^monitoring\s+(?:tools?|systems?|platforms?|practices?)\b|^testing\s+(?:methodologies|methods?|frameworks?|tools?|practices?)\b/i;
 
 const boundaryPatterns = [
   /,\s+with\s+/gi,
@@ -65,7 +71,7 @@ const boundaryPatterns = [
   /,\s+(?:and|plus)\s+/gi,
   /,?\s+(?:while|whereas)\s+/gi,
   /\s+(?:and|plus|as\s+well\s+as)\s+/gi,
-  /\s+with\s+/gi,
+  /\s+with\s+(?=(?:ability|capability|responsibility|required|responsible)\s+to\b)/gi,
   /\s+[|&-]\s+/g,
   /\s*[—–]\s*/g,
   /\//g,
@@ -193,7 +199,9 @@ function isDeliveryClause(text: string, hasKnowledge: boolean): boolean {
     explicitDelivery.test(text) ||
     experienceDelivery.test(text) ||
     introducedDelivery.test(text) ||
-    deliveryEvidence.test(text)
+    deliveryEvidence.test(text) ||
+    assignedDelivery.test(text) ||
+    nominalDeliveryHistory.test(text)
   ) {
     return true;
   }

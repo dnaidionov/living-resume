@@ -1288,6 +1288,84 @@ test("requirement extraction recognizes operational execution and deployment own
   assert.ok(delivery.every((item) => item.category === "function"));
 });
 
+test("requirement extraction recognizes broader accountability and delivery history", async () => {
+  const service = createRequirementExtractionService(
+    async () => ({
+      requirements: [
+        "Knowledge of Claude API and accountability for production integrations.",
+        "Knowledge of Claude API and ownership over production integrations.",
+        "Knowledge of Claude API and proven success in production deployments.",
+        "Knowledge of Claude API and a history of deploying production integrations."
+      ].map((text) => ({
+        text,
+        category: "requirement" as const,
+        priority: "must_have" as const
+      }))
+    }),
+    () => true
+  );
+
+  const requirements = await service.extract("Broader accountability and delivery history");
+  const delivery = requirements.filter((item) =>
+    /accountability for|ownership over|proven success|history of deploying/i.test(item.text)
+  );
+
+  assert.equal(requirements.length, 8);
+  assert.equal(delivery.length, 4);
+  assert.ok(delivery.every((item) => item.category === "function"));
+});
+
+test("requirement extraction preserves complete with-framed delivery clauses", async () => {
+  const service = createRequirementExtractionService(
+    async () => ({
+      requirements: [
+        "Knowledge of Claude API and experience with building production agents.",
+        "Knowledge of Claude API and tasked with deploying production integrations.",
+        "Knowledge of Claude API and charged with operating production agents."
+      ].map((text) => ({
+        text,
+        category: "requirement" as const,
+        priority: "must_have" as const
+      }))
+    }),
+    () => true
+  );
+
+  const requirements = await service.extract("With-framed delivery clauses");
+  const labels = requirements.map((item) => item.text);
+
+  assert.equal(requirements.length, 6);
+  assert.ok(labels.some((item) => /^experience with building production agents$/i.test(item)));
+  assert.ok(labels.some((item) => /^tasked with deploying production integrations$/i.test(item)));
+  assert.ok(labels.some((item) => /^charged with operating production agents$/i.test(item)));
+  assert.ok(labels.every((item) => !/^Knowledge of Claude API and (?:experience|tasked|charged)$/i.test(item)));
+});
+
+test("requirement extraction preserves coordinated operational knowledge domains", async () => {
+  const service = createRequirementExtractionService(
+    async () => ({
+      requirements: [
+        {
+          text: "Knowledge of Claude API and monitoring tools.",
+          category: "requirement",
+          priority: "important"
+        },
+        {
+          text: "Knowledge of Claude API and testing methodologies.",
+          category: "requirement",
+          priority: "important"
+        }
+      ]
+    }),
+    () => true
+  );
+
+  const requirements = await service.extract("Operational knowledge domains");
+
+  assert.equal(requirements.length, 2);
+  assert.ok(requirements.every((item) => item.category === "requirement"));
+});
+
 test("requirement extraction recognizes broader delivery verbs and knowledge wording", async () => {
   const service = createRequirementExtractionService(
     async () => ({

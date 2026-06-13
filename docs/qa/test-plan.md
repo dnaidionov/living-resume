@@ -80,12 +80,15 @@
 - Coordinated delivery verbs with a shared object, such as `build and deploy production agents`, must remain a self-contained delivery atom and must not produce standalone verb fragments.
 - Delivery-evidence framing must be covered at extraction, retrieval, and recruiter-output layers, including track-record, demonstrated-success, years-of-experience, accountability, and past-tense oversight wording.
 - Operational execution and accountability coverage must include optimize, monitor, troubleshoot, test, and deployment ownership at extraction, retrieval, and visible-output layers.
+- Broader accountability/history and assignment framing must cover accountability for, ownership over, proven success, history of delivery, tasked with, and charged with.
+- Generic `with` must not split complete delivery phrases, and coordinated monitoring/testing domain nouns must remain credential-eligible knowledge.
 - Recruiter-facing credential support must identify Anthropic as issuer, use certification-validation language, and must not render the credential as prior employment.
 - Credential issuer tests must derive attribution from credential provenance rather than tags.
 - Waymo URL intake must fall back to the public text reader only after a direct WAF-blocked or unreadable response; non-Waymo JavaScript-rendered pages must retain the existing explicit failure behavior.
 - Definitive Waymo `404`/`410` responses must not invoke the reader, and reader responses containing upstream error metadata or missing/error titles must be rejected before job-content scoring.
 - Waymo WAF detection must use the response header independently of body length, including non-empty challenge shells.
 - Reader fallback requests must omit all source URL query parameters to avoid disclosing referral, session, candidate, or signed tokens to a third party.
+- Reader error-title rejection must include infrastructure and challenge titles such as internal server errors, upstream timeouts, service unavailability, and browser-challenge pages.
 - Atomic splitting must not discard the eighth source requirement in either LLM or heuristic extraction; post-split output may exceed the eight-item source limit within the shared twelve-item atomic cap.
 - LLM responses that already contain split atomic requirements must be normalized against the twelve-item atomic cap rather than truncated to the eight-source limit.
 - Heuristic extraction must rank all source requirements before applying the eight-source limit so later must-haves are not dropped due to document order.

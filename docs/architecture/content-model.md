@@ -64,6 +64,9 @@
 - Coordinated delivery verbs that share an object remain one delivery atom rather than being split into standalone verb fragments.
 - Delivery evidence framing such as `track record of building`, `demonstrated success deploying`, years-of-experience phrasing, `accountable for`, and past-tense oversight is execution evidence and cannot be supported by a credential.
 - Operational execution verbs such as optimize, monitor, troubleshoot, and test, plus deployment-accountability nouns, are delivery evidence rather than credential-supported knowledge.
+- Broader accountability and delivery-history framing, including accountability for, ownership over, proven success, history of delivery, and assigned/charged work, is execution evidence.
+- `with` is a clause boundary only for validated action introducers; generic `with` inside phrases such as `experience with building` remains part of the delivery atom.
+- Operational gerunds followed by domain nouns, such as monitoring tools and testing methodologies, remain knowledge domains when coordinated under an explicit knowledge frame.
 - Reverse recursive slash compounds split at the knowledge boundary so valid credential-supported knowledge is retained.
 - Recruiter-facing credential support identifies Anthropic as issuer and is phrased as certification validation, never as employment or prior-role experience.
 - Credential issuer attribution is derived from structured credential metadata rather than display text or topical tags.

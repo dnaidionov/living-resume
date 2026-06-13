@@ -461,6 +461,45 @@ test("credential evidence cannot prove operational execution or deployment owner
   }
 });
 
+test("credential evidence cannot prove broader accountability or delivery history", () => {
+  const credentialEvidence: EvidenceChunk[] = [
+    {
+      id: "credential-claude",
+      sourceType: "credential",
+      title: "Claude Certified Architect - Foundations Certification",
+      section: "credential",
+      text: "Anthropic credential validating knowledge of Claude API and Model Context Protocol.",
+      tags: ["credential", "claude", "mcp"],
+      metadata: { issuer: "Anthropic" },
+      embedding: [1, 0, 0]
+    }
+  ];
+
+  for (const deliveryClause of [
+    "accountability for production integrations",
+    "ownership over production integrations",
+    "proven success in production deployments",
+    "a history of deploying production integrations",
+    "experience with building production agents",
+    "tasked with deploying production integrations",
+    "charged with operating production agents"
+  ]) {
+    const roleText = `Knowledge of Claude API and ${deliveryClause}.`;
+    const result = buildFallbackFitAnalysisResponse(
+      roleText,
+      extractRoleRequirements(roleText),
+      credentialEvidence,
+      "text",
+      "recruiter_brief"
+    );
+    const matchText = result.presentation.mode === "recruiter_brief"
+      ? (result.presentation.whereIMatch ?? []).flatMap((item) => [item.requirement, item.support]).join(" ")
+      : "";
+
+    assert.doesNotMatch(matchText, new RegExp(deliveryClause, "i"));
+  }
+});
+
 test("resume chat fallback politely declines off-scope personal questions", () => {
   const answer = buildFallbackChatAnswer("What is Dmitry's favorite movie?", [], "resume_qa");
   assert.equal(answer, buildResumeChatScopeRefusal());
