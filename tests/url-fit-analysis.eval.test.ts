@@ -66,9 +66,9 @@ test("url-fit-analysis fixture keeps required build-gate cases enabled", () => {
   assert.deepEqual(
     requiredCases.map((item) => item.id).sort(),
     [
-      "motive-staff-product-manager-telematics",
+      "motive-principal-product-manager-ai-cameras-video-safety",
       "sourgum-director-of-product",
-      "waymo-product-manager-driving-behaviors"
+      "waymo-group-product-manager-fleet-event-response"
     ]
   );
 });

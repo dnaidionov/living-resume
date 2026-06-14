@@ -52,6 +52,52 @@
 - Retrieval regressions must verify that batch query search preserves the single-query result shape for fit-analysis retrieval
 - Fit-analysis retrieval should merge a broad role-text query with prioritized per-requirement queries so downstream requirement matching can choose distinct, role-appropriate evidence instead of overfitting to the top few broad-query chunks
 - Requirement-extraction regressions must verify that identical JD text reuses cached extracted requirements while distinct JD text does not
+- Credential evidence may support explicit certification and knowledge requirements but must not support implementation, delivery, ownership, or leadership claims.
+- Compound credential requirements must be split into atomic knowledge and delivery clauses, including forward/reverse order, modal and base-form actions, and common connectors such as `and`, `as well as`, and `plus`.
+- Delivery-clause coverage must include noun forms such as `ownership of`, `leadership of`, and `responsibility for`.
+- Delivery-clause coverage must include common execution verbs such as design, integrate, ship, manage, architect, create, launch, scale, maintain, configure, oversee, execute, drive, and run.
+- Delivery-clause coverage must recognize limited adverbs between an action introducer and verb, such as `ability to successfully build`.
+- Compound splitting must cover coordinated adverbs, gerunds, passive delivery voice, `responsible for`, `while`/`whereas`, and defensible dash/slash clause separators without splitting coordinated knowledge-domain nouns.
+- Credential knowledge coverage must include proficiency, expertise, and knowledgeable-about wording.
+- Credential knowledge coverage must include `proficiency with`, `proficiency in`, and adjective-form `proficient with` / `proficient in` wording.
+- Knowledge-domain nouns such as `build systems` and `deploy tooling` must remain credential-eligible without masking later delivery clauses in the same requirement.
+- Knowledge-domain noun protection must apply consistently across `and`, `plus`, `as well as`, and slash-separated knowledge lists.
+- Recursive knowledge/delivery compounds must preserve all valid knowledge domains before splitting the later execution clause.
+- Delivery-clause coverage must include `be able to` and `able to` phrasing plus progressive-passive forms such as `are actively being deployed`.
+- Delivery-clause coverage must include modal and expectation variants such as `should`, `can`, `expected to`, and `needs to`, including reverse-order compounds.
+- Modal coverage must include bounded multiword actor subjects, actor-specific expectation wording, and straight/curly apostrophe contractions.
+- Actor coverage must include plurals, direct pronouns, person-in-role language, and recruiter expectations while preserving actor words embedded inside relative knowledge clauses.
+- Actor coverage must include role-holder/incumbent expectations and actor-prefixed `must be able to`.
+- Compound splitting must support pipe, ampersand, Unicode dash, and unspaced slash separators while preserving earlier knowledge-list items.
+- Separator regressions must preserve technology names such as `CI/CD`, `R&D`, and hyphenated knowledge terms, including reverse-order delivery compounds.
+- Modal regressions must distinguish candidate obligations from knowledge descriptions such as platforms that can deploy models.
+- Knowledge-domain regressions must preserve action-shaped nouns such as `design systems`, `design patterns`, `build-vs-buy tradeoffs`, and `design and architecture patterns` across conjunction, slash, ampersand, pipe, and dash forms.
+- Accountability suffixes such as `design systems ownership` must remain delivery evidence rather than inheriting knowledge-domain protection.
+- Accountability coverage must include architecture ownership while preserving conceptual knowledge phrases such as ownership models, leadership principles, and responsibility matrices.
+- Reverse recursive slash compounds must retain the valid knowledge atom.
+- Alternating knowledge/delivery/knowledge clauses must retain and classify the embedded delivery expectation rather than allowing a trailing knowledge signal to make the whole requirement credential-eligible.
+- Explicit accountability phrases such as `ownership of`, `leadership of`, and `responsibility for` must override conceptual nouns such as frameworks or models.
+- Coordinated delivery verbs with a shared object, such as `build and deploy production agents`, must remain a self-contained delivery atom and must not produce standalone verb fragments.
+- Delivery-evidence framing must be covered at extraction, retrieval, and recruiter-output layers, including track-record, demonstrated-success, years-of-experience, accountability, and past-tense oversight wording.
+- Operational execution and accountability coverage must include optimize, monitor, troubleshoot, test, and deployment ownership at extraction, retrieval, and visible-output layers.
+- Broader accountability/history and assignment framing must cover accountability for, ownership over, proven success, history of delivery, tasked with, and charged with.
+- Generic `with` must not split complete delivery phrases, and coordinated monitoring/testing domain nouns must remain credential-eligible knowledge.
+- Embedded execution qualifiers (`gained through`, `developed through`, `acquired by`, `demonstrated by`, `from building`, `based on building`) must block credential evidence and must be normalized as delivery even when no atomic boundary split is available.
+- Recruiter-facing credential support must identify Anthropic as issuer, use certification-validation language, and must not render the credential as prior employment.
+- Credential issuer tests must derive attribution from credential provenance rather than tags.
+- Waymo URL intake must fall back to the public text reader only after a direct WAF-blocked or unreadable response; non-Waymo JavaScript-rendered pages must retain the existing explicit failure behavior.
+- Definitive Waymo `404`/`410` responses must not invoke the reader, and reader responses containing upstream error metadata or missing/error titles must be rejected before job-content scoring.
+- Waymo WAF detection must use the response header independently of body length, including non-empty challenge shells.
+- Reader fallback requests must omit all source URL query parameters to avoid disclosing referral, session, candidate, or signed tokens to a third party.
+- Reader error-title rejection must include infrastructure and challenge titles such as internal server errors, upstream timeouts, service unavailability, human-verification prompts, security checks, CAPTCHA, and browser-challenge pages.
+- Reader challenge rejection must inspect both title and body semantics so browser checks, robot challenges, Cloudflare attention pages, and human-verification content cannot pass by adding job-like headings.
+- Reader body rejection must also cover explicit automated-request denial and human-only access messages without treating ordinary job-domain automation language as a challenge.
+- Explicit access-denied, HTTP-forbidden, security-service blocking, and upstream infrastructure-error bodies must be rejected before scoring or caching.
+- Access-denial matching must allow intervening target text, such as `Access to this website has been denied`, rather than depending on one exact sentence shape.
+- Atomic splitting must not discard the eighth source requirement in either LLM or heuristic extraction; post-split output may exceed the eight-item source limit within the shared twelve-item atomic cap.
+- LLM responses that already contain split atomic requirements must be normalized against the twelve-item atomic cap rather than truncated to the eight-source limit.
+- Heuristic extraction must rank all source requirements before applying the eight-source limit so later must-haves are not dropped due to document order.
+- Credential expiration must remain in structured metadata and must not appear in public UI or retrievable credential evidence text.
 - Benchmark-tooling regressions must verify that `npm run bench:fit` exists and that the benchmark script reports the active provider/model configuration plus the expected stage timings
 - Provider-config regressions must verify backward-compatible OpenAI defaults, OpenRouter routing, and custom OpenAI-compatible provider resolution from namespaced env vars
 - Provider-adapter regressions must verify that OpenAI-compatible providers use the configured base URL and provider-specific headers for both completions and embeddings

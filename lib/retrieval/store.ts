@@ -4,6 +4,7 @@ import { buildDocuments } from "@/lib/content/store";
 import { computeDeterministicEmbedding, cosineSimilarity } from "@/lib/retrieval/embeddings";
 import { requestEmbeddings } from "@/lib/ai/openai";
 import { hasProviderConfig } from "@/lib/ai/provider-config";
+import { isCredentialOnlyRequirement } from "@/lib/ai/credential-requirements";
 import generatedEmbeddings from "@/content/retrieval/embeddings.generated.json";
 
 type EmbeddedChunk = EvidenceChunk & {
@@ -17,9 +18,13 @@ function modeFilter(mode: "resume_qa" | "fit_analysis" | "build_process", chunk:
     return chunk.sourceType === "build_doc" || chunk.sourceType === "case_study";
   }
   if (mode === "fit_analysis") {
-    return chunk.sourceType === "resume" || chunk.sourceType === "ai_context";
+    return chunk.sourceType === "resume" || chunk.sourceType === "ai_context" || chunk.sourceType === "credential";
   }
   return chunk.sourceType !== "build_doc";
+}
+
+export function isCredentialEvidenceQuery(query: string): boolean {
+  return isCredentialOnlyRequirement(query);
 }
 
 export const staticRetrievalStore: RetrievalStore = {
@@ -34,8 +39,14 @@ export const staticRetrievalStore: RetrievalStore = {
     const queryEmbeddings = await embedQueries(queries, usesSemanticEmbeddings(chunks));
     const filteredChunks = chunks.filter((chunk) => modeFilter(mode, chunk));
 
-    return queryEmbeddings.map((queryEmbedding) =>
+    return queryEmbeddings.map((queryEmbedding, queryIndex) =>
       filteredChunks
+        .filter(
+          (chunk) =>
+            chunk.sourceType !== "credential" ||
+            mode !== "fit_analysis" ||
+            isCredentialEvidenceQuery(queries[queryIndex] ?? "")
+        )
         .map((chunk) => ({
           chunk,
           score: cosineSimilarity(queryEmbedding, chunk.embedding)

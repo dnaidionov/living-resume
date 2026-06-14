@@ -289,6 +289,297 @@ test("fetchJobDescriptionFromUrl reports JS-rendered pages explicitly when conte
   }
 });
 
+test("fetchJobDescriptionFromUrl uses the public reader for a Waymo WAF challenge", async () => {
+  const originalFetch = globalThis.fetch;
+  const requests: string[] = [];
+  globalThis.fetch = async (input) => {
+    const url = String(input);
+    requests.push(url);
+    if (url.startsWith("https://r.jina.ai/http://careers.withwaymo.com/")) {
+      return new Response(
+        [
+          "Title: Group Product Manager, Fleet & Event Response - Mountain View, California, United States",
+          "",
+          "URL Source: http://careers.withwaymo.com/jobs/group-product-manager-fleet-event-response",
+          "",
+          "Markdown Content:",
+          "# Group Product Manager, Fleet & Event Response",
+          "Waymo is an autonomous driving technology company.",
+          "About the role",
+          "Develop the product roadmap and lead cross-functional delivery across product, engineering, data science, and operations.",
+          "Responsibilities",
+          "Manage a team of product managers and connect roadmap priorities to long-term commercial and cost goals.",
+          "Qualifications",
+          "10+ years of product management experience and a demonstrated track record of delivering transformational product impact."
+        ].join("\n"),
+        { status: 200, headers: { "content-type": "text/plain" } }
+      );
+    }
+    return new Response("", {
+      status: 202,
+      headers: {
+        "content-type": "text/html",
+        "x-amzn-waf-action": "challenge"
+      }
+    });
+  };
+
+  try {
+    const text = await fetchJobDescriptionFromUrl(
+      "https://careers.withwaymo.com/jobs/group-product-manager-fleet-event-response",
+      { useCache: false }
+    );
+
+    assert.equal(requests.length, 2);
+    assert.match(requests[1] ?? "", /^https:\/\/r\.jina\.ai\/http:\/\/careers\.withwaymo\.com\//);
+    assert.match(text, /Group Product Manager, Fleet & Event Response/);
+    assert.match(text, /Develop the product roadmap/);
+  } finally {
+    globalThis.fetch = originalFetch;
+  }
+});
+
+test("fetchJobDescriptionFromUrl uses the Waymo reader for a non-empty WAF challenge", async () => {
+  const originalFetch = globalThis.fetch;
+  const requests: string[] = [];
+  globalThis.fetch = async (input) => {
+    const url = String(input);
+    requests.push(url);
+    if (url.startsWith("https://r.jina.ai/")) {
+      return new Response(
+        [
+          "Title: Group Product Manager, Fleet & Event Response",
+          "Markdown Content:",
+          "Group Product Manager, Fleet & Event Response",
+          "About the role",
+          "Lead product strategy, roadmap planning, and cross-functional delivery.",
+          "Responsibilities",
+          "Manage product managers and coordinate engineering, design, and operations.",
+          "Qualifications",
+          "10+ years of product management experience."
+        ].join("\n"),
+        { status: 200 }
+      );
+    }
+    return new Response(
+      "<html><body>Checking your browser before accessing this public job posting. This security challenge requires additional validation.</body></html>",
+      {
+        status: 202,
+        headers: { "x-amzn-waf-action": "challenge" }
+      }
+    );
+  };
+
+  try {
+    const text = await fetchJobDescriptionFromUrl(
+      "https://careers.withwaymo.com/jobs/group-product-manager-fleet-event-response",
+      { useCache: false }
+    );
+    assert.equal(requests.length, 2);
+    assert.match(text, /Lead product strategy/);
+  } finally {
+    globalThis.fetch = originalFetch;
+  }
+});
+
+test("fetchJobDescriptionFromUrl strips query parameters from the Waymo reader request", async () => {
+  const originalFetch = globalThis.fetch;
+  const requests: string[] = [];
+  globalThis.fetch = async (input) => {
+    const url = String(input);
+    requests.push(url);
+    if (url.startsWith("https://r.jina.ai/")) {
+      return new Response(
+        [
+          "Title: Group Product Manager, Fleet & Event Response",
+          "Markdown Content:",
+          "Group Product Manager, Fleet & Event Response",
+          "About the role",
+          "Lead product strategy, roadmap planning, and cross-functional delivery.",
+          "Responsibilities",
+          "Manage product managers and coordinate engineering, design, and operations.",
+          "Qualifications",
+          "10+ years of product management experience."
+        ].join("\n"),
+        { status: 200 }
+      );
+    }
+    return new Response("", {
+      status: 202,
+      headers: { "x-amzn-waf-action": "challenge" }
+    });
+  };
+
+  try {
+    await fetchJobDescriptionFromUrl(
+      "https://careers.withwaymo.com/jobs/group-product-manager-fleet-event-response?candidate_token=secret-123&utm_source=test",
+      { useCache: false }
+    );
+    assert.equal(requests.length, 2);
+    assert.doesNotMatch(requests[1] ?? "", /candidate_token|secret-123|utm_source/i);
+  } finally {
+    globalThis.fetch = originalFetch;
+  }
+});
+
+test("fetchJobDescriptionFromUrl does not use the Waymo reader for definitive missing responses", async () => {
+  const originalFetch = globalThis.fetch;
+  const requests: string[] = [];
+  globalThis.fetch = async (input) => {
+    requests.push(String(input));
+    return new Response("Not found", { status: 404 });
+  };
+
+  try {
+    await assert.rejects(
+      () => fetchJobDescriptionFromUrl(
+        "https://careers.withwaymo.com/jobs/removed-role",
+        { useCache: false }
+      ),
+      /Failed to fetch job description/i
+    );
+    assert.equal(requests.length, 1);
+  } finally {
+    globalThis.fetch = originalFetch;
+  }
+});
+
+test("fetchJobDescriptionFromUrl rejects Waymo reader error pages", async () => {
+  const originalFetch = globalThis.fetch;
+  let calls = 0;
+  globalThis.fetch = async () => {
+    calls += 1;
+    if (calls === 1) {
+      return new Response("", {
+        status: 202,
+        headers: { "x-amzn-waf-action": "challenge" }
+      });
+    }
+    return new Response(
+      [
+        "Title: Page Not Found",
+        "Warning: Target URL returned error 404: Not Found",
+        "Markdown Content:",
+        "Responsibilities and qualifications could not be found.",
+        "Build and deploy production systems while owning delivery."
+      ].join("\n"),
+      { status: 200 }
+    );
+  };
+
+  try {
+    await assert.rejects(
+      () => fetchJobDescriptionFromUrl(
+        "https://careers.withwaymo.com/jobs/removed-role",
+        { useCache: false }
+      ),
+      /Failed to fetch job description/i
+    );
+    assert.equal(calls, 2);
+  } finally {
+    globalThis.fetch = originalFetch;
+  }
+});
+
+test("fetchJobDescriptionFromUrl rejects broader Waymo reader error and challenge titles", async () => {
+  const originalFetch = globalThis.fetch;
+
+  try {
+    for (const title of [
+      "Internal Server Error",
+      "Upstream Timeout",
+      "Just a moment...",
+      "Verify you are human",
+      "Security Check",
+      "CAPTCHA",
+      "Checking your browser...",
+      "Robot Challenge",
+      "Attention Required! | Cloudflare"
+    ]) {
+      let calls = 0;
+      globalThis.fetch = async () => {
+        calls += 1;
+        if (calls === 1) {
+          return new Response("", {
+            status: 202,
+            headers: { "x-amzn-waf-action": "challenge" }
+          });
+        }
+        return new Response(
+          [
+            `Title: ${title}`,
+            "Markdown Content:",
+            "About the role",
+            "Lead product strategy and roadmap planning.",
+            "Responsibilities",
+            "Build and deploy production systems.",
+            "Qualifications",
+            "10+ years of product management experience."
+          ].join("\n"),
+          { status: 200 }
+        );
+      };
+
+      await assert.rejects(
+        () => fetchJobDescriptionFromUrl(
+          "https://careers.withwaymo.com/jobs/unavailable-role",
+          { useCache: false }
+        ),
+        /Failed to fetch job description/i
+      );
+    }
+  } finally {
+    globalThis.fetch = originalFetch;
+  }
+});
+
+test("fetchJobDescriptionFromUrl rejects Waymo reader challenge and bot-denial body content", async () => {
+  const originalFetch = globalThis.fetch;
+
+  try {
+    for (const denialText of [
+      "Checking your browser before accessing careers.withwaymo.com. Please complete the security verification to prove you are human.",
+      "Automated requests from this client have been denied. Access is restricted to human visitors.",
+      "Access denied. This request was blocked by our security service.",
+      "Access to this website has been denied by the security service.",
+      "403 Forbidden. You do not have permission to access this resource.",
+      "Upstream service returned an internal server error while processing this request."
+    ]) {
+      let calls = 0;
+      globalThis.fetch = async () => {
+        calls += 1;
+        if (calls === 1) {
+          return new Response("", {
+            status: 202,
+            headers: { "x-amzn-waf-action": "challenge" }
+          });
+        }
+        return new Response(
+          [
+            "Title: Waymo Careers",
+            "Markdown Content:",
+            denialText,
+            "Responsibilities",
+            "Qualifications",
+            "About the role and requirements"
+          ].join("\n"),
+          { status: 200 }
+        );
+      };
+
+      await assert.rejects(
+        () => fetchJobDescriptionFromUrl(
+          "https://careers.withwaymo.com/jobs/unavailable-role",
+          { useCache: false }
+        ),
+        /Failed to fetch job description/i
+      );
+    }
+  } finally {
+    globalThis.fetch = originalFetch;
+  }
+});
+
 test("fetchJobPostingFromUrl caches repeated URL fetches for the same posting", async () => {
   const originalFetch = globalThis.fetch;
   let calls = 0;

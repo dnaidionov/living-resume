@@ -13,6 +13,14 @@ import type {
   ChatMode
 } from "@/types/ai";
 import type { Citation, EvidenceChunk } from "@/types/content";
+import {
+  isCredentialOnlyRequirement,
+  splitCompoundCredentialRequirements
+} from "@/lib/ai/credential-requirements";
+import {
+  MAX_ATOMIC_REQUIREMENTS,
+  MAX_SOURCE_REQUIREMENTS
+} from "@/lib/ai/requirement-policy";
 
 const dimensionOrder: FitDimension["name"][] = [
   "core_match",
@@ -77,7 +85,7 @@ export function buildChatSystemPrompt(mode: ChatMode): string {
   const modeInstruction =
     mode === "build_process"
       ? "Answer only from build/process evidence. If the evidence is weak, say that directly."
-      : "Answer only from resume, project, FAQ, and AI-context evidence. If the evidence is weak, say that directly.";
+      : "Answer only from resume, project, FAQ, AI-context, and credential evidence. If the evidence is weak, say that directly.";
 
   return [
     "You are the AI systems architect for Dmitry Naidionov's Career Twin.",
@@ -105,6 +113,7 @@ export function buildFitAnalysisSystemPrompt(): string {
     "Do not treat repeated evidence as separate proof points; repeated bullets should reference the earlier point instead of restating the same evidence.",
     "Do not treat older pre-LLM AI/ML or chatbot work as direct proof of modern LLM orchestration, RAG, evals, or agent workflows.",
     "Technology matches must respect context: integration or product-adjacent exposure is not the same as hands-on engineering ownership unless the evidence proves that depth.",
+    "Credential evidence may support certification, familiarity, or knowledge requirements, but it must never prove hands-on implementation, delivery ownership, or production leadership.",
     "Recruiter-facing output must never mention Dmitry's preferred domains, preferred technologies, absent AI wording, or internal scoring logic.",
     "Use gaps as validation points for interview follow-up, not as premature rejection language.",
     "Return valid JSON only with the requested fields."
@@ -149,6 +158,7 @@ export function buildFitAnalysisUserPrompt(
     "- If the same evidence supports multiple bullets, show the first bullet normally and use 'Same as above.' or 'See previous point.' for later bullets.",
     "- Do not count pre-2023 AI/ML or chatbot work as direct evidence for modern LLM orchestration, RAG, evals, or agent workflows.",
     "- When a requirement names a technology, distinguish product-adjacent exposure from hands-on engineering implementation.",
+    "- Use credential evidence only for certification, familiarity, or knowledge requirements; never use it as proof of hands-on implementation, delivery ownership, or production leadership.",
     "",
     `Primary presentation mode: ${presentationMode}`,
     "Return JSON with these top-level fields:",
@@ -407,25 +417,28 @@ export function extractRoleRequirementsHeuristically(roleText: string): Extracte
     .filter((item) => item.length >= 20)
     .filter(isLikelyRequirementSegment);
 
-  const prioritized = prioritizeRequirements(
+  const sourceRequirements = prioritizeRequirements(
     dedupeRequirements(segments).map((segment) => ({
       text: segment,
       category: inferRequirementCategory(segment),
       priority: inferRequirementPriority(segment)
     }))
-  ).slice(0, 8);
+  ).slice(0, MAX_SOURCE_REQUIREMENTS);
+  const prioritized = prioritizeRequirements(
+    splitCompoundCredentialRequirements(sourceRequirements)
+  ).slice(0, MAX_ATOMIC_REQUIREMENTS);
 
   if (prioritized.length > 0) {
       return prioritized;
   }
 
-  return [
+  return splitCompoundCredentialRequirements([
     {
       text: sanitizeRequirementSegment(roleText.slice(0, 180)),
       category: "requirement" as const,
       priority: "important" as const
     }
-  ].filter((item) => item.text.length > 0);
+  ].filter((item) => item.text.length > 0));
 }
 
 export function extractRoleRequirements(roleText: string): ExtractedRoleRequirement[] {
@@ -768,7 +781,7 @@ function stripLeadIn(text: string): string {
 function buildTransferBulletsFromEvidence(evidence: EvidenceChunk[]): TransferBullet[] {
   const seen = new Set<string>();
 
-  return rankEvidenceForSupport(evidence)
+  return rankEvidenceForSupport(evidence.filter((item) => item.sourceType !== "credential"))
     .map((item) => ({
       skillOrExperience: buildTransferTitle(item),
       relevance: summarizeSupportEvidence(item) ?? "My prior work includes directly relevant experience that would transfer to this role."
@@ -923,6 +936,11 @@ function summarizeSupportEvidence(
     return undefined;
   }
 
+  if (item.sourceType === "credential") {
+    const issuer = item.metadata?.issuer;
+    return `The ${issuer ? `${issuer}-issued ` : ""}${item.title} validates knowledge relevant to this requirement.`;
+  }
+
   const text = item.text.trim().replace(/\s+/g, " ");
   const company = item.metadata?.company ?? inferCompanyFromTitle(item);
   const portfolioSummary = summarizePortfolioEvidence(item, evidencePool);
@@ -1023,7 +1041,7 @@ function isLikelyRequirementSegment(segment: string): boolean {
   if (isLikelyTitleSegment(cleanedSegment)) {
     return false;
   }
-  if (!/(experience|ability|develop|drive|lead|build|deliver|determine|define|gather|analy|align|work cross-functionally|vision|strategy|road-?map|requirements|mission|goal|bring|technical|familiarity|preferred|certification|certified|clearance)/i.test(normalized)) {
+  if (!/(experience|ability|develop|drive|lead|leadership|build|deliver|determine|define|gather|analy|align|work cross-functionally|vision|strategy|road-?map|requirements|responsibility|ownership|mission|goal|bring|technical|knowledge|understanding|familiarity|preferred|certification|certified|clearance)/i.test(normalized)) {
     return false;
   }
 
@@ -1145,7 +1163,9 @@ function selectBestEvidenceForRequirement(
   usedEvidenceIds: Set<string>
 ): { chunk: EvidenceChunk; score: number } | undefined {
   const keywords = extractRequirementKeywords(requirement);
-  const candidatePool = leadershipQualifiedEvidencePool(requirement, evidence);
+  const candidatePool = leadershipQualifiedEvidencePool(requirement, evidence).filter(
+    (item) => item.sourceType !== "credential" || isCredentialEvidenceRequirement(requirement)
+  );
 
   const candidates = [...candidatePool]
     .map((item) => ({
@@ -1161,6 +1181,10 @@ function selectBestEvidenceForRequirement(
   }
 
   return bestUnused.score >= minimumEvidenceScore(requirement) ? bestUnused : undefined;
+}
+
+function isCredentialEvidenceRequirement(requirement: string): boolean {
+  return isCredentialOnlyRequirement(requirement);
 }
 
 function leadershipQualifiedEvidencePool(requirement: string, evidence: EvidenceChunk[]): EvidenceChunk[] {
@@ -1252,8 +1276,13 @@ function requirementEvidenceScore(
   const leadershipSectionAdjustment = leadershipEvidenceSectionAdjustment(requirement, item);
   const strategicExecutionBonus = strategicExecutionEvidenceBonus(requirement, item);
   const strategicExecutionPenalty = strategicExecutionMismatchPenalty(requirement, item);
+  const credentialBonus = credentialEvidenceBonus(requirement, item);
 
-  return evidencePreferenceScore(item) * 10 + keywordHits * 5 + directPhraseBonus + recencyBonus + domainBonus + leadershipBonus + leadershipRoleBonus + leadershipSectionAdjustment + strategicExecutionBonus - reusePenalty - rolePenalty - recencyPenalty - contextPenalty - catchAllRolePenalty - specificityPenalty - leadershipPenalty - leadershipOutcomePenalty - strategicExecutionPenalty;
+  return evidencePreferenceScore(item) * 10 + keywordHits * 5 + directPhraseBonus + recencyBonus + domainBonus + leadershipBonus + leadershipRoleBonus + leadershipSectionAdjustment + strategicExecutionBonus + credentialBonus - reusePenalty - rolePenalty - recencyPenalty - contextPenalty - catchAllRolePenalty - specificityPenalty - leadershipPenalty - leadershipOutcomePenalty - strategicExecutionPenalty;
+}
+
+function credentialEvidenceBonus(requirement: string, item: EvidenceChunk): number {
+  return item.sourceType === "credential" && isCredentialOnlyRequirement(requirement) ? 12 : 0;
 }
 
 function roleSpecificityPenalty(item: EvidenceChunk): number {

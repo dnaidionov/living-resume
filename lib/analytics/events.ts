@@ -12,6 +12,7 @@ export type AnalyticsEvent =
   | "fit_analysis_started"
   | "fit_analysis_completed"
   | "contact_clicked"
+  | "credential_clicked"
   | "github_clicked"
   | "linkedin_clicked"
   | "resume_downloaded";

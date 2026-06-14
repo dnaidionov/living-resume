@@ -1,0 +1,2 @@
+export const MAX_SOURCE_REQUIREMENTS = 8;
+export const MAX_ATOMIC_REQUIREMENTS = 12;

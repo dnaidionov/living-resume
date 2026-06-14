@@ -1,9 +1,9 @@
 [
   {
-    "id": "waymo-product-manager-driving-behaviors",
-    "description": "Required build-gate product-role regression for a Waymo job page. Expected to ingest a real JD and land in the positive-fit band.",
-    "url": "https://careers.withwaymo.com/jobs/product-manager-driving-behaviors-mountain-view-california-united-states-san-francisco-new-york-city-new-york",
-    "expectedTitle": "Product Manager, Driving Behaviors",
+    "id": "waymo-group-product-manager-fleet-event-response",
+    "description": "Required build-gate product-leadership regression for a Waymo job page. Expected to ingest a real JD and land in the positive-fit band.",
+    "url": "https://careers.withwaymo.com/jobs/group-product-manager-fleet-event-response-mountain-view-california-united-states-san-francisco",
+    "expectedTitle": "Group Product Manager, Fleet & Event Response",
     "expectedCompany": "Waymo",
     "expectedOutcome": "positive_fit",
     "enabled": true,
@@ -21,11 +21,12 @@
     "requiredForBuild": true
   },
   {
-    "id": "motive-staff-product-manager-telematics",
+    "id": "motive-principal-product-manager-ai-cameras-video-safety",
     "description": "Required build-gate product-role regression for a Greenhouse posting. Expected to ingest a real JD and land in the positive-fit band.",
-    "url": "https://job-boards.greenhouse.io/gomotive/jobs/8303849002",
-    "expectedTitle": "Staff Product Manager, Telematics",
+    "url": "https://job-boards.greenhouse.io/gomotive/jobs/8518742002",
+    "expectedTitle": "Principal Product Manager, AI Cameras & Video Safety",
     "expectedCompany": "Motive",
+    "expectedTargetTitle": "Principal/Director Product Manager",
     "expectedOutcome": "positive_fit",
     "enabled": true,
     "requiredForBuild": true

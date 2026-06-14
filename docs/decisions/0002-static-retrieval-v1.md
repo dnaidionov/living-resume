@@ -13,3 +13,7 @@ Use repo-managed content plus generated static artifacts for retrieval in v1.
 ## Consequence
 
 Runtime retrieval is simple and cheap, but large-scale content ingestion is deferred.
+
+## Credential evidence amendment
+
+Structured credentials may be indexed with the static corpus and retrieved for resume questions. In fit analysis, credential records are eligible only for explicit certification or knowledge requirements. Compound knowledge-and-delivery requirements must be split before retrieval so credential evidence cannot establish implementation, delivery, ownership, or leadership.

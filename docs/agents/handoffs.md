@@ -65,6 +65,31 @@
 - unresolved risks
 - release gates
 
+## Content Strategist / AI Systems Architect -> QA / Evaluations Agent (Credential Evidence 2026-06-11)
+
+- verify the structured Anthropic credential is available to resume chat and explicit certification/knowledge fit requirements
+- reject credential evidence as proof of hands-on implementation, production delivery, ownership, or leadership
+- split compound knowledge/delivery requirements instead of discarding valid knowledge evidence
+- test forward and reverse clause order, modal and base-form delivery verbs, and common connectors
+- include noun-form accountability clauses such as ownership, leadership, and responsibility
+- include launch, scale, maintain, and configure in delivery-clause adversarial coverage
+- include oversee, execute, drive, run, and adverbial introducers such as `ability to successfully build`
+- include coordinated adverbs, gerunds, passive voice, `responsible for`, `while`/`whereas`, and dash/slash separators
+- preserve knowledge-domain noun phrases such as `build systems` and `deploy tooling` while ensuring they do not mask later delivery clauses
+- verify both LLM and heuristic extraction preserve all eight source requirements after atomic splitting, up to the shared twelve-item cap
+- verify an LLM response that is already split into nine or more atomic requirements is not truncated to the eight-source limit
+- treat credential expiration as stored evidence metadata only; exclude it from UI and retrievable evidence text, and do not hide or downgrade the credential based on expiration
+- preserve slash-separated and recursive knowledge domains while splitting later delivery clauses; recognize `be able to` and progressive-passive delivery wording
+- render credential-supported recruiter evidence as certification validation, never as prior-role or employer experience
+- maintain the mixed-requirement gate as a clause-classification pipeline: add syntax boundaries and clause signals with paired positive/negative tests rather than restoring ordered phrase patches
+- read credential issuer from structured evidence metadata; do not infer provenance from display text or tags
+- preserve embedded delivery in alternating knowledge/delivery clauses, prioritize explicit accountability over conceptual suffixes, and keep shared-object coordinated verbs in one delivery atom
+- classify delivery-evidence framing independently from knowledge, and keep Waymo reader fallback limited to WAF/transient failures with upstream error-page rejection
+- keep operational execution verbs and deployment accountability outside credential evidence; never forward source query parameters to the Waymo reader
+- preserve complete `with`-framed delivery atoms, protect coordinated operational knowledge nouns, and reject reader infrastructure/challenge titles before scoring
+- treat embedded execution qualifiers as delivery and recategorize unsplit delivery clauses instead of preserving an upstream `requirement` category
+- detect execution origin introduced by `from`, and reject reader challenge semantics from both metadata and body content
+
 ## Diagram Artifact
 
 - Mermaid source: `docs/agents/handoffs.mmd`

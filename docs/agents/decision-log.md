@@ -398,3 +398,155 @@ Use this log for concise, chronological records of meaningful decisions that do 
 - Decision: Configure the active runtime to route all AI tasks through OpenRouter: chat uses `openai/gpt-5.4-nano`, fit and requirements use `openai/gpt-oss-120b:free`, and embeddings use `openai/text-embedding-3-small`.
 - Rationale: The selected configuration prioritizes one provider path and current OpenRouter balance while keeping the quality-oriented free GPT OSS path for fit/requirements. `qwen/qwen3-next-80b-a3b-instruct:free` remains the fastest benchmarked free fit/requirements option, but stricter review found it more generic than GPT OSS. Direct smoke testing confirmed `openai/text-embedding-3-small` works through OpenRouter embeddings with 1536-dimensional vectors and pricing parity with OpenAI direct.
 - Scope impact: `.env.example`, `tests/cf-deploy-script.test.ts`, `docs/qa/fit-analysis-benchmark-2026-03-17.md`, `docs/architecture/ai-system.md`, `docs/operations/runbook.md`, `docs/qa/test-plan.md`, `docs/agents/decision-log.md`, `docs/agents/handoffs.md`.
+
+### 2026-06-08
+
+- Agent role: Content Strategist / Application Engineer
+- Decision: Add the verified `Claude Certified Architect \u2013 Foundations Certification` as a compact hero credential badge and a structured credential evidence record.
+- Rationale: A standalone certifications section would overstate a single credential, while the hero placement strengthens first-impression AI credibility and the structured credential lets the Career Twin cite verified Claude, Claude Code, Agent SDK, Claude API, and MCP coverage.
+- Scope impact: `components/hero.tsx`, `components/home-page-shell.tsx`, `content/credentials/credentials.json`, `lib/content/store.ts`, `lib/retrieval/store.ts`, `types/content.ts`, `docs/architecture/content-model.md`.
+
+- Agent role: Content Strategist / Experience Designer
+- Decision: Use a local thumbnail of the verified certificate itself as the hero credential visual rather than a generic certificate icon or an unofficial Anthropic or Claude logo.
+- Rationale: The certificate image is the strongest available proof-oriented visual and avoids implying use of a standalone official certification mark. Keeping a local copy also avoids depending on Skilljar's expiring signed image URL while the linked badge still opens the public verification record.
+- Scope impact: `public/claude-certified-architect-foundations.jpg`, `components/hero.tsx`, `app/globals.css`, `tests/click-analytics.test.ts`.
+
+- Agent role: Content Strategist / Experience Designer
+- Decision: Present the certificate as a small, edge-cropped thumbnail without an additional border or white frame.
+- Rationale: The credential title already provides identification, so the image should act as an authentic visual proof point rather than compete with the hero content. Cropping the source image's white outer margin makes the thumbnail feel integrated with the badge, while vertical centering keeps it aligned with the two-line credential text at all breakpoints.
+- Scope impact: `components/hero.tsx`, `app/globals.css`, `tests/click-analytics.test.ts`.
+
+### 2026-06-10
+
+- Agent role: Content Strategist / AI Systems Architect
+- Decision: Store credential expiration as structured evidence metadata without displaying it or automatically hiding, downgrading, or relabeling the credential after that date.
+- Rationale: The source record should remain complete and auditable, while the public credential treatment should not introduce an automated status policy the product has not otherwise defined.
+- Decision: Restrict credential evidence in fit analysis to explicit certification, familiarity, or knowledge requirements and exclude it from hands-on implementation, production leadership, and generic transfer claims.
+- Rationale: Passing an exam supports verified knowledge but does not independently prove delivery ownership. The restriction is enforced in query retrieval, deterministic requirement matching, transfer rendering, and the model prompt.
+- Decision: Include credentials in the resume-chat evidence contract.
+- Rationale: Resume Q&A already retrieves credential records, so the system prompt must explicitly permit the model to use them rather than create a contradictory evidence boundary.
+- Scope impact: `content/credentials/credentials.json`, `types/content.ts`, `lib/content/store.ts`, `lib/retrieval/store.ts`, `lib/ai/prompting.ts`, `tests/content-store.test.ts`, `tests/retrieval.test.ts`, `tests/prompting.test.ts`, `docs/architecture/content-model.md`.
+
+- Agent role: Content Strategist / AI Systems Architect
+- Decision: Split compound requirements when credential or knowledge language is combined with implementation, delivery, ownership, or leadership expectations.
+- Rationale: Rejecting credential evidence for the entire compound statement would discard valid evidence for the knowledge clause. Atomic requirements preserve that valid match while independently evaluating the unsupported execution clause.
+- Scope impact: `lib/ai/credential-requirements.ts`, `lib/ai/requirement-extraction.ts`, `lib/ai/prompting.ts`, `lib/retrieval/store.ts`, `tests/requirement-extraction.test.ts`, `tests/retrieval.test.ts`, `tests/prompting.test.ts`, `docs/architecture/content-model.md`.
+
+- Agent role: Content Strategist / AI Systems Architect
+- Decision: Detect delivery expectations through action and experience phrases, not bare domain nouns such as `production` or `build`.
+- Rationale: Terms such as `production-grade architecture` and `build systems` can describe knowledge domains covered by a credential. Treating those nouns as execution evidence created false negatives and prevented the credential from supporting its declared scope.
+- Decision: Match job-title noise using whole role words so domain terms such as `architecture` are not discarded because they contain `architect`.
+- Rationale: Requirement normalization should remove actual title lines without suppressing valid technical knowledge domains.
+- Scope impact: `lib/ai/credential-requirements.ts`, `lib/ai/requirement-extraction.ts`, `tests/requirement-extraction.test.ts`, `tests/retrieval.test.ts`, `docs/architecture/content-model.md`.
+
+- Agent role: Content Strategist / AI Systems Architect
+- Decision: Recognize base-form delivery verbs only when they begin an execution clause or follow an action introducer such as `capability to`.
+- Rationale: This closes execution-overclaim paths such as `and build production agents` and `deploy production integrations` without reclassifying knowledge-domain nouns such as `build systems`.
+- Scope impact: `lib/ai/credential-requirements.ts`, `tests/requirement-extraction.test.ts`, `tests/retrieval.test.ts`, `docs/architecture/content-model.md`.
+
+- Agent role: Content Strategist / AI Systems Architect
+- Decision: Model modal delivery language separately from `to`-introduced action language.
+- Rationale: Natural requirements use `must build`, `will build`, and `you will deploy`, while phrases such as `ability to build` use an infinitive. Treating both through one expression left common modal clauses unprotected.
+- Scope impact: `lib/ai/credential-requirements.ts`, `tests/requirement-extraction.test.ts`, `tests/retrieval.test.ts`, `docs/architecture/content-model.md`.
+
+## 2026-06-11 - Preserve coordinated credential knowledge domains
+
+- Decision: Keep coordinated phrases such as `knowledge of Claude API and build systems` and `familiarity with CI/CD and deploy tooling` as atomic knowledge requirements.
+- Rationale: In an explicit knowledge or familiarity frame, `build` and `deploy` can modify domain nouns rather than express execution responsibility. Splitting those phrases creates a false delivery requirement and rejects valid credential evidence. Explicit delivery markers and base-form actions outside this narrow domain-noun pattern remain protected.
+- Scope impact: `lib/ai/credential-requirements.ts`, `tests/requirement-extraction.test.ts`, `tests/retrieval.test.ts`, `docs/architecture/content-model.md`.
+
+## 2026-06-11 - Normalize compound credential requirements by clause
+
+- Decision: Scope knowledge-domain noun exceptions to their clause and recursively split mixed credential/delivery requirements across forward and reverse order plus common connectors.
+- Rationale: A phrase such as `build systems` is valid credential-supported knowledge, but it must not suppress a later `deploy production integrations` clause. Connector-only handling also discarded valid knowledge evidence for common wording such as `as well as`, `plus`, and delivery-first compounds.
+- Scope impact: `lib/ai/credential-requirements.ts`, `tests/requirement-extraction.test.ts`, `tests/retrieval.test.ts`, `docs/architecture/content-model.md`, `docs/qa/test-plan.md`, `docs/agents/handoffs.md`.
+
+## 2026-06-11 - Close credential ownership and expiration evidence gaps
+
+- Decision: Treat noun-form accountability (`ownership of`, `leadership of`, `responsibility for`) as delivery evidence, support unpunctuated `plus` compounds, and remove expiration from retrievable credential text while retaining it in metadata.
+- Rationale: Credentials can validate knowledge but cannot establish execution accountability. Common connector punctuation should not change evidence eligibility. Expiration was explicitly modeled for auditability, not public or conversational display.
+- Scope impact: `lib/ai/credential-requirements.ts`, `lib/ai/prompting.ts`, `lib/content/store.ts`, credential extraction/retrieval/prompting/content tests, generated embeddings, `docs/architecture/content-model.md`, `docs/qa/test-plan.md`, `docs/agents/handoffs.md`.
+
+## 2026-06-11 - Broaden credential language and make featured display explicit
+
+- Decision: Recognize broader knowledge and execution wording, separate the eight-item source limit from a twelve-item atomic limit, and model featured credential display data explicitly.
+- Rationale: Evidence policy should not depend on a narrow verb vocabulary, valid knowledge wording should not create false negatives, splitting should not erase an original source requirement, and hero rendering should not rely on array order or hardcoded date/asset values.
+- Scope impact: `lib/ai/credential-requirements.ts`, `lib/ai/requirement-extraction.ts`, `types/content.ts`, `content/credentials/credentials.json`, `components/hero.tsx`, `components/home-page-shell.tsx`, related tests, `docs/architecture/content-model.md`, `docs/qa/test-plan.md`.
+
+## 2026-06-12 - Close remaining delivery verbs and extraction-cap drift
+
+- Decision: Treat launch, scale, maintain, and configure as delivery actions and centralize the eight-source/twelve-atomic requirement limits across LLM and heuristic extraction.
+- Rationale: Credential evidence must not prove execution merely because a job description uses a previously unlisted verb. The atomic preservation contract also cannot depend on whether the primary LLM extractor or heuristic fallback produced the requirements.
+- Scope impact: `lib/ai/credential-requirements.ts`, `lib/ai/requirement-policy.ts`, `lib/ai/requirement-extraction.ts`, `lib/ai/prompting.ts`, credential extraction/retrieval/prompting tests, `docs/architecture/content-model.md`, `docs/qa/test-plan.md`, `docs/agents/handoffs.md`.
+
+## 2026-06-12 - Align atomic LLM output and credential retrieval architecture
+
+- Decision: Let the LLM return up to twelve already-split atomic requirements, recognize oversight/execution verbs and limited adverbial action introducers, and document credentials as a narrow exception to experience-only fit evidence.
+- Rationale: Once the extraction prompt asks the model to split compounds, its output count is atomic rather than source-level. Evidence protection must also cover normal recruiter wording such as oversee, drive, execute, run, and `ability to successfully build`. The architecture and ADRs must describe the implemented credential boundary explicitly.
+- Scope impact: `lib/ai/credential-requirements.ts`, `lib/ai/requirement-extraction.ts`, credential extraction/retrieval/prompting tests, `docs/architecture/ai-system.md`, `docs/architecture/content-model.md`, `docs/decisions/0002-static-retrieval-v1.md`, `docs/decisions/0007-fit-analysis-upgrade-plan.md`, `docs/qa/test-plan.md`, `docs/agents/handoffs.md`.
+
+## 2026-06-12 - Expand compound grammar without weakening knowledge domains
+
+- Decision: Recognize coordinated adverbs, gerunds, passive delivery clauses, `responsible for`, `while`/`whereas`, and dash/slash separators while retaining targeted connector boundaries.
+- Rationale: A generic `and` splitter would incorrectly separate knowledge-domain phrases such as `Claude API and build systems`. Targeted grammar closes normal delivery variants while preserving the existing domain-noun exception and split-not-reject policy.
+- Scope impact: `lib/ai/credential-requirements.ts`, credential extraction/retrieval/prompting tests, `docs/architecture/content-model.md`, `docs/qa/test-plan.md`, `docs/agents/handoffs.md`.
+
+## 2026-06-12 - Rank before capping and normalize equivalent connectors
+
+- Decision: Rank heuristic source requirements before the eight-item cap, protect coordinated knowledge nouns across `and`, `plus`, and `as well as`, and add validated comma/colon, explicit-subject modal, and adverbial-passive split boundaries.
+- Rationale: Source order should not suppress a later must-have. Equivalent knowledge connectors should not change evidence eligibility, while common punctuation and voice variants should preserve valid knowledge evidence through atomic splitting.
+- Scope impact: `lib/ai/prompting.ts`, `lib/ai/credential-requirements.ts`, extraction/retrieval tests, `docs/architecture/content-model.md`, `docs/qa/test-plan.md`.
+
+## 2026-06-12 - Preserve recursive knowledge and credential provenance
+
+- Agent role: Content Strategist / AI Systems Architect / QA Evaluations Agent
+- Decision: Treat `proficiency in` as credential knowledge, preserve slash-separated and recursive knowledge-domain phrases, and recognize `be able to` plus progressive-passive clauses as delivery expectations.
+- Rationale: Recruiter wording varies without changing the evidence standard. The parser must retain legitimate knowledge evidence while separating any execution requirement instead of either rejecting the whole compound or allowing a credential to overclaim delivery.
+- Decision: Render credential-supported fit evidence as certification validation rather than generic prior-role prose.
+- Rationale: A certification is evidence of validated knowledge, not an employer or work engagement. Reusing employment-oriented templates misstates provenance even when the underlying requirement match is valid.
+- Scope impact: `lib/ai/credential-requirements.ts`, `lib/ai/prompting.ts`, credential extraction/retrieval/prompting tests, `docs/architecture/content-model.md`, `docs/architecture/ai-system.md`, `docs/qa/test-plan.md`, `docs/agents/handoffs.md`.
+- Follow-up: Extend the same policy to adjective-form `proficient in` and both `be able to` / `able to` delivery phrasing so ordinary recruiter grammar does not change evidence eligibility.
+- Follow-up: Treat modal/expectation wording and common visual separators as clause syntax, preserve the complete knowledge side of recursive slash lists, support `proficient with`, and identify Anthropic in recruiter-facing credential attribution.
+- Follow-up: Narrow separator handling to real clause boundaries so `CI/CD`, `R&D`, and hyphenated domains remain intact; constrain subjectless modals to clause starts; derive credential issuer from evidence provenance rather than tags.
+- Follow-up: Recognize multiword actor subjects and `you'll` contractions as explicit delivery clauses while protecting action-shaped knowledge domains such as design systems and build-vs-buy tradeoffs.
+- Follow-up: Generalize actor delivery grammar to applicant/candidate phrases, `you are expected to`, and `you'd`, while applying design-domain protection consistently across all supported separators.
+- Follow-up: Add plural/pronoun/person-in-role/recruiter actor forms, restrict candidate modifiers to recruiting adjectives so relative clauses remain knowledge, and let accountability suffixes override design-domain protection.
+- Follow-up: Add role-holder/incumbent expectation and `must be able to` forms, include architecture ownership, exempt conceptual accountability terminology, and split reverse recursive slash compounds at the knowledge boundary.
+
+## 2026-06-12 - Replace ordered credential regex patches with clause classification
+
+- Agent role: Content Strategist / AI Systems Architect / Application Engineer
+- Decision: Refactor mixed credential requirements into a normalization pipeline that enumerates syntax boundaries, classifies clauses independently as knowledge, delivery, or ambiguous, and selects the split that preserves the complete framed clause.
+- Rationale: The prior ordered regex stack fixed one wording family at a time and repeatedly shifted failures into adjacent phrasing. Independent clause classification makes the evidence policy explicit, supports global boundary selection, and defaults ambiguous compounds away from credential overclaim.
+- Decision: Carry credential issuer as structured document metadata and use it for recruiter-facing attribution.
+- Rationale: Issuer provenance is content data, not something presentation code should infer from prose or tags.
+- Counterargument considered: A full natural-language parser or an additional LLM classification call would handle more syntax. It was rejected for this bounded gate because it would add latency, nondeterminism, and deployment cost while weakening regression-level auditability.
+- Scope impact: `lib/ai/credential-requirements.ts`, `lib/ai/prompting.ts`, `lib/content/store.ts`, `types/content.ts`, parser/retrieval/prompting/content-store tests, ADR 0007, architecture and QA documentation.
+- Independent review finding: Knowledge signals could mask delivery elsewhere in the same clause, conceptual-accountability exemptions could override explicit accountability, and longest-left boundary scoring could isolate a standalone verb.
+- Resolution: Detect delivery within mixed clauses before granting knowledge-only status, give explicit accountability grammar precedence, and invalidate boundaries whose framed side already contains embedded delivery. Added positive and negative regressions for all three structures.
+- Live-evaluation maintenance: Replaced the removed Waymo `Product Manager, Driving Behaviors` posting with the current `Group Product Manager, Fleet & Event Response` posting while preserving Waymo as a required product-role URL intake regression.
+- Live-evaluation maintenance: Replaced the expired Motive `Staff Product Manager, Telematics` posting with the current US `Principal Product Manager, AI Cameras & Video Safety` posting.
+- URL intake decision: For `careers.withwaymo.com` only, fall back to the public Jina reader when direct server-side retrieval is blocked or returns insufficient content. The fallback is domain-bounded because Waymo's WAF challenges server fetches even when the public posting remains available; other domains retain the existing direct-fetch and explicit-failure behavior.
+- Independent review finding: Credential gating missed delivery-evidence framing such as track record, demonstrated success, years of experience, accountability, and `oversaw`.
+- Resolution: Added one generalized delivery-evidence grammar plus past-tense oversight coverage, with extraction, retrieval, and visible recruiter-output regressions.
+- Independent review finding: The Waymo reader fallback ran for definitive missing responses and could accept a reader-generated error page if its generic text happened to score like a JD.
+- Resolution: Restricted non-success fallback to WAF/transient statuses and reject missing or error reader titles plus upstream error warnings before content scoring.
+- Documentation correction: Updated the PRD required live URL gate from the historical Waymo/Sourgum/Motive/Netflix set to the current Waymo/Sourgum/Motive set.
+- Independent re-review finding: Operational verbs outside the original delivery vocabulary and `deployment ownership` remained credential-eligible.
+- Resolution: Extended shared execution grammar to optimize, monitor, troubleshoot, and test, and extended accountability nouns to deployments, with extraction, retrieval, and visible-output regressions.
+- Independent re-review finding: Non-empty Waymo WAF responses could bypass fallback, and source query parameters were forwarded to the public reader.
+- Resolution: Trigger fallback directly from the Waymo WAF header regardless of body length and strip the complete query string before constructing the reader request.
+- Final review finding: Broader accountability/history and assigned-work phrases remained credential-eligible; generic `with` could create malformed atoms; coordinated monitoring/testing nouns became false delivery; and additional reader error titles could pass content scoring.
+- Resolution: Expanded nominal accountability/history and assignment grammar, constrained `with` boundaries to validated action introducers, protected operational knowledge-domain nouns, and broadened infrastructure/challenge title rejection.
+- Material-only review finding: Knowledge claims qualified by embedded execution history remained credential-eligible because delivery detection did not recognize `gained/developed through` or `acquired by` action framing.
+- Resolution: Added embedded-execution qualifier detection and recategorize unsplit clauses as `function` whenever independent delivery classification applies.
+- Material-only review finding: Waymo reader pages titled as human-verification or CAPTCHA challenges could still pass generic job-content scoring.
+- Resolution: Expanded reader title rejection to explicit human-verification, security-check, and CAPTCHA titles before content scoring or caching.
+- Material-only re-review finding: Execution history phrased as `knowledge ... from building` and challenge pages with alternate browser/robot/Cloudflare wording still reached visible analysis.
+- Resolution: Extended embedded execution-origin grammar to `from <delivery action>` and reject challenge semantics in both reader titles and bodies before scoring or caching.
+- Closure review finding: A generic reader title plus explicit automated-request denial text could still pass when padded with job-like headings.
+- Resolution: Added bounded body detection for automated-request denial/blocking and human-only access messages before scoring or caching.
+- Final closure finding: `knowledge ... based on building` still overclaimed execution, while explicit access-denied/403/security-service/upstream-error reader bodies could pass under a generic title.
+- Resolution: Added `based on <delivery action>` to execution-origin grammar and reject explicit denial, forbidden, security-block, and upstream-error body semantics before scoring or caching.
+- Verification review finding: `demonstrated by <delivery action>` and access-denial sentences with an intervening target phrase remained outside the generalized rules.
+- Resolution: Extended execution-origin participles to `demonstrated by` and made access-denial body matching tolerate bounded intervening target text.

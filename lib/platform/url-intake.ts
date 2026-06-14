@@ -22,17 +22,24 @@ export async function fetchJobPostingFromUrl(
     return cached.result;
   }
 
-  const response = await fetch(url, {
-    headers: {
-      "user-agent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/136.0.0.0 Safari/537.36",
-      accept: "text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8",
-      "accept-language": "en-US,en;q=0.9",
-      "cache-control": "no-cache",
-      pragma: "no-cache"
+  let response: Response;
+  try {
+    response = await fetch(url, { headers: jobPageHeaders });
+  } catch (error) {
+    if (isWaymoJobUrl(url)) {
+      return cacheJobPostingResult(url, await fetchWaymoJobThroughReader(url), useCache);
     }
-  });
+    throw error;
+  }
+
+  if (isWaymoJobUrl(url) && response.headers.get("x-amzn-waf-action") === "challenge") {
+    return cacheJobPostingResult(url, await fetchWaymoJobThroughReader(url), useCache);
+  }
 
   if (!response.ok) {
+    if (isWaymoJobUrl(url) && isTransientOrWafResponse(response)) {
+      return cacheJobPostingResult(url, await fetchWaymoJobThroughReader(url), useCache);
+    }
     throw new Error(`Failed to fetch job description from ${url}`);
   }
 
@@ -41,6 +48,9 @@ export async function fetchJobPostingFromUrl(
   const targetSummary = extractJobTargetSummary(html, url);
 
   if (normalized.length < 60 && scoreDocument(normalized) < 3) {
+    if (isWaymoJobUrl(url)) {
+      return cacheJobPostingResult(url, await fetchWaymoJobThroughReader(url), useCache);
+    }
     if (/enable javascript to run this app|javascript required|please enable javascript/i.test(html)) {
       throw new Error("This job page is heavily JavaScript-rendered, and the current fetch could not recover enough recruiter-readable description text. Use Paste Text or Upload File for this posting.");
     }
@@ -52,13 +62,100 @@ export async function fetchJobPostingFromUrl(
     targetSummary
   };
 
+  return cacheJobPostingResult(url, result, useCache);
+}
+
+const jobPageHeaders = {
+  "user-agent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/136.0.0.0 Safari/537.36",
+  accept: "text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8",
+  "accept-language": "en-US,en;q=0.9",
+  "cache-control": "no-cache",
+  pragma: "no-cache"
+};
+
+function isWaymoJobUrl(value: string): boolean {
+  try {
+    return new URL(value).hostname === "careers.withwaymo.com";
+  } catch {
+    return false;
+  }
+}
+
+async function fetchWaymoJobThroughReader(
+  url: string
+): Promise<{ content: string; targetSummary?: FitTargetSummary }> {
+  const sourceUrl = new URL(url);
+  const readerUrl = `https://r.jina.ai/http://${sourceUrl.host}${sourceUrl.pathname}`;
+  const response = await fetch(readerUrl, {
+    headers: {
+      accept: "text/plain",
+      "cache-control": "no-cache"
+    }
+  });
+
+  if (!response.ok) {
+    throw new Error(`Failed to fetch job description from ${url}`);
+  }
+
+  const readerText = await response.text();
+  const title = readerText.match(/^Title:\s*(.+)$/im)?.[1]?.trim();
+  if (!title || isReaderErrorResponse(readerText, title)) {
+    throw new Error(`Failed to fetch job description from ${url}`);
+  }
+  const content = normalizeReaderContent(readerText);
+  if (content.length < 60 || scoreDocument(content) < 3) {
+    throw new Error("Fetched page did not contain enough readable job description content.");
+  }
+
+  return {
+    content,
+    targetSummary: extractJobTargetSummary(
+      title ? `<html><head><title>${title}</title></head></html>` : "",
+      url
+    )
+  };
+}
+
+function isTransientOrWafResponse(response: Response): boolean {
+  return response.headers.get("x-amzn-waf-action") === "challenge" ||
+    response.status === 408 ||
+    response.status === 425 ||
+    response.status === 429 ||
+    response.status >= 500;
+}
+
+function isReaderErrorResponse(readerText: string, title: string): boolean {
+  return /^Warning:\s+Target URL returned error\b/im.test(readerText) ||
+    /\b(?:404|410|not found|page unavailable|access denied|internal server error|upstream timeout|gateway timeout|service unavailable|just a moment|verify (?:that )?you are human|security check|captcha|checking your browser|robot challenge|attention required)\b/i.test(title) ||
+    /\b(?:checking your browser|security verification|prove you are human|verify (?:that )?you are human|robot challenge|captcha|attention required|automated requests?[^.\n]{0,80}(?:denied|blocked|restricted)|access[^.\n]{0,80}(?:has been |is )?(?:denied|restricted to human visitors)|403 forbidden|request was blocked by (?:our|the) security service|upstream (?:service )?(?:returned|reported)[^.\n]{0,80}(?:error|unavailable)|internal server error)\b/i.test(readerText);
+}
+
+function normalizeReaderContent(value: string): string {
+  const content = value.includes("Markdown Content:")
+    ? value.slice(value.indexOf("Markdown Content:") + "Markdown Content:".length)
+    : value;
+
+  return content
+    .replace(/!\[[^\]]*]\([^)]+\)/g, "")
+    .replace(/\[([^\]]+)]\([^)]+\)/g, "$1")
+    .replace(/^#{1,6}\s+/gm, "")
+    .replace(/^\s*[*-]\s+/gm, "")
+    .replace(/[ \t]+/g, " ")
+    .replace(/\n{3,}/g, "\n\n")
+    .trim();
+}
+
+function cacheJobPostingResult(
+  url: string,
+  result: { content: string; targetSummary?: FitTargetSummary },
+  useCache: boolean
+): { content: string; targetSummary?: FitTargetSummary } {
   if (useCache) {
     jobPostingCache.set(url, {
       result,
       expiresAt: Date.now() + jobPostingCacheTtlMs
     });
   }
-
   return result;
 }
 

@@ -2,6 +2,7 @@ import type {
   AIContextExplainer,
   BuildDoc,
   ContentDocument,
+  Credential,
   FaqItem,
   ProjectBrief,
   ResumeRole
@@ -13,6 +14,7 @@ import caseStudies from "@/content/case-studies/case-studies.json";
 import faq from "@/content/faq/faq.json";
 import explainers from "@/content/ai-context/explainers.json";
 import buildDocs from "@/content/build-docs/build-docs.json";
+import credentials from "@/content/credentials/credentials.json";
 
 export async function loadRoles(): Promise<ResumeRole[]> {
   return roles as ResumeRole[];
@@ -38,14 +40,19 @@ export async function loadBuildDocs(): Promise<BuildDoc[]> {
   return buildDocs as BuildDoc[];
 }
 
+export async function loadCredentials(): Promise<Credential[]> {
+  return credentials as Credential[];
+}
+
 export async function buildDocuments(): Promise<ContentDocument[]> {
-  const [roles, projects, explainers, faq, buildDocs, caseStudies] = await Promise.all([
+  const [roles, projects, explainers, faq, buildDocs, caseStudies, credentials] = await Promise.all([
     loadRoles(),
     loadProjects(),
     loadExplainers(),
     loadFaq(),
     loadBuildDocs(),
-    loadCaseStudies()
+    loadCaseStudies(),
+    loadCredentials()
   ]);
   const roleDateById = new Map(roles.map((role) => [role.id, { startDate: role.startDate, endDate: role.endDate }]));
   const roleMetaById = new Map(roles.map((role) => [role.id, { company: role.company, roleTitle: role.title }]));
@@ -319,6 +326,18 @@ export async function buildDocuments(): Promise<ContentDocument[]> {
       section: "body",
       text: `${doc.summary} ${doc.body}`,
       tags: ["case-study"]
+    })),
+    ...credentials.map((credential) => ({
+      id: `credential-${credential.id}`,
+      sourceType: "credential" as const,
+      title: credential.title,
+      section: "credential",
+      text: `${credential.issuer} credential completed ${credential.completedDate}. ${credential.summary} Validated areas: ${credential.validatedAreas.join(", ")}. Verification: ${credential.verificationUrl}`,
+      tags: credential.tags,
+      metadata: {
+        expirationDate: credential.expirationDate,
+        issuer: credential.issuer
+      }
     }))
   ];
 }

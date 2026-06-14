@@ -37,6 +37,11 @@ The product still needs to remain:
 - Preserve the public fit-analysis API while improving internal evaluator stages.
 - Keep recruiter-facing bullets deterministic so requirement-to-evidence mapping stays grounded and testable.
 - Limit the LLM to internal fit synthesis, verdict calibration, and recommendation text rather than freeform recruiter-bullet generation.
+- Allow up to eight source requirements and up to twelve atomic requirements after compound splitting in both primary and fallback extraction paths.
+- Permit structured credential evidence only for explicit certification or knowledge requirements; split mixed clauses so execution expectations are evaluated independently.
+- Normalize mixed credential requirements through a clause classifier rather than an ordered regex-patch chain: enumerate candidate boundaries, classify each side independently as knowledge, delivery, or ambiguous, and select the boundary that preserves the complete framed clause.
+- Treat ambiguous mixed clauses conservatively. Credential evidence may support only independently classified knowledge clauses; it must not inherit delivery claims from a compound requirement.
+- Store credential issuer as structured evidence metadata and use that provenance when rendering recruiter-facing support.
 
 ## Consequences
 
@@ -53,3 +58,4 @@ The product still needs to remain:
 - More evaluator stages increase prompt-contract and QA complexity.
 - The fallback path still needs maintenance because the system remains stateless.
 - Deterministic ranking policy now carries more product responsibility, so weak evidence-selection heuristics are visible and must be refined directly rather than hidden behind model phrasing.
+- The clause classifier remains a bounded natural-language heuristic, so new syntax families require positive and negative regression cases even though the architecture no longer depends on regex ordering.

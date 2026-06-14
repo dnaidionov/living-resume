@@ -73,6 +73,20 @@ export type BuildDoc = {
   body: string;
 };
 
+export type Credential = {
+  id: string;
+  featured?: boolean;
+  imagePath: string;
+  title: string;
+  issuer: string;
+  completedDate: string;
+  expirationDate: string;
+  verificationUrl: string;
+  summary: string;
+  validatedAreas: string[];
+  tags: string[];
+};
+
 export type ContentDocument = {
   id: string;
   sourceType:
@@ -81,7 +95,8 @@ export type ContentDocument = {
     | "case_study"
     | "faq"
     | "ai_context"
-    | "build_doc";
+    | "build_doc"
+    | "credential";
   title: string;
   section: string;
   text: string;
@@ -92,6 +107,8 @@ export type ContentDocument = {
     relatedRoleId?: string;
     company?: string;
     roleTitle?: string;
+    expirationDate?: string;
+    issuer?: string;
   };
 };
 

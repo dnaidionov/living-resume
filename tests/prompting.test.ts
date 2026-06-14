@@ -134,6 +134,409 @@ test("fit-analysis prompt keeps anti-false-negative logic in the hidden prompt",
   assert.match(prompt, /Do not count pre-2023 AI\/ML or chatbot work as direct evidence/);
 });
 
+test("resume chat prompt permits structured credential evidence", () => {
+  const prompt = buildChatSystemPrompt("resume_qa");
+
+  assert.match(prompt, /credential evidence/i);
+});
+
+test("credential evidence cannot prove hands-on production implementation", () => {
+  const credentialEvidence: EvidenceChunk[] = [
+    {
+      id: "credential-claude",
+      sourceType: "credential",
+      title: "Claude Certified Architect - Foundations Certification",
+      section: "credential",
+      text: "Verified credential issued by Anthropic validating knowledge of Claude API and Model Context Protocol.",
+      tags: ["credential", "claude", "mcp"],
+      metadata: { issuer: "Anthropic" },
+      embedding: [1, 0, 0]
+    }
+  ];
+  const result = buildFallbackFitAnalysisResponse(
+    "Lead production Claude API and Model Context Protocol implementations.",
+    [
+      {
+        text: "Lead production Claude API and Model Context Protocol implementations.",
+        category: "requirement",
+        priority: "must_have"
+      }
+    ],
+    credentialEvidence,
+    "text",
+    "recruiter_brief"
+  );
+  const matchText = result.presentation.mode === "recruiter_brief"
+    ? (result.presentation.whereIMatch ?? []).flatMap((item) => [item.requirement, item.support]).join(" ")
+    : "";
+
+  assert.equal(result.presentation.mode === "recruiter_brief" ? result.presentation.whereIMatch?.length ?? 0 : 0, 0);
+  assert.doesNotMatch(matchText, /credential|certified architect|anthropic/i);
+});
+
+test("compound credential requirements are split before fit matching", () => {
+  const splitRequirements = extractRoleRequirements(
+    "Strong understanding of Claude API and MCP, with experience leading production implementations."
+  );
+  const credentialEvidence: EvidenceChunk[] = [
+    {
+      id: "credential-claude",
+      sourceType: "credential",
+      title: "Claude Certified Architect - Foundations Certification",
+      section: "credential",
+      text: "Anthropic credential validating knowledge of Claude API and Model Context Protocol.",
+      tags: ["credential", "anthropic", "claude", "mcp"],
+      metadata: { issuer: "Anthropic" },
+      embedding: [1, 0, 0]
+    }
+  ];
+  const result = buildFallbackFitAnalysisResponse(
+    "Strong understanding of Claude API and MCP, with experience leading production implementations.",
+    splitRequirements,
+    credentialEvidence,
+    "text",
+    "recruiter_brief"
+  );
+  const matchRequirements = result.presentation.mode === "recruiter_brief"
+    ? (result.presentation.whereIMatch ?? []).map((item) => item.requirement).join(" ")
+    : "";
+
+  assert.equal(splitRequirements.length, 2);
+  assert.ok(splitRequirements.some((item) => /understanding of Claude API and MCP/i.test(item.text)));
+  assert.ok(splitRequirements.some((item) => /leading production implementations/i.test(item.text)));
+  assert.match(matchRequirements, /understanding of Claude API and MCP/i);
+  assert.doesNotMatch(matchRequirements, /leading production implementations/i);
+});
+
+test("credential support is rendered as validation, not prior employment", () => {
+  const roleText = "Proficiency in Claude API and MCP.";
+  const credentialEvidence: EvidenceChunk[] = [
+    {
+      id: "credential-claude",
+      sourceType: "credential",
+      title: "Claude Certified Architect - Foundations Certification",
+      section: "credential",
+      text: "Anthropic credential validating knowledge of Claude API and Model Context Protocol.",
+      tags: ["credential", "anthropic", "claude", "mcp"],
+      metadata: { issuer: "Anthropic" },
+      embedding: [1, 0, 0]
+    }
+  ];
+  const result = buildFallbackFitAnalysisResponse(
+    roleText,
+    extractRoleRequirements(roleText),
+    credentialEvidence,
+    "text",
+    "recruiter_brief"
+  );
+  const support = result.presentation.mode === "recruiter_brief"
+    ? result.presentation.whereIMatch?.[0]?.support ?? ""
+    : "";
+
+  assert.match(support, /Anthropic-issued .* certification validates/i);
+  assert.doesNotMatch(support, /\b(?:At|prior role|worked on)\b/i);
+});
+
+test("credential evidence cannot prove noun-form ownership in compound requirements", () => {
+  const roleText = "Knowledge of Claude API and ownership of production integrations.";
+  const splitRequirements = extractRoleRequirements(roleText);
+  const credentialEvidence: EvidenceChunk[] = [
+    {
+      id: "credential-claude",
+      sourceType: "credential",
+      title: "Claude Certified Architect - Foundations Certification",
+      section: "credential",
+      text: "Anthropic credential validating knowledge of Claude API and Model Context Protocol.",
+      tags: ["credential", "anthropic", "claude", "mcp"],
+      embedding: [1, 0, 0]
+    }
+  ];
+  const result = buildFallbackFitAnalysisResponse(
+    roleText,
+    splitRequirements,
+    credentialEvidence,
+    "text",
+    "recruiter_brief"
+  );
+  const matchRequirements = result.presentation.mode === "recruiter_brief"
+    ? (result.presentation.whereIMatch ?? []).map((item) => item.requirement).join(" ")
+    : "";
+
+  assert.equal(splitRequirements.length, 2);
+  assert.match(matchRequirements, /Knowledge of Claude API/i);
+  assert.doesNotMatch(matchRequirements, /ownership of production integrations/i);
+});
+
+test("credential evidence cannot prove launch delivery in compound requirements", () => {
+  const roleText = "Knowledge of Claude API and launch production agents.";
+  const splitRequirements = extractRoleRequirements(roleText);
+  const credentialEvidence: EvidenceChunk[] = [
+    {
+      id: "credential-claude",
+      sourceType: "credential",
+      title: "Claude Certified Architect - Foundations Certification",
+      section: "credential",
+      text: "Anthropic credential validating knowledge of Claude API and Model Context Protocol.",
+      tags: ["credential", "anthropic", "claude", "mcp"],
+      embedding: [1, 0, 0]
+    }
+  ];
+  const result = buildFallbackFitAnalysisResponse(
+    roleText,
+    splitRequirements,
+    credentialEvidence,
+    "text",
+    "recruiter_brief"
+  );
+  const matchRequirements = result.presentation.mode === "recruiter_brief"
+    ? (result.presentation.whereIMatch ?? []).map((item) => item.requirement).join(" ")
+    : "";
+
+  assert.equal(splitRequirements.length, 2);
+  assert.match(matchRequirements, /Knowledge of Claude API/i);
+  assert.doesNotMatch(matchRequirements, /launch production agents/i);
+});
+
+test("credential evidence cannot prove oversight delivery in compound requirements", () => {
+  const roleText = "Knowledge of Claude API and oversee production deployments.";
+  const splitRequirements = extractRoleRequirements(roleText);
+  const credentialEvidence: EvidenceChunk[] = [
+    {
+      id: "credential-claude",
+      sourceType: "credential",
+      title: "Claude Certified Architect - Foundations Certification",
+      section: "credential",
+      text: "Anthropic credential validating knowledge of Claude API and Model Context Protocol.",
+      tags: ["credential", "anthropic", "claude", "mcp"],
+      embedding: [1, 0, 0]
+    }
+  ];
+  const result = buildFallbackFitAnalysisResponse(
+    roleText,
+    splitRequirements,
+    credentialEvidence,
+    "text",
+    "recruiter_brief"
+  );
+  const matchRequirements = result.presentation.mode === "recruiter_brief"
+    ? (result.presentation.whereIMatch ?? []).map((item) => item.requirement).join(" ")
+    : "";
+
+  assert.equal(splitRequirements.length, 2);
+  assert.match(matchRequirements, /Knowledge of Claude API/i);
+  assert.doesNotMatch(matchRequirements, /oversee production deployments/i);
+});
+
+test("credential evidence cannot prove adverbial delivery in compound requirements", () => {
+  const roleText = "Knowledge of Claude API and successfully build production agents.";
+  const splitRequirements = extractRoleRequirements(roleText);
+  const credentialEvidence: EvidenceChunk[] = [
+    {
+      id: "credential-claude",
+      sourceType: "credential",
+      title: "Claude Certified Architect - Foundations Certification",
+      section: "credential",
+      text: "Anthropic credential validating knowledge of Claude API and Model Context Protocol.",
+      tags: ["credential", "anthropic", "claude", "mcp"],
+      embedding: [1, 0, 0]
+    }
+  ];
+  const result = buildFallbackFitAnalysisResponse(
+    roleText,
+    splitRequirements,
+    credentialEvidence,
+    "text",
+    "recruiter_brief"
+  );
+  const matchRequirements = result.presentation.mode === "recruiter_brief"
+    ? (result.presentation.whereIMatch ?? []).map((item) => item.requirement).join(" ")
+    : "";
+
+  assert.equal(splitRequirements.length, 2);
+  assert.match(matchRequirements, /Knowledge of Claude API/i);
+  assert.doesNotMatch(matchRequirements, /successfully build production agents/i);
+});
+
+test("credential evidence cannot prove contracted or multiword-subject delivery", () => {
+  const roleText = "Knowledge of Claude API and the successful candidate will deploy production integrations.";
+  const credentialEvidence: EvidenceChunk[] = [
+    {
+      id: "credential-claude",
+      sourceType: "credential",
+      title: "Claude Certified Architect - Foundations Certification",
+      section: "credential",
+      text: "Anthropic credential validating knowledge of Claude API and Model Context Protocol.",
+      tags: ["credential", "claude", "mcp"],
+      embedding: [1, 0, 0]
+    }
+  ];
+  const splitRequirements = extractRoleRequirements(roleText);
+  const result = buildFallbackFitAnalysisResponse(
+    roleText,
+    splitRequirements,
+    credentialEvidence,
+    "text",
+    "recruiter_brief"
+  );
+  const matchRequirements = result.presentation.mode === "recruiter_brief"
+    ? (result.presentation.whereIMatch ?? []).map((item) => item.requirement).join(" ")
+    : "";
+
+  assert.equal(splitRequirements.length, 2);
+  assert.match(matchRequirements, /Knowledge of Claude API/i);
+  assert.doesNotMatch(matchRequirements, /successful candidate will deploy/i);
+});
+
+test("credential evidence cannot prove delivery evidence or accountability framing", () => {
+  const credentialEvidence: EvidenceChunk[] = [
+    {
+      id: "credential-claude",
+      sourceType: "credential",
+      title: "Claude Certified Architect - Foundations Certification",
+      section: "credential",
+      text: "Anthropic credential validating knowledge of Claude API and Model Context Protocol.",
+      tags: ["credential", "claude", "mcp"],
+      metadata: { issuer: "Anthropic" },
+      embedding: [1, 0, 0]
+    }
+  ];
+
+  for (const deliveryClause of [
+    "track record of building production agents",
+    "demonstrated success deploying production integrations",
+    "5+ years building production agents",
+    "accountable for deploying production integrations",
+    "oversaw production deployments"
+  ]) {
+    const roleText = `Knowledge of Claude API and ${deliveryClause}.`;
+    const result = buildFallbackFitAnalysisResponse(
+      roleText,
+      extractRoleRequirements(roleText),
+      credentialEvidence,
+      "text",
+      "recruiter_brief"
+    );
+    const matchText = result.presentation.mode === "recruiter_brief"
+      ? (result.presentation.whereIMatch ?? []).flatMap((item) => [item.requirement, item.support]).join(" ")
+      : "";
+
+    assert.doesNotMatch(matchText, new RegExp(deliveryClause.replace(/[+]/g, "\\+"), "i"));
+  }
+});
+
+test("credential evidence cannot prove operational execution or deployment ownership", () => {
+  const credentialEvidence: EvidenceChunk[] = [
+    {
+      id: "credential-claude",
+      sourceType: "credential",
+      title: "Claude Certified Architect - Foundations Certification",
+      section: "credential",
+      text: "Anthropic credential validating knowledge of Claude API and Model Context Protocol.",
+      tags: ["credential", "claude", "mcp"],
+      metadata: { issuer: "Anthropic" },
+      embedding: [1, 0, 0]
+    }
+  ];
+
+  for (const deliveryClause of [
+    "optimize production agents",
+    "monitor production agents",
+    "troubleshoot production agents",
+    "test production agents",
+    "production deployment ownership"
+  ]) {
+    const roleText = `Knowledge of Claude API and ${deliveryClause}.`;
+    const result = buildFallbackFitAnalysisResponse(
+      roleText,
+      extractRoleRequirements(roleText),
+      credentialEvidence,
+      "text",
+      "recruiter_brief"
+    );
+    const matchText = result.presentation.mode === "recruiter_brief"
+      ? (result.presentation.whereIMatch ?? []).flatMap((item) => [item.requirement, item.support]).join(" ")
+      : "";
+
+    assert.doesNotMatch(matchText, new RegExp(deliveryClause, "i"));
+  }
+});
+
+test("credential evidence cannot prove broader accountability or delivery history", () => {
+  const credentialEvidence: EvidenceChunk[] = [
+    {
+      id: "credential-claude",
+      sourceType: "credential",
+      title: "Claude Certified Architect - Foundations Certification",
+      section: "credential",
+      text: "Anthropic credential validating knowledge of Claude API and Model Context Protocol.",
+      tags: ["credential", "claude", "mcp"],
+      metadata: { issuer: "Anthropic" },
+      embedding: [1, 0, 0]
+    }
+  ];
+
+  for (const deliveryClause of [
+    "accountability for production integrations",
+    "ownership over production integrations",
+    "proven success in production deployments",
+    "a history of deploying production integrations",
+    "experience with building production agents",
+    "tasked with deploying production integrations",
+    "charged with operating production agents"
+  ]) {
+    const roleText = `Knowledge of Claude API and ${deliveryClause}.`;
+    const result = buildFallbackFitAnalysisResponse(
+      roleText,
+      extractRoleRequirements(roleText),
+      credentialEvidence,
+      "text",
+      "recruiter_brief"
+    );
+    const matchText = result.presentation.mode === "recruiter_brief"
+      ? (result.presentation.whereIMatch ?? []).flatMap((item) => [item.requirement, item.support]).join(" ")
+      : "";
+
+    assert.doesNotMatch(matchText, new RegExp(deliveryClause, "i"));
+  }
+});
+
+test("credential evidence cannot prove embedded execution qualifiers", () => {
+  const credentialEvidence: EvidenceChunk[] = [
+    {
+      id: "credential-claude",
+      sourceType: "credential",
+      title: "Claude Certified Architect - Foundations Certification",
+      section: "credential",
+      text: "Anthropic credential validating knowledge of Claude API and Model Context Protocol.",
+      tags: ["credential", "claude", "mcp"],
+      metadata: { issuer: "Anthropic" },
+      embedding: [1, 0, 0]
+    }
+  ];
+
+  for (const roleText of [
+    "Knowledge of Claude API gained through building production agents.",
+    "Knowledge of Claude API developed through deploying production integrations.",
+    "Knowledge of Claude API acquired by implementing production workflows.",
+    "Knowledge of Claude API from building production agents.",
+    "Knowledge of Claude API based on building production agents.",
+    "Knowledge of Claude API demonstrated by building production agents."
+  ]) {
+    const result = buildFallbackFitAnalysisResponse(
+      roleText,
+      extractRoleRequirements(roleText),
+      credentialEvidence,
+      "text",
+      "recruiter_brief"
+    );
+    const matchText = result.presentation.mode === "recruiter_brief"
+      ? (result.presentation.whereIMatch ?? []).flatMap((item) => [item.requirement, item.support]).join(" ")
+      : "";
+
+    assert.doesNotMatch(matchText, /gained through|developed through|acquired by|from building|based on building|demonstrated by building/i);
+  }
+});
+
 test("resume chat fallback politely declines off-scope personal questions", () => {
   const answer = buildFallbackChatAnswer("What is Dmitry's favorite movie?", [], "resume_qa");
   assert.equal(answer, buildResumeChatScopeRefusal());

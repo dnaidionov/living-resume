@@ -22,9 +22,9 @@ type UrlFitAnalysisCase = {
 };
 
 const requiredBuildCaseIds = [
-  "motive-staff-product-manager-telematics",
+  "motive-principal-product-manager-ai-cameras-video-safety",
   "sourgum-director-of-product",
-  "waymo-product-manager-driving-behaviors"
+  "waymo-group-product-manager-fleet-event-response"
 ];
 
 function loadUrlFitCases(): UrlFitAnalysisCase[] {

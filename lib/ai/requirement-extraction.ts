@@ -3,6 +3,11 @@ import type { ExtractedRoleRequirement, RoleRequirementCategory, RoleRequirement
 import { extractRoleRequirementsHeuristically } from "@/lib/ai/prompting";
 import { requestJsonCompletion } from "@/lib/ai/openai";
 import { hasProviderConfig, readProviderSummary } from "@/lib/ai/provider-config";
+import { splitCompoundCredentialRequirements } from "@/lib/ai/credential-requirements";
+import {
+  MAX_ATOMIC_REQUIREMENTS,
+  MAX_SOURCE_REQUIREMENTS
+} from "@/lib/ai/requirement-policy";
 
 type RequirementExtractionResponse = {
   requirements?: Array<{
@@ -64,6 +69,8 @@ export function createRequirementExtractionService(
         }
       }
 
+      requirements = splitCompoundCredentialRequirements(requirements).slice(0, MAX_ATOMIC_REQUIREMENTS);
+
       cache.set(normalizedRoleText, {
         requirements,
         expiresAt: Date.now() + requirementExtractionCacheTtlMs
@@ -83,7 +90,8 @@ function buildRequirementExtractionSystemPrompt(): string {
     "Ignore titles, locations, compensation, benefits, equal-opportunity statements, privacy text, cookies, navigation, application instructions, and ATS boilerplate.",
     "Keep only requirements, functions, expectations, and mission-alignment items that matter for evaluating candidate fit.",
     "Prefer concrete responsibilities and must-have qualifications over marketing copy.",
-    "Each requirement must be concise, self-contained, and recruiter-readable."
+    "Each requirement must be concise, self-contained, and recruiter-readable.",
+    "Split compound requirements into separate items when one clause describes certification or knowledge and another describes implementation, delivery, ownership, or leadership."
   ].join(" ");
 }
 
@@ -93,7 +101,7 @@ function buildRequirementExtractionUserPrompt(roleText: string): string {
     roleText,
     "",
     "Return JSON with one top-level field: requirements.",
-    "requirements must be an array of up to 8 objects.",
+    `Extract up to ${MAX_SOURCE_REQUIREMENTS} source requirements. Split mixed knowledge and delivery clauses into separate objects, returning up to ${MAX_ATOMIC_REQUIREMENTS} atomic objects after splitting.`,
     "Each object must contain:",
     '- text: the extracted requirement text',
     '- category: one of "requirement", "function", "expectation", "mission"',
@@ -123,7 +131,7 @@ function normalizeExtractedRequirements(
       seen.add(key);
       return true;
     })
-    .slice(0, 8);
+    .slice(0, MAX_ATOMIC_REQUIREMENTS);
 }
 
 function normalizeCategory(value: string | undefined): RoleRequirementCategory {
@@ -141,7 +149,7 @@ function looksLikeLocationOrTitle(text: string): boolean {
   const wordCount = normalized.split(/\s+/).length;
 
   if (wordCount <= 8 && !/(experience|ability|develop|drive|lead|build|deliver|determine|define|gather|analy|align|strategy|road-?map|requirements|mission|goal|bring|technical|responsible)/i.test(normalized)) {
-    return /(manager|director|lead|engineer|architect|analyst|principal|senior|staff|head|specialist|owner)/i.test(normalized);
+    return /\b(manager|director|lead|engineer|architect|analyst|principal|senior|staff|head|specialist|owner)\b/i.test(normalized);
   }
 
   return /\b(remote|hybrid|onsite|on-site|united states|usa|city|country|region)\b/i.test(normalized);
