@@ -1,5 +1,15 @@
 # Agent Handoffs
 
+## Content Strategist -> QA / Release (Recent Projects 2026-10-19)
+
+- Release attempt after user authorization: 260 tests pass, three external URL checks fail. Cloudflare deployment preflight passed with the existing production referer supplied to the command; build blocked at 0/3 passing live URL checks. Approved content is prepared for commit/push; production was not updated.
+
+- Added three GitHub-backed project narratives and reordered the shared website/AI content source. Proofreading revision emphasizes OHNY assistant installation and mobile/voice use, Library Shelf availability now versus waiting lists, and Foodease repetitive-click automation; removes OHNY approval status from public copy.
+- The user confirmed Library Shelf appears once in second place.
+- Sources, alternatives, rationale, and proof boundaries are recorded in [the content artifact](content-strategist-recent-projects-2026-10-19.md).
+- New content tests were written first and confirmed the missing entries before the content update; all four pass after the proofreading update. Embeddings were regenerated for the 193-document corpus.
+- Validation: three new content tests pass; TypeScript checking reports two errors in unchanged test files (`chat-service.test.ts:299` implicit-any and `prompting.test.ts:1049` union-property access); local browser preview confirms all seven project cards and their order. Full suite: 259 pass, three live job-page checks fail after a network-enabled retry (Waymo fetch failure, Sourgum insufficient readable text, Motive expected-title mismatch). The production build correctly stops at this gate; no publication occurred.
+
 ## Product Architect -> Experience Designer / Content Strategist
 
 - recruiter-first scope

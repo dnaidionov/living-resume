@@ -79,6 +79,8 @@
 ## Project Shape
 
 - Projects are stored in `content/projects/projects.json`.
+- Array order is the editorial display order; one stable entry represents each project. The current order is Ask OHNY, Library Shelf, Research Assistant, School Lunch Ordering, MyBrain, Digital Career Twin, Dalek.
+- Independent projects use empty `relatedRoleIds` rather than implying employer provenance. Website narratives and indexed AI evidence come from the same project entries.
 - Each project entry includes:
   - `id`
   - `name`

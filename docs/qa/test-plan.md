@@ -2,6 +2,7 @@
 
 ## Functional
 
+- Recent-project content tests verify editorial order, uniqueness, complete narratives, indexed sections, and the absence of invented employer attribution. They also verify OHNY installation and mobile/voice positioning without approval-status copy, Library Shelf immediate-availability versus waiting-list framing and snapshot/matching limits, and Foodease repetitive-click framing with payment boundaries.
 - Homepage renders
 - Resume roles render
 - Every role opens AI context

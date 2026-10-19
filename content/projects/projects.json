@@ -1,21 +1,51 @@
 [
   {
-    "id": "living-resume",
-    "name": "Digital Career Twin (this project)",
+    "id": "ask-ohny",
+    "name": "Ask OHNY",
     "projectType": "product_system",
-    "summary": "A recruiter-facing digital twin that turns a resume into a grounded conversation.",
-    "context": "Traditional resumes are static and one-directional. They make claims, but they do not show much of the reasoning, tradeoffs, or evidence behind them.",
-    "build": "Built a chat-first career site that combines structured career history, project evidence, role-level AI context, and fit analysis so people can see not just what I have done, but how I think and work. The system uses structured content as the source of truth for both the public UI and the AI layer, and includes role-level context plus a fit-analysis workflow that separates supported experience from adjacent or unsupported claims.",
+    "summary": "An unofficial Open House New York Weekend guide designed for use on the go, inside the AI assistant you already use, with voice support for hands-free questions and planning.",
+    "context": "Festival plans depend on changing hours, cancellations, entry rules, and travel time. A place being open now does not mean it will still be open when you arrive.",
+    "build": "Built a reusable skill and MCP service that installs directly into ChatGPT, Claude, and Gemini. Visitors can find nearby sites, ask festival questions, and plan around their tickets while exploring the city, using voice in ChatGPT and Claude or text in Gemini. The service reads live OHNY data and checks opening times and travel time before recommending a stop.",
     "keyDecisions": [
-      "Treat structured content as the source of truth for both the public UI and the AI layer.",
-      "Expose role-level AI context so experience claims are inspectable rather than decorative.",
-      "Make fit analysis candid by separating supported experience from adjacent or unsupported claims."
+      "Use live festival data for changing hours and cancellations, and say when live information is unavailable.",
+      "Treat existing tickets and travel time as planning constraints rather than optional suggestions.",
+      "Bring the guide into popular AI assistants so visitors can use familiar mobile and voice interfaces on the go."
     ],
-    "significance": "Brings together product thinking, content strategy, retrieval design, evaluation logic, and delivery discipline in one artifact, while showing a practical AI-native interaction model beyond basic chat.",
-    "status": "Active and evolving.",
-    "link": "https://github.com/dnaidionov/living-resume",
-    "tags": ["ai", "portfolio", "retrieval", "evaluation", "product"],
-    "relatedRoleIds": ["epam", "modus-create", "vingis"]
+    "significance": "Makes festival planning useful in the moment: ask what is open nearby, check whether there is time to visit, and adjust the day’s plan while walking around the city.",
+    "status": "Built for Open House New York Weekend 2026.",
+    "link": "https://github.com/dnaidionov/OHNY-skills",
+    "tags": [
+      "ai",
+      "mcp",
+      "planning",
+      "live-data",
+      "consumer-tools"
+    ],
+    "relatedRoleIds": []
+  },
+  {
+    "id": "library-shelf",
+    "name": "Library Shelf",
+    "projectType": "product_system",
+    "summary": "A Claude skill that turns a Goodreads reading list into a page of ebooks and audiobooks available to borrow from your libraries through Libby/OverDrive and Hoopla.",
+    "context": "A reading list tells you what you want to read, but not which books are available for borrowing right now and which have a long waiting list. Finding out means checking separate library catalogs and formats.",
+    "build": "Built a skill that checks a Goodreads shelf against digital library collections and generates a single HTML page. Readers can filter by format and library, then sort by availability, rating, length, or the date they added a book.",
+    "keyDecisions": [
+      "Keep each reader’s configuration and results in their own local folder, using their own browser sessions.",
+      "Generate a portable HTML page that opens in any browser.",
+      "Present results as a snapshot: availability changes, title-and-author matching can be imperfect, and Hoopla borrowing limits still apply."
+    ],
+    "significance": "Connects a personal reading backlog to an immediate next action: finding something to borrow that is available right now, with less repeated searching across services.",
+    "status": "Implemented as a Claude skill and plugin; refresh scans to update the availability snapshot.",
+    "link": "https://github.com/dnaidionov/library-shelf",
+    "tags": [
+      "ai",
+      "skills",
+      "books",
+      "library",
+      "consumer-tools"
+    ],
+    "relatedRoleIds": []
   },
   {
     "id": "research-assistant",
@@ -32,8 +62,41 @@
     "significance": "Treats AI research as a system with structure, traceability, and operational discipline, not as a prompt-writing exercise.",
     "status": "Active and evolving.",
     "link": "https://github.com/dnaidionov/research-assistant",
-    "tags": ["ai", "research", "orchestration", "evaluation", "auditing"],
-    "relatedRoleIds": ["epam", "vingis"]
+    "tags": [
+      "ai",
+      "research",
+      "orchestration",
+      "evaluation",
+      "auditing"
+    ],
+    "relatedRoleIds": [
+      "epam",
+      "vingis"
+    ]
+  },
+  {
+    "id": "school-lunch-ordering",
+    "name": "School Lunch Ordering",
+    "projectType": "product_system",
+    "summary": "A reusable AI skill that helps parents choose and submit school meal orders on Foodease using their child’s menu and saved family preferences.",
+    "context": "Foodease makes parents work through multiple clicks for each meal, even when choosing the defaults or placing a repeat order. Customizations add more repetitive steps. This skill handles that clicking for you, applying saved preferences across the month and submitting the orders.",
+    "build": "Built a browser-based skill that checks the current menu, applies saved preferences, handles unavailable choices, and submits meal orders for a month or selected dates. Each parent signs in to their own account and receives an order summary with dates, meals, and total.",
+    "keyDecisions": [
+      "Reuse saved family preferences when available; ask when they are missing or ambiguous instead of guessing.",
+      "Check the current child, menu, prices, and completed orders on each run.",
+      "Keep family profiles separate from the shared skill. The skill does not add funds, enable auto-pay, or make payments."
+    ],
+    "significance": "Turns a recurring household task into a repeatable workflow while preserving account boundaries, preference control, and a clear separation between ordering and payment.",
+    "status": "Reusable skill published; placing orders requires browser control and the parent’s own Foodease session.",
+    "link": "https://github.com/dnaidionov/foodease-school-lunch",
+    "tags": [
+      "ai",
+      "skills",
+      "browser-automation",
+      "preferences",
+      "consumer-tools"
+    ],
+    "relatedRoleIds": []
   },
   {
     "id": "mybrain",
@@ -50,8 +113,45 @@
     "significance": "Shows product judgment in extending an existing system where usability and coverage matter most: less manual effort, broader scope, and memory that is not tied to one assistant.",
     "status": "Active extension work.",
     "link": "https://github.com/dnaidionov/mybrain",
-    "tags": ["memory", "mcp", "postgres", "pgvector", "ai-tools"],
-    "relatedRoleIds": ["epam", "soli"]
+    "tags": [
+      "memory",
+      "mcp",
+      "postgres",
+      "pgvector",
+      "ai-tools"
+    ],
+    "relatedRoleIds": [
+      "epam",
+      "soli"
+    ]
+  },
+  {
+    "id": "living-resume",
+    "name": "Digital Career Twin (this project)",
+    "projectType": "product_system",
+    "summary": "A recruiter-facing digital twin that turns a resume into a grounded conversation.",
+    "context": "Traditional resumes are static and one-directional. They make claims, but they do not show much of the reasoning, tradeoffs, or evidence behind them.",
+    "build": "Built a chat-first career site that combines structured career history, project evidence, role-level AI context, and fit analysis so people can see not just what I have done, but how I think and work. The system uses structured content as the source of truth for both the public UI and the AI layer, and includes role-level context plus a fit-analysis workflow that separates supported experience from adjacent or unsupported claims.",
+    "keyDecisions": [
+      "Treat structured content as the source of truth for both the public UI and the AI layer.",
+      "Expose role-level AI context so experience claims are inspectable rather than decorative.",
+      "Make fit analysis candid by separating supported experience from adjacent or unsupported claims."
+    ],
+    "significance": "Brings together product thinking, content strategy, retrieval design, evaluation logic, and delivery discipline in one artifact, while showing a practical AI-native interaction model beyond basic chat.",
+    "status": "Active and evolving.",
+    "link": "https://github.com/dnaidionov/living-resume",
+    "tags": [
+      "ai",
+      "portfolio",
+      "retrieval",
+      "evaluation",
+      "product"
+    ],
+    "relatedRoleIds": [
+      "epam",
+      "modus-create",
+      "vingis"
+    ]
   },
   {
     "id": "dalek",
@@ -60,7 +160,13 @@
     "summary": "A full-scale Doctor Who NSD Dalek that I built for fun out of plywood, cardboard, and styrofoam, with Arduino-controlled electronics and mechanical parts, a voice changer, lighting effects, and water-gun energy weapons.",
     "why": "For fun.",
     "status": "Waiting to be rebuilt, this time with more electronics and 3D-printed parts.",
-    "tags": ["hardware", "arduino", "fabrication", "electronics", "personal-build"],
+    "tags": [
+      "hardware",
+      "arduino",
+      "fabrication",
+      "electronics",
+      "personal-build"
+    ],
     "relatedRoleIds": []
   }
 ]

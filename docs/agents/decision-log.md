@@ -12,6 +12,22 @@ Use this log for concise, chronological records of meaningful decisions that do 
 
 ## Entries
 
+### 2026-10-19 — Project proofreading
+
+- Agent role: Content Strategist
+- Decision: Emphasize Ask OHNY’s installation into ChatGPT, Claude, and Gemini and use on the go; remove public approval status from portfolio copy. Keep voice attribution specific to ChatGPT/Claude rather than implying Gemini voice support.
+- Rationale: User feedback prioritizes the practical experience over distribution administration. Named supported assistants are more precise than a universal compatibility claim.
+- Decision: Frame Library Shelf around immediate availability versus waiting lists, and Foodease ordering around repetitive clicks for defaults, repeat orders, and customizations.
+- Rationale: These are the concrete user problems the tools solve; generic task descriptions obscured their usefulness.
+- Scope impact: Shared project content, retrieval artifacts, project-content tests, PRD, QA plan, and recent-project content artifact. No renderer, schema, or project-order changes.
+
+### 2026-10-19
+
+- Agent role: Content Strategist
+- Decision: Add repository-backed Ask OHNY, Library Shelf, and School Lunch Ordering narratives; order all seven projects as Ask OHNY, Library Shelf, Research Assistant, School Lunch Ordering, MyBrain, Digital Career Twin, Dalek.
+- Rationale: Present the recent consumer tools first while keeping the requested relative order. The user confirmed Library Shelf appears once, in second place. Preserve source limits and avoid unsupported employer attribution or adoption claims.
+- Scope impact: Project JSON, regenerated retrieval artifacts, project-content tests, PRD, content model, QA plan, and the [recent-project artifact](content-strategist-recent-projects-2026-10-19.md). Existing renderer and architecture remain sufficient.
+
 ### 2026-03-06
 
 - Agent role: Content Strategist
