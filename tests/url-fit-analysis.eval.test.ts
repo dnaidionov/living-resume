@@ -6,6 +6,7 @@ import { fetchJobPostingFromUrl } from "@/lib/platform/url-intake";
 import { extractRoleRequirementsHeuristically } from "@/lib/ai/prompting";
 import { heuristicFitAnalysisService } from "@/lib/ai/fit-analysis";
 import type { FitVerdict } from "@/types/ai";
+import liveUrlEvalPolicy from "@/tests/fixtures/live-url-eval-policy.json";
 
 type UrlFitAnalysisCase = {
   id: string;
@@ -76,7 +77,7 @@ test("url-fit-analysis fixture keeps required build-gate cases enabled", () => {
 for (const testCase of enabledCases) {
   test(
     `url-fit-analysis eval: ${testCase.id} ingests, parses, and analyzes the remote JD`,
-    { timeout: 60_000 },
+    { timeout: 60_000, skip: liveUrlEvalPolicy.enabled ? false : liveUrlEvalPolicy.reason },
     async () => {
       const originalEnv = {
         OPENAI_API_KEY: process.env.OPENAI_API_KEY,

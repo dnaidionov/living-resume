@@ -7,6 +7,7 @@ import { loadLocalEnv } from "@/lib/env/load-local-env";
 import { fetchJobPostingFromUrl } from "@/lib/platform/url-intake";
 import { formatDeployUrlEvalSummary, shouldBlockDeployOnUrlEval, type DeployUrlEvalSummary } from "@/lib/deploy/url-eval-policy";
 import type { FitVerdict } from "@/types/ai";
+import liveUrlEvalPolicy from "@/tests/fixtures/live-url-eval-policy.json";
 
 type UrlFitAnalysisCase = {
   id: string;
@@ -156,6 +157,10 @@ async function verifyCase(testCase: UrlFitAnalysisCase) {
 }
 
 async function main() {
+  if (!liveUrlEvalPolicy.enabled) {
+    console.log(`Live job-page checks paused: ${liveUrlEvalPolicy.reason}`);
+    return;
+  }
   loadLocalEnv();
 
   const urlFitCases = loadUrlFitCases();

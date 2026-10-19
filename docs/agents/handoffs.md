@@ -1,5 +1,13 @@
 # Agent Handoffs
 
+## QA / Evaluations -> Ops / Release (Live job-page pause 2026-10-19)
+
+- User explicitly authorized pausing live job-page checks pending drift correction, superseding the earlier release blocker for those checks only.
+- Shared policy: `tests/fixtures/live-url-eval-policy.json`, `enabled: false`. Existing fixtures and gates remain available; restore `enabled: true` after fixture refresh.
+- Pause regressions were written first and failed against the former behavior. After implementation the suite passed with three live checks skipped. Also fixed two existing test-file type errors without changing runtime behavior.
+- Deployment authorization remained the user’s preceding “commit, push, publish” request. Final validation: 263 tests pass, zero failures, three explicitly skipped live evaluations; TypeScript, standard production build, and Cloudflare build pass.
+- Published successfully to `https://naidionov.com` and the existing `www.naidionov.com/*` route. Cloudflare version: `e82daad0-4d62-4d3a-a05f-11d571c25d3d`. Production HTTP 200; verified all seven project headings in order and all three revised summaries/problem statements against source content.
+
 ## Content Strategist -> QA / Release (Recent Projects 2026-10-19)
 
 - Release attempt after user authorization: 260 tests pass, three external URL checks fail. Cloudflare deployment preflight passed with the existing production referer supplied to the command; build blocked at 0/3 passing live URL checks. Approved content is prepared for commit/push; production was not updated.

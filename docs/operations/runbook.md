@@ -110,7 +110,7 @@
 - Standalone repo scripts such as `npm run embeddings:build`, `npm run content:build`, and `npm run bench:fit` load `.env.local` automatically.
 - For Cloudflare, store provider secrets in the project or Worker settings, or use `wrangler secret put <KEY_NAME>`.
 - `npm run cf:deploy` now includes a deployment preflight that prints the exact Cloudflare env configuration it intends to deploy and refuses to continue until rerun with `--confirm-env`.
-- Cloudflare deploy builds use a deploy-only external URL gate: required JD URL cases that drift or break are logged and skipped, but deployment is blocked if all required external URL cases fail.
+- When the live job-page policy is enabled, Cloudflare deploy builds use a deploy-only external URL gate: required JD URL cases that drift or break are logged and skipped, but deployment is blocked if all required external URL cases fail.
 - The committed Cloudflare runtime defaults in `wrangler.jsonc` must stay aligned with the active task-routing and model defaults documented in `.env.example`; local benchmarking overrides do not change what Cloudflare will deploy.
 - For Vercel, store provider secrets in the project environment settings or via `vercel env add <KEY_NAME>`.
 
@@ -159,6 +159,12 @@
     - `openai/gpt-5.4-nano` remains the best cheap OpenRouter-hosted chat candidate from the rerun
     - `openai/text-embedding-3-small` works through OpenRouter's embeddings API and has pricing parity with OpenAI direct; it may not appear in the general OpenRouter `/api/v1/models` text-model catalog
 
+## Temporary live job-page test pause (2026-10-19)
+
+The user requested a pause until fixture drift correction. `tests/fixtures/live-url-eval-policy.json` currently has `enabled: false` and records the reason. `npm test` marks only the three external job-page evaluations skipped. Build, deployment, and direct deployment-eval commands report the pause without fetching those pages. The fixture integrity assertion, deterministic URL-intake tests, and all other tests remain active. Application URL intake is unchanged.
+
+To re-enable: refresh the retained URLs and expected titles in `tests/fixtures/url-fit-analysis-cases.json`, set the policy’s `enabled` to `true`, and run `npm test`, `npm run build`, and `npm run cf:build`. Pause-only regression tests automatically skip when the policy is enabled. The original strict/deployment failure rules then apply again.
+
 ## Release procedure
 
 ### Common preflight checklist
@@ -173,7 +179,7 @@
 
 - [ ] `npm install` has been run for the current checkout.
 - [ ] `npm run cf:build` completes successfully.
-- [ ] The deploy-only external URL gate leaves at least one required live JD URL case passing; broken or drifted cases are treated as warnings, not deploy blockers, unless all required URL cases fail.
+- [ ] If live job-page checks are enabled, the deploy-only external URL gate leaves at least one required live JD URL case passing; broken or drifted cases are treated as warnings, not deploy blockers, unless all required URL cases fail.
 - [ ] `.open-next/worker.js` exists.
 - [ ] `.open-next/assets` exists.
 - [ ] Required provider credentials are set for the routed tasks in Cloudflare project settings or via `wrangler secret put <KEY_NAME>`.
@@ -197,7 +203,7 @@
   - [ ] Ask AI chat returns a grounded answer in the overlay
   - [ ] pasted-text fit analysis returns a scorecard
   - [ ] URL fit analysis works for a readable public job page
-  - [ ] `npm run test:url-evals:deploy` leaves at least one required live URL case passing; investigate skipped cases separately in the full strict suite
+  - [ ] If live job-page checks are enabled, `npm run test:url-evals:deploy` leaves at least one required live URL case passing; investigate skipped cases separately in the full strict suite
   - [ ] TXT uploads are accepted
   - [ ] PDF uploads are accepted
   - [ ] DOCX uploads are accepted
@@ -213,7 +219,7 @@
   - [ ] Ask AI chat returns a grounded answer in the overlay
   - [ ] pasted-text fit analysis returns a scorecard
   - [ ] URL fit analysis works for a readable public job page
-  - [ ] `npm run test:url-evals` passes the enabled required live URL cases
+  - [ ] If live job-page checks are enabled, `npm run test:url-evals` passes the enabled required live URL cases
   - [ ] TXT uploads are accepted
   - [ ] PDF uploads are accepted
   - [ ] DOCX uploads are accepted

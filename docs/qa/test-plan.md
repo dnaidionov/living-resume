@@ -1,5 +1,9 @@
 # Test Plan
 
+## Temporary live job-page pause — 2026-10-19
+
+User-authorized pause until drift correction: `tests/fixtures/live-url-eval-policy.json` controls live checks across the suite and build/deploy scripts. With `enabled: false`, three external evaluations are explicitly skipped; their fixtures and existing validators are retained. Pause regressions verify that both build/deployment entry points return successfully with a visible pause message and no live fetch. All deterministic URL-intake and fit-analysis coverage remains active. Set `enabled: true` after refreshing the fixtures; the pause-only tests then skip and the existing live gates resume.
+
 ## Functional
 
 - Recent-project content tests verify editorial order, uniqueness, complete narratives, indexed sections, and the absence of invented employer attribution. They also verify OHNY installation and mobile/voice positioning without approval-status copy, Library Shelf immediate-availability versus waiting-list framing and snapshot/matching limits, and Foodease repetitive-click framing with payment boundaries.
@@ -136,7 +140,7 @@
 ## Operational
 
 - Cloudflare and Vercel deployment paths remain documented
-- `npm run build` and `npm run cf:build` must fail if the enabled required live URL evals fail
+- When the live job-page policy is enabled, `npm run build` and `npm run cf:build` must enforce their existing live URL failure policies; while paused they must explicitly report the pause.
 - Fit-analysis performance experiments should run through `npm run bench:fit -- --url <job-url>` so URL/requirement caches remain visible inside one process; model experiments should use per-command env overrides rather than editing `.env.local`
 - The benchmark report at `docs/qa/fit-analysis-benchmark-2026-03-17.md` is the canonical record for fit-analysis latency methodology, matrix results, and model-comparison conclusions; update it when new benchmark evidence materially changes the current performance picture
 - OpenRouter free-model evaluations must record, at minimum:

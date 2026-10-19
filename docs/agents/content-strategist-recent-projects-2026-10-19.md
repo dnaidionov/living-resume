@@ -63,3 +63,11 @@
 - Deployment preflight found the local environment missing `OPENROUTER_HTTP_REFERER`; supplied `https://naidionov.com` for the command, matching the existing production configuration. No stored environment or model-routing values were changed.
 - Ran `OPENROUTER_HTTP_REFERER=https://naidionov.com npm run cf:deploy -- --confirm-env`. Environment preflight passed; the Cloudflare build failed because all three required external URL checks failed (0/3 passing). Deployment was never reached and production remains unchanged.
 - Retain the release gate and commit/push the reviewed content. Publishing remains blocked pending resolution of the live-URL checks; no claim of a successful production build or release.
+
+## Successful release after authorized pause — 2026-10-19
+
+- User authorized temporarily skipping live job-page tests until drift correction. Policy, rationale, and re-enable steps are documented in the runbook and decision log; the earlier blocker is historical.
+- Final suite: 263 pass, zero fail, three live job-page checks explicitly skipped. `npx tsc --noEmit`, `npm run build`, and the Cloudflare build pass after test-only type corrections.
+- Published through the existing Cloudflare deployment wrapper with unchanged provider/model configuration and the production referer supplied to the command.
+- Cloudflare version `e82daad0-4d62-4d3a-a05f-11d571c25d3d`; deployed to `naidionov.com` and `www.naidionov.com/*`.
+- Verified production HTTP 200, all seven projects in the approved order, all three revised summaries and problem statements, and removal of the old approval-status copy. This was a project-content smoke check, not a new live chat/fit-analysis benchmark.

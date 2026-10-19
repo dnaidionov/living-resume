@@ -1,0 +1,4 @@
+{
+  "enabled": false,
+  "reason": "Temporarily paused by user request on 2026-10-19; refresh outdated job-page fixtures during drift correction before re-enabling."
+}

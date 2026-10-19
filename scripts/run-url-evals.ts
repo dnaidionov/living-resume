@@ -1,7 +1,12 @@
 import { spawnSync } from "node:child_process";
 import { loadLocalEnv } from "@/lib/env/load-local-env";
+import liveUrlEvalPolicy from "@/tests/fixtures/live-url-eval-policy.json";
 
 function main() {
+  if (!liveUrlEvalPolicy.enabled) {
+    console.log(`Live job-page checks paused: ${liveUrlEvalPolicy.reason}`);
+    return;
+  }
   loadLocalEnv();
 
   const deployMode = process.env.DEPLOY_URL_EVAL_MODE === "deploy";

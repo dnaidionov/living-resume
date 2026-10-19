@@ -1046,6 +1046,7 @@ test("catch-all Vingis evidence is rendered as previous roles rather than naming
     "recruiter_brief"
   );
 
+  assert.equal(result.presentation.mode, "recruiter_brief");
   const support = result.presentation.whereIMatch?.[0]?.support ?? "";
   assert.match(support, /In my previous roles/i);
   assert.doesNotMatch(support, /At Vingis/i);

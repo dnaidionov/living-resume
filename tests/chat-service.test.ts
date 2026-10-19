@@ -1,6 +1,7 @@
 import test from "node:test";
 import assert from "node:assert/strict";
 import { answerChatWithDependencies, resolveChatMode } from "@/lib/ai/chat-service";
+import type { ModelInput } from "@/types/ai";
 
 test("resolveChatMode treats built/system/site questions as build-process questions", () => {
   assert.equal(
@@ -296,7 +297,7 @@ test("answerChat caches classifier decisions for repeated ambiguous prompts", as
       classifierCalls += 1;
       return "allow_build_process" as const;
     },
-    generateAnswer: async (input) => {
+    generateAnswer: async (input: ModelInput) => {
       seenModes.push(input.mode);
       return {
         answer: "Cached build answer",

@@ -52,9 +52,9 @@ Build a recruiter-first Career Twin that acts as a grounded, interactive profess
 - Uploaded fit-analysis files currently support `TXT`, `PDF`, and `DOCX`.
 - Uploaded fit-analysis files must fail fast when the document is readable but does not contain extractable job-description requirements; the product should not generate recruiter output from benefits pages, handbooks, or other non-JD documents.
 - Fit-analysis results should show the checked role/company label above the analysis body when that target can be extracted defensibly from the JD, and the displayed role title should prefer the recruiter-readable JD title when metadata and visible JD content disagree.
-- URL-based fit analysis is protected by a live external regression fixture stored in `tests/fixtures/url-fit-analysis-cases.json`; the required build-gate set currently covers Waymo, Sourgum, and Motive product-role URLs.
+- Live URL regression fixtures remain in `tests/fixtures/url-fit-analysis-cases.json` (Waymo, Sourgum, Motive). On 2026-10-19 the user temporarily paused live job-page checks until drift correction, using `tests/fixtures/live-url-eval-policy.json`; deterministic URL-intake and fit-analysis tests remain active.
 - The fixture format is intentionally editable without code changes and stores URL, expected parsed-JD title/company, optional target-summary title/company, optional expected outcome, and enable/build-gate flags.
-- Expected fit outcome mismatches are treated as QA warnings, but failure to ingest, parse, or analyze the required live URLs is a build blocker.
+- When live checks are enabled, expected fit outcome mismatches are QA warnings; ingestion, parsing, or analysis failures block strict builds. While paused, builds report the pause explicitly and do not fetch the live fixtures.
 - Recruiter-facing fit output is a deterministic brief rather than freeform model copy.
 - Fit analysis should render only the strongest 3 to 5 recruiter-facing bullets with grounded support.
 - Clearly non-product roles should be screened out even when tools or domain terms overlap.

@@ -36,7 +36,7 @@ Keep the site cheap, stateless, and portable while supporting grounded resume ch
 
 ## Build pipeline
 
-- `npm run build` runs embeddings verification, live URL regression gates, and then the standard Next.js production build
+- `npm run build` runs embeddings verification, the live URL policy check, and the standard Next.js production build. Live job-page checks are temporarily paused by user request through `tests/fixtures/live-url-eval-policy.json`; the scripts report the reason without fetching. Set `enabled` to `true` after fixture drift correction to restore the existing strict/deploy gates.
 - `npm run cf:build` runs the same embeddings/url gates before generating the Cloudflare worker bundle and assets through OpenNext
 - `npm run cf:deploy` now acts as a deployment preflight plus deploy wrapper:
   - loads local env

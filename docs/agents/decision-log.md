@@ -12,6 +12,15 @@ Use this log for concise, chronological records of meaningful decisions that do 
 
 ## Entries
 
+### 2026-10-19 — Temporary live job-page pause
+
+- Agent role: QA / Evaluations + Ops / Release
+- Decision: Temporarily skip external job-page evaluations in tests and build/deployment entry points using one checked-in policy switch, preserving fixture data and validators for later drift correction.
+- Rationale: The user identified likely outdated postings and explicitly requested the pause. Repeatedly blocking portfolio publication on mutable historical postings is currently less useful than retaining deterministic coverage and reporting the reduced live coverage clearly. This does not assert that every failure is proven fixture drift or alter application URL parsing.
+- Re-enable: Refresh the retained live fixtures, set `tests/fixtures/live-url-eval-policy.json` `enabled` to `true`, and rerun the suite and build checks. Pause-only regression tests skip automatically in the enabled state.
+- Supporting fix: Add the missing `ModelInput` annotation and recruiter-brief assertion in two existing tests so production TypeScript checking can validate the release without suppressing errors.
+- Scope: Two evaluation scripts, the live evaluation test, pause policy/regressions, test-only type corrections, PRD, deployment/QA/runbook documentation, and release handoff.
+
 ### 2026-10-19 — Project proofreading
 
 - Agent role: Content Strategist
