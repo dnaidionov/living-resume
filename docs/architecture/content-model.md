@@ -31,6 +31,7 @@
   - `completedDate`
   - `expirationDate`
   - `verificationUrl`
+  - optional `embedUrl` (public issuer-hosted badge iframe)
   - `summary`
   - `validatedAreas[]`
   - `tags`
@@ -74,7 +75,7 @@
 - Requirement extraction accepts up to eight source requirements and may retain up to twelve atomic requirements after splitting so normalization does not discard a source item.
 - Source and atomic requirement limits are shared by the LLM and heuristic extraction paths rather than duplicated in each implementation.
 - Heuristic extraction ranks all defensible source requirements before applying the eight-source cap, then splits retained compounds within the twelve-atomic cap.
-- The hero selects the explicitly featured credential and derives its thumbnail and completion month from credential content.
+- The hero selects the explicitly featured credential and derives its verification link, optional badge iframe, and completion month from credential content. The Anthropic credential uses Credly; its iframe reserves 150 × 270 CSS pixels and the independent verification link remains usable if embedding is blocked.
 
 ## Project Shape
 

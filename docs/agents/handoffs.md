@@ -285,3 +285,34 @@
 - Application Engineer owns implementation after content, UX, and architecture requirements are finalized.
 - QA / Evaluations Agent owns grounding, semantic-color, capability-coverage, and chat/performance regression coverage.
 - Ops / Release Agent owns production monitoring and rollout guidance for latency-related changes.
+
+
+## 2026-10-30 - Credly credential migration
+
+- Application Engineer: migrated Anthropic verification to Credly and embedded the official badge at 150 × 270, with responsive stacking and an independent verification link.
+- QA: focused regressions first failed on the old thumbnail and Skilljar URL, then passed after implementation. Full validation and retrieval refresh status are recorded in the delivery response.
+- Ops: no production publication is implied by local validation.
+
+
+## 2026-11-04 - Credly search-index refresh completed
+
+- User explicitly requested the search-index refresh after the external-provider approval block.
+- Regenerated all 193 semantic vectors through the configured OpenRouter `openai/text-embedding-3-small` service, the committed corpus manifest, and the local content index.
+- Verified the credential evidence contains the new Credly public URL and no Skilljar reference; all 193 vectors contain 1536 finite values.
+- Validation: `npm test` passed (264 passed, 3 previously authorized live-URL skips, zero failures); `npm run build` passed, including corpus-freshness verification.
+- This refresh and validation are local; no commit, push, or production deployment was performed.
+
+
+## 2026-11-04 - Downloadable resume replacement
+
+- Replaced `public/DmitryNaidionov-cv.pdf` with the latest PDF supplied by the user from Google Drive.
+- Before replacement, the exact-match check failed as expected because the existing PDF differed. After replacement, verified byte-for-byte equality with the supplied source and successful PDF metadata parsing; both header and hero continue pointing to this stable asset path.
+- No PDF contents were used as instructions. No production deployment was performed as part of this replacement.
+
+
+## 2026-11-04 - Credly and resume release handoff
+
+- User authorized pushing, creating and merging a PR, and publishing to Cloudflare.
+- Release scope includes the responsive Credly badge and verification URL, refreshed semantic search artifacts, and exact latest downloadable resume PDF.
+- QA: 264 tests passed; three existing external job-page checks remain explicitly paused. Standard production build passed. Desktop/mobile badge rendering was checked during implementation.
+- Ops: the initial Cloudflare build failed on OpenNext's lifecycle cutoff. The official Next.js support extension is documented in the runbook with a bounded build override; deployment status and PR URL are reported in the release response after execution.

@@ -63,32 +63,34 @@ export function Hero({
             </a>
           </p>
           {credential ? (
-            <a
-              href={credential.verificationUrl}
-              target="_blank"
-              rel="noreferrer"
-              className="hero-credential"
-              aria-label={`View verified ${credential.title} credential`}
-              onClick={() => {
-                trackEvent("credential_clicked", { credential: credential.id, surface: "hero" });
-              }}
-            >
-              <span className="hero-credential__thumbnail-frame">
-                <Image
-                  src={credential.imagePath}
-                  alt={`${credential.title} certificate`}
-                  className="hero-credential__thumbnail"
-                  width={132}
-                  height={102}
+            <div className="hero-credential">
+              {credential.embedUrl ? (
+                <iframe
+                  src={credential.embedUrl}
+                  title={`View verified ${credential.title} on Credly`}
+                  className="hero-credential__embed"
+                  width={150}
+                  height={270}
+                  scrolling="no"
                 />
-              </span>
-              <span className="hero-credential__body">
+              ) : null}
+              <a
+                href={credential.verificationUrl}
+                target="_blank"
+                rel="noreferrer"
+                className="hero-credential__body"
+                aria-label={`View verified ${credential.title} credential`}
+                onClick={() => {
+                  trackEvent("credential_clicked", { credential: credential.id, surface: "hero" });
+                }}
+              >
                 <span className="hero-credential__title">{credential.title}</span>
                 <span className="hero-credential__meta">
                   {credential.issuer} verified &middot; {formatCredentialDate(credential.completedDate)}
                 </span>
-              </span>
-            </a>
+                <span className="hero-credential__verify">Verify credential &rarr;</span>
+              </a>
+            </div>
           ) : null}
           <div style={{ display: "flex", gap: 12, flexWrap: "wrap", marginTop: 24, alignItems: "stretch" }}>
             <a href="#experience" className="button secondary">
