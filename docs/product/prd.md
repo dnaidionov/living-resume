@@ -20,6 +20,8 @@ Build a recruiter-first Career Twin that acts as a grounded, interactive profess
 
 ## Shipped capabilities
 
+- The featured Anthropic credential links to Credly and displays its official 150 × 270 badge embed, alongside a readable verification link. On narrow screens the text stacks below the badge to avoid shrinking or clipping its contents.
+
 - Selected Projects includes Ask OHNY, Library Shelf, Research Assistant, School Lunch Ordering, MyBrain, Digital Career Twin, and Dalek, in that editorial order. Library Shelf appears once in second place, as confirmed by the user.
 - Project narratives use repository-backed descriptions and retain material limits: Ask OHNY is an unofficial guide installed into ChatGPT, Claude, and Gemini for use on the go, with voice in ChatGPT/Claude and text in Gemini; Library Shelf distinguishes immediate borrowing availability from waiting lists; School Lunch Ordering handles Foodease’s repetitive clicks for defaults, repeat orders, and customizations, without funding or payments. Public plugin approval status is omitted from portfolio copy because it does not explain the project’s value.
 - The hero remains personal and centered on Dmitry rather than the product taxonomy.

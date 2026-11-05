@@ -82,6 +82,7 @@ export type Credential = {
   completedDate: string;
   expirationDate: string;
   verificationUrl: string;
+  embedUrl?: string;
   summary: string;
   validatedAreas: string[];
   tags: string[];

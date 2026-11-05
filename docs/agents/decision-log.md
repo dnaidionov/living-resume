@@ -575,3 +575,19 @@ Use this log for concise, chronological records of meaningful decisions that do 
 - Resolution: Added `based on <delivery action>` to execution-origin grammar and reject explicit denial, forbidden, security-block, and upstream-error body semantics before scoring or caching.
 - Verification review finding: `demonstrated by <delivery action>` and access-denial sentences with an intervening target phrase remained outside the generalized rules.
 - Resolution: Extended execution-origin participles to `demonstrated by` and made access-denial body matching tolerate bounded intervening target text.
+
+
+## 2026-10-30 - Migrate Anthropic credential to Credly
+
+- Decision: Replace the Skilljar verification URL with the user-supplied Credly public badge URL and replace the certificate thumbnail with the official badge iframe.
+- Rationale: Credly is the user's new verification destination. Inspection of Credly's public embed loader confirmed that it creates `/embedded_badge/<id>` with the supplied dimensions; rendering that iframe directly avoids a DOM-replacing external script and React remount problems.
+- Counterargument considered: Keeping the old compact thumbnail would preserve hero height, but would omit the requested current badge. Shrinking the complete 270px embed would make its internal text unreadable. Reserve the suggested 150 × 270 size, place local text beside it, and stack on screens at or below 560px.
+- Keep the accessible local verification link outside the iframe so it remains available when third-party content is blocked. Local click analytics cover this link; interactions inside the cross-origin iframe are controlled by Credly.
+- Scope: credential content/type, hero, responsive styles, credential regressions, retrieval artifacts, product/content-model docs.
+
+
+## 2026-11-04 - Replace downloadable resume with supplied latest PDF
+
+- Decision: Copy the user-provided Google Drive PDF verbatim to `public/DmitryNaidionov-cv.pdf`, retaining the existing filename used by both header and hero download controls.
+- Rationale: Both download surfaces should serve the same current artifact. Reformatting or extracting/rebuilding the supplied PDF would risk altering its content and layout; an exact copy preserves the approved document.
+- Scope: downloadable PDF only; this request does not authorize rewriting structured website career content from document text.
