@@ -266,3 +266,8 @@ They must not include raw job-description text or uploaded-document content.
 OpenNext 1.17.1 rejects Next.js 15 after its original two-year lifecycle cutoff. The official Next.js support policy (https://nextjs.org/support-policy) extends Next.js 15 security support through January 31, 2027. For the Credly/resume release only, use `npm run cf:build -- --dangerouslyUseUnsupportedNextVersion` after the regular tests/build pass, then deploy with `npx opennextjs-cloudflare deploy`. The standard deployment script remains unchanged. Review current framework support before reusing this exception; this does not establish that version 15.2.9 contains every subsequent security fix.
 
 The deployment preflight was reviewed with `OPENROUTER_HTTP_REFERER=https://naidionov.com`, matching the committed Worker configuration. OpenRouter routing/model defaults are unchanged.
+
+
+### 2026-11-05 compact credential follow-up
+
+Rechecked the official support policy before reusing the bounded lifecycle override for the compact badge release: Next.js 15 support remains extended through January 31, 2027. The same explicit build flag is used for this follow-up only; runtime models and deployment environment remain unchanged. Standard tests/build and desktop/mobile preview passed before release.

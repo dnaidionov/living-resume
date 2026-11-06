@@ -591,3 +591,19 @@ Use this log for concise, chronological records of meaningful decisions that do 
 - Decision: Copy the user-provided Google Drive PDF verbatim to `public/DmitryNaidionov-cv.pdf`, retaining the existing filename used by both header and hero download controls.
 - Rationale: Both download surfaces should serve the same current artifact. Reformatting or extracting/rebuilding the supplied PDF would risk altering its content and layout; an exact copy preserves the approved document.
 - Scope: downloadable PDF only; this request does not authorize rewriting structured website career content from document text.
+
+
+## 2026-11-05 - Compact badge-only credential
+
+- Decision: Replace the 150 × 270 Credly iframe and accompanying text with the official transparent badge image at 88 × 88 pixels, linked to the same public verification URL.
+- Rationale: The user's production screenshot shows that the full card dominates the hero and repeats the credential title. Badge-only presentation restores the hierarchy of name, positioning, and actions.
+- Counterargument: The full embed exposes issuer and verification text without hovering. The compact badge instead preserves an accessible link label, descriptive image alt text, and hover title, while verification details remain available at Credly.
+- Use the unmodified 604 × 604 PNG from `https://images.credly.com/images/f2040db3-3904-4240-8966-e87b1510bea0/blob` as a local asset. Do not crop the iframe or shrink its text. Keep the same 88px square on mobile without introducing a white background.
+- Supersedes the 2026-10-30 hero embed presentation; credential evidence and verification destination are unchanged, so embeddings do not need regeneration.
+
+
+## 2026-11-05 - Retain visible credential identification
+
+- User clarified that only the large embedded card should be removed, not all credential text. Supersedes the badge-only presentation above.
+- Keep the official 88px badge with the certificate name and `Issued by Anthropic` beside it, plus an explicit `Verify on Credly` affordance. Wrap image and text in one verification link and preserve analytics/accessibility.
+- Rationale: A small badge alone is difficult to identify; visible title and issuer provide clarity while avoiding the full iframe's height and duplicated internal text. Allow adjacent text to wrap on mobile; do not shrink the badge or add a white card.

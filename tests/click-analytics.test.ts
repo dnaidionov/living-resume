@@ -17,18 +17,18 @@ test("hero tracks linkedin clicks, resume downloads, and ask-ai entry point", ()
   assert.match(heroSource, /onAskAi\("hero_cta"\)/);
 });
 
-test("hero presents the Credly badge with accessible verification fallback", () => {
-  assert.match(heroSource, /src=\{credential\.embedUrl\}/);
-  assert.match(heroSource, /<iframe/);
-  assert.match(heroSource, /width=\{150\}/);
-  assert.match(heroSource, /height=\{270\}/);
-  assert.match(heroSource, /title=\{`View verified/);
+test("hero presents a compact badge with visible certificate and issuer linked to Credly", () => {
+  assert.match(heroSource, /src=\{credential\.imagePath\}/);
+  assert.match(heroSource, /width=\{88\}/);
+  assert.match(heroSource, /height=\{88\}/);
   assert.match(heroSource, /href=\{credential\.verificationUrl\}/);
-  assert.doesNotMatch(heroSource, /embed\.js|thumbnail-frame|loading="lazy"/);
-  assert.match(heroSource, /formatCredentialDate\(credential\.completedDate\)/);
-  assert.match(heroSource, /credential.embedUrl \? \(/);
+  assert.match(heroSource, /aria-label=\{`View verified/);
+  assert.match(heroSource, /alt=\{credential\.title\}/);
   assert.match(heroSource, /trackEvent\("credential_clicked", \{ credential: credential\.id, surface: "hero" \}\)/);
-  assert.doesNotMatch(heroSource, /expirationDate|expired|expires/i);
+  assert.match(heroSource, /className="hero-credential__title">\{credential\.title\}/);
+  assert.match(heroSource, /Issued by \{credential\.issuer\}/);
+  assert.match(heroSource, /Verify on Credly/);
+  assert.doesNotMatch(heroSource, /<iframe|embedUrl|formatCredentialDate/);
 });
 
 test("home page tracks GitHub clicks and passes ask-ai entry points through to the overlay", () => {
@@ -41,12 +41,11 @@ test("home page tracks GitHub clicks and passes ask-ai entry points through to t
 });
 
 
-test("Credly iframe retains its full height when mobile layout stacks vertically", () => {
+test("badge stays compact without clipping or a card background", () => {
   const css = readFileSync(path.join(process.cwd(), "app/globals.css"), "utf8");
-  const embed = css.match(/\.hero-credential__embed\s*\{([^}]+)\}/)?.[1] ?? "";
-  assert.match(embed, /width: 150px/);
-  assert.match(embed, /height: 270px/);
-  assert.match(embed, /flex: none/);
-  assert.doesNotMatch(embed, /flex: 0 0 150px/);
-  assert.match(css, /@media \(max-width: 560px\)[\s\S]*?\.hero-credential\s*\{[^}]*flex-direction: column/);
+  const badge = css.match(/\.hero-credential__badge\s*\{([^}]+)\}/)?.[1] ?? "";
+  assert.match(badge, /width: 88px/);
+  assert.match(badge, /height: 88px/);
+  assert.match(badge, /object-fit: contain/);
+  assert.doesNotMatch(css, /hero-credential__embed/);
 });

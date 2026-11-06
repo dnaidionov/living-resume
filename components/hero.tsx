@@ -5,15 +5,6 @@ import Image from "next/image";
 import { ChatIcon } from "@/components/chat-icon";
 import { DownloadIcon } from "@/components/download-icon";
 
-function formatCredentialDate(value: string): string {
-  const [year, month] = value.split("-").map(Number);
-  return new Intl.DateTimeFormat("en-US", {
-    month: "long",
-    year: "numeric",
-    timeZone: "UTC"
-  }).format(new Date(Date.UTC(year, month - 1, 1)));
-}
-
 export function Hero({
   credential,
   onAskAi
@@ -63,34 +54,30 @@ export function Hero({
             </a>
           </p>
           {credential ? (
-            <div className="hero-credential">
-              {credential.embedUrl ? (
-                <iframe
-                  src={credential.embedUrl}
-                  title={`View verified ${credential.title} on Credly`}
-                  className="hero-credential__embed"
-                  width={150}
-                  height={270}
-                  scrolling="no"
-                />
-              ) : null}
-              <a
-                href={credential.verificationUrl}
-                target="_blank"
-                rel="noreferrer"
-                className="hero-credential__body"
-                aria-label={`View verified ${credential.title} credential`}
-                onClick={() => {
-                  trackEvent("credential_clicked", { credential: credential.id, surface: "hero" });
-                }}
-              >
+            <a
+              href={credential.verificationUrl}
+              target="_blank"
+              rel="noreferrer"
+              className="hero-credential"
+              aria-label={`View verified ${credential.title} on Credly`}
+              title={`${credential.title} — verify on Credly`}
+              onClick={() => {
+                trackEvent("credential_clicked", { credential: credential.id, surface: "hero" });
+              }}
+            >
+              <Image
+                src={credential.imagePath}
+                alt={credential.title}
+                className="hero-credential__badge"
+                width={88}
+                height={88}
+              />
+              <span className="hero-credential__body">
                 <span className="hero-credential__title">{credential.title}</span>
-                <span className="hero-credential__meta">
-                  {credential.issuer} verified &middot; {formatCredentialDate(credential.completedDate)}
-                </span>
-                <span className="hero-credential__verify">Verify credential &rarr;</span>
-              </a>
-            </div>
+                <span className="hero-credential__issuer">Issued by {credential.issuer}</span>
+                <span className="hero-credential__verify">Verify on Credly &rarr;</span>
+              </span>
+            </a>
           ) : null}
           <div style={{ display: "flex", gap: 12, flexWrap: "wrap", marginTop: 24, alignItems: "stretch" }}>
             <a href="#experience" className="button secondary">
