@@ -25,7 +25,7 @@ test("document index includes verified credential evidence", async () => {
 
   assert.equal(credentials[0]?.expirationDate, "2026-12-05");
   assert.equal(credentials[0]?.featured, true);
-  assert.equal(credentials[0]?.imagePath, "/claude-certified-architect-foundations.jpg");
+  assert.equal(credentials[0]?.imagePath, "/claude-certified-architect-foundations-badge.png");
   assert.equal(credentials[0]?.verificationUrl, "https://www.credly.com/badges/a47f8856-58e5-4ce4-81da-33d729df576c/public_url");
   assert.equal(credentials[0]?.embedUrl, "https://www.credly.com/embedded_badge/a47f8856-58e5-4ce4-81da-33d729df576c");
   assert.ok(credential);

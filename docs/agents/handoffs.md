@@ -316,3 +316,27 @@
 - Release scope includes the responsive Credly badge and verification URL, refreshed semantic search artifacts, and exact latest downloadable resume PDF.
 - QA: 264 tests passed; three existing external job-page checks remain explicitly paused. Standard production build passed. Desktop/mobile badge rendering was checked during implementation.
 - Ops: the initial Cloudflare build failed on OpenNext's lifecycle cutoff. The official Next.js support extension is documented in the runbook with a bounded build override; deployment status and PR URL are reported in the release response after execution.
+
+
+## 2026-11-05 - Compact badge-only hero
+
+- Replaced the full Credly card and duplicate visible text with an 88px official badge image linked to verification. Preserved credential click analytics and accessible identification.
+- Added positive badge/link sizing checks and negative iframe/duplicate-text regressions before implementation; initial failures confirmed the prior full-card presentation.
+- Badge asset is an unmodified local copy of the official transparent Credly PNG. No indexed career evidence changed.
+- Final validation: 264 tests passed, three previously paused live-URL checks skipped; production build passed. Desktop and 375px mobile previews show the full transparent 88px badge without duplicate text or white card. The unchanged embeddings manifest passed verification.
+- During implementation, the negative duplicate-text regression and compiler caught a leftover JSX block; removed it. A concurrent preview/build artifact conflict was resolved by stopping preview and rerunning the build in isolation.
+- Changes remain local pending release.
+
+
+## 2026-11-05 - Credential text clarification
+
+- Restored visible content-derived certificate title and issuer beside the 88px badge, with `Verify on Credly`; the full row links to verification.
+- Wrote the visible title/issuer regression first and confirmed it failed on the badge-only implementation before restoring the text. This supersedes the preceding badge-only handoff.
+- Final clarification validation: 264 tests passed, three pre-existing live-URL skips, production build passed. Desktop and 375px mobile previews verified visible title, Anthropic issuer, and Credly verification affordance beside the small badge. Changes remain local.
+
+
+## 2026-11-05 - Compact credential release
+
+- User approved the corrected compact badge with visible certificate name, Anthropic issuer, and Credly verification link, and requested PR/publication.
+- Release validation: 264 tests passed, three previously authorized skips, production build passed, desktop and 375px mobile rendering checked. Indexed evidence remains unchanged and its manifest verifies.
+- Cloudflare preflight reviewed with the existing OpenRouter configuration and production referrer. Lifecycle override rationale rechecked and documented in the runbook. PR/merge and live deployment results are reported after execution.
